@@ -1,0 +1,46 @@
+{
+  "name": "hyy-vue3-autoTesPlatform",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "build:stage": "vite build --mode staging",
+    "prod": "vite serve --mode production",
+    "build:prod": "vite build --mode production",
+    "preview": "vite preview",
+    "format": "prettier --write src/* src/*/* src/*/*/* src/*/*/*/*"
+  },
+  "dependencies": {
+    "@types/node": "^18.0.0",
+    "@vueuse/integrations": "^8.6.0",
+    "axios": "^0.27.2",
+    "clipboard": "^2.0.11",
+    "echarts": "^5.3.3",
+    "element-plus": "^2.2.5",
+    "jwt-decode": "^3.1.2",
+    "monaco-editor": "^0.34.0",
+    "node-sass": "^7.0.1",
+    "path-to-regexp": "^2.4.0",
+    "pinia": "^2.0.14",
+    "qs": "^6.11.0",
+    "sass": "^1.52.3",
+    "sass-loader": "^13.0.0",
+    "universal-cookie": "^4.0.4",
+    "unplugin-element-plus": "^0.4.1",
+    "vue": "^3.2.25",
+    "vue-router": "4",
+    "vue3-json-viewer": "^2.2.2",
+    "xterm": "^3.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.3",
+    "prettier": "^2.8.0",
+    "unplugin-auto-import": "^0.8.8",
+    "unplugin-vue-components": "^0.19.6",
+    "vite": "^2.9.9"
+  },
+  "engines": {
+    "node": "14.x || 16.x || 18.x"
+  }
+}
