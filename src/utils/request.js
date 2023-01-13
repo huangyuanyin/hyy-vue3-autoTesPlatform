@@ -1,10 +1,8 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-// import { useCookies } from '@vueuse/integrations/useCookies'
 import { getToken } from './auth'
 import baseUrl from '@/config/api'
 const service = axios.create({
-  // baseURL: "http://10.20.70.89:8082", // 登录
   timeout: 120000
 })
 
@@ -40,7 +38,7 @@ service.interceptors.request.use(
         config.url = baseUrl.Base_Xterm_URL + config.url
         break
       case 'Login':
-        config.url = baseUrl.Base_Login_URL + config.url
+        config.url = import.meta.env.VITE_BASE_LOGIN_URL + config.url
         break
       case 'APV':
         config.url = baseUrl.Base_APV_URL + config.url

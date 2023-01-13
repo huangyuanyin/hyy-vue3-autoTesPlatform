@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineComponent, ref, reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { Lock, Avatar } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -31,7 +31,7 @@ import { useUserStore } from '@/store/modules/user'
 const router = useRouter()
 const loading = ref(false)
 const store = useUserStore()
-const userInfo = ref({})
+
 // 登录表单
 const formData = reactive({
   username: '',
@@ -67,7 +67,6 @@ const onLogin = async (formEl: FormInstance | undefined) => {
 <style lang="scss" scoped>
 .form-style {
   width: 250px;
-
   .submit-style {
     width: 100%;
   }

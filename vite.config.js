@@ -1,25 +1,19 @@
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
-
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import ElementPlus from 'unplugin-element-plus/vite'
-
 import path from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // const env = loadEnv(mode, __dirname);
-  // // 获取当前环境的配置
-  // const config = loadEnv(mode, '__dirname')
   return {
+    base: '/autoTestPlatform/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src')
       }
     },
-    base: '/autoTestPlatform/',
     build: {
       chunkSizeWarningLimit: 1500000,
       outDir: 'dist',
@@ -41,23 +35,6 @@ export default defineConfig(({ mode }) => {
         }
       }
     },
-    // base: env.VITE_API_BASE_URL,
-    // define:{
-    //   'process.env.VITE_API_BASE_URL':JSON.stringify(env.VITE_API_BASE_URL)
-    // },
-
-    // server: {
-    //   proxy: {
-    //     '/api': {
-    //       target: config.VITE_BASE_URL,
-    //       changeOrigin: true,
-    //       pathRewrite: {
-    //         '^/api': ''
-    //       }
-    //     }
-    //   }
-    // },
-
     plugins: [
       vue(),
       ElementPlus(),

@@ -65,6 +65,15 @@ const routes = [
             component: () => import('@/views/testTask/index.vue')
           },
           {
+            path: '/testTask/addTestTask',
+            name: 'AddTestTask',
+            meta: {
+              title: '新建任务',
+              keepAlive: false
+            },
+            component: () => import('@/views/testTask/addTestTask.vue')
+          },
+          {
             path: '/testResult',
             name: 'TestResult',
             meta: {

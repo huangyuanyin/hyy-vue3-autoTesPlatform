@@ -35,7 +35,6 @@ import Login from './components/loginForm.vue'
   display: flex;
   justify-content: center;
   align-items: center;
-
   .login-container {
     width: 874px;
     min-width: 874px;
@@ -48,29 +47,24 @@ import Login from './components/loginForm.vue'
     overflow: hidden;
     background-color: white;
     box-shadow: 0 0 20px 5px rgba(34, 84, 142, 0.26);
-
     .login-left {
       width: 50%;
       padding: 47px 54px;
-
       img {
         width: 100%;
         height: auto;
         margin: 0px 20px;
       }
-
       .top {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
         margin: 40px 0px;
-
         .title {
           font-size: 32px;
           margin-bottom: 16px;
         }
-
         .desc {
           font-size: 28px;
           text-align: left;
@@ -78,7 +72,6 @@ import Login from './components/loginForm.vue'
         }
       }
     }
-
     .login-right {
       width: 50%;
       display: flex;
