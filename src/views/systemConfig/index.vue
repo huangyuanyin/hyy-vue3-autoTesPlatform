@@ -21,4 +21,8 @@ import ProductPackage from './ProductPackage/ProductPackage.vue'
 const activeName = ref('systemManage')
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.systemConfig-wrap {
+  padding: 10px 0 0 20px;
+}
+</style>
