@@ -71,7 +71,7 @@ const routes = [
               title: '新建任务',
               keepAlive: false
             },
-            component: () => import('@/views/testTask/addTestTask.vue')
+            component: () => import('@/views/lane/index.vue')
           },
           {
             path: '/testResult',
