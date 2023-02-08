@@ -1,43 +1,45 @@
 <template>
-  <el-drawer v-model="ishowDrawer" direction="rtl" class="group-drawer" @close="closeDrawer">
-    <template #header>
-      <span class="select_group">选择任务组</span>
-    </template>
-    <template #default>
-      <el-input v-model="input" class="w-50 m-2" placeholder="请输入任务名称" :prefix-icon="Search" />
-      <el-tabs tab-position="left" style="height: calc(100vh - 185px); margin-top: 20px" class="group-tabs">
-        <el-tab-pane label="代码扫描">
-          <span class="group-name">代码扫描</span>
-          <el-card class="group-name-item" shadow="hover" @click="addStage(data)">
-            <div class="group-name-item-detail">
-              <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
-              <div class="group-name-item-detail-right">
-                <span class="detail-name">{{ data.name }}</span>
-                <p>{{ data.desc }}</p>
+  <div>
+    <el-drawer v-model="ishowDrawer" direction="rtl" custom-class="group-drawer" @close="closeDrawer">
+      <template #header>
+        <span class="select_group">选择任务组</span>
+      </template>
+      <template #default>
+        <el-input v-model="input" class="w-50 m-2" placeholder="请输入任务名称" :prefix-icon="Search" />
+        <el-tabs tab-position="left" style="height: calc(100vh - 185px); margin-top: 20px" class="group-tabs">
+          <el-tab-pane label="代码扫描">
+            <span class="group-name">代码扫描</span>
+            <el-card class="group-name-item" shadow="hover" @click="addStage(data)">
+              <div class="group-name-item-detail">
+                <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
+                <div class="group-name-item-detail-right">
+                  <span class="detail-name">{{ data.name }}</span>
+                  <p>{{ data.desc }}</p>
+                </div>
               </div>
-            </div>
-          </el-card>
-        </el-tab-pane>
-        <el-tab-pane label="测试">
-          <span class="group-name">测试</span>
-          <el-card class="group-name-item" shadow="hover" @click="addStage(data2)">
-            <div class="group-name-item-detail">
-              <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
-              <div class="group-name-item-detail-right">
-                <span class="detail-name">{{ data2.name }}</span>
-                <p>{{ data2.desc }}</p>
+            </el-card>
+          </el-tab-pane>
+          <el-tab-pane label="测试">
+            <span class="group-name">测试</span>
+            <el-card class="group-name-item" shadow="hover" @click="addStage(data2)">
+              <div class="group-name-item-detail">
+                <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
+                <div class="group-name-item-detail-right">
+                  <span class="detail-name">{{ data2.name }}</span>
+                  <p>{{ data2.desc }}</p>
+                </div>
               </div>
-            </div>
-          </el-card>
-        </el-tab-pane>
-        <el-tab-pane label="构建">构建</el-tab-pane>
-        <el-tab-pane label="测试构建">测试构建</el-tab-pane>
-        <el-tab-pane label="镜像构建">镜像构建</el-tab-pane>
-        <el-tab-pane label="部署">部署</el-tab-pane>
-        <el-tab-pane label="工具">工具</el-tab-pane>
-      </el-tabs>
-    </template>
-  </el-drawer>
+            </el-card>
+          </el-tab-pane>
+          <el-tab-pane label="构建">构建</el-tab-pane>
+          <el-tab-pane label="测试构建">测试构建</el-tab-pane>
+          <el-tab-pane label="镜像构建">镜像构建</el-tab-pane>
+          <el-tab-pane label="部署">部署</el-tab-pane>
+          <el-tab-pane label="工具">工具</el-tab-pane>
+        </el-tabs>
+      </template>
+    </el-drawer>
+  </div>
 </template>
 
 <script lang="ts" setup>

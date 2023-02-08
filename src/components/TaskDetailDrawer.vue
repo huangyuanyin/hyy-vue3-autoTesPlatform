@@ -3,7 +3,7 @@
     v-model="ishowDrawer"
     direction="rtl"
     @close="cancelClick(taskDetailFormRef)"
-    class="taskDetail-drawer"
+    custom-class="taskDetail-drawer"
     :modal="false"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
