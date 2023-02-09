@@ -34,7 +34,18 @@
           <el-tab-pane label="构建">构建</el-tab-pane>
           <el-tab-pane label="测试构建">测试构建</el-tab-pane>
           <el-tab-pane label="镜像构建">镜像构建</el-tab-pane>
-          <el-tab-pane label="部署">部署</el-tab-pane>
+          <el-tab-pane label="部署">
+            <span class="group-name">部署</span>
+            <el-card class="group-name-item" shadow="hover" @click="addStage({ name: '主机部署' })">
+              <div class="group-name-item-detail">
+                <img src="https://img.alicdn.com/tfs/TB1JRQ_wKH2gK0jSZJnXXaT1FXa-88-88.png" alt="" />
+                <div class="group-name-item-detail-right">
+                  <span class="detail-name">主机部署</span>
+                  <p>主机部署</p>
+                </div>
+              </div>
+            </el-card>
+          </el-tab-pane>
           <el-tab-pane label="工具">工具</el-tab-pane>
         </el-tabs>
       </template>
@@ -82,7 +93,7 @@ const closeDrawer = () => {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .group-drawer {
   .el-drawer__header {
     font-size: 14px;
@@ -108,7 +119,8 @@ const closeDrawer = () => {
       display: flex;
       align-items: center;
       height: 100%;
-      justify-content: center;
+      justify-content: flex-start;
+      padding: 0 20px;
       img {
         height: 42px;
         width: 42px;
@@ -118,7 +130,9 @@ const closeDrawer = () => {
         margin-right: 12px;
       }
       .group-name-item-detail-right {
+        max-width: 120px;
         .detail-name {
+          font-size: 14px;
           color: #292929;
           font-weight: 500;
         }
@@ -132,7 +146,7 @@ const closeDrawer = () => {
         }
       }
     }
-    .el-card__body {
+    :deep(.el-card__body) {
       height: 100%;
       padding: 0px;
     }
