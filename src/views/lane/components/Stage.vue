@@ -50,7 +50,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import TaskDetailDrawer from '@/components/TaskDetailDrawer.vue'
+import TaskDetailDrawer from '@/components/TestTask/TaskDetailDrawer.vue'
 
 const props = defineProps({
   stage: {

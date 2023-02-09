@@ -10,7 +10,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import TaskGroupDrawer from '@/components/TaskGroupDrawer.vue'
+import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 
 const emit = defineEmits(['add-stage'])
 const isExitHover = ref(false)

@@ -36,7 +36,7 @@
 import { reactive, ref } from 'vue'
 import Stage from './Stage.vue'
 import AddStage from './AddStage.vue'
-import DeleteGroupDialog from '@/components/DeleteGroupDialog.vue'
+import DeleteGroupDialog from '@/components/TestTask/DeleteGroupDialog.vue'
 
 const emit = defineEmits(['removeFlow'])
 

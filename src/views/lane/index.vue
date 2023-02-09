@@ -4,7 +4,7 @@
       <el-row :gutter="20">
         <el-col class="backButton" :span="4">
           <div class="grid-content ep-bg-purple" />
-          <el-button>返回</el-button>
+          <el-button @click="router.go(-1)">返回</el-button>
           <span>流水线 2023-02-08</span>
         </el-col>
         <el-col :span="16">
@@ -33,7 +33,9 @@
 import { ref, reactive } from 'vue'
 import Lane from './lane.vue'
 import basicInformation from './basicInformation/index.vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const tabName = ref('basicInformation')
 const data = reactive({
   flows: [

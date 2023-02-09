@@ -19,7 +19,7 @@
           </el-form-item>
           <el-form-item>
             <el-button type="danger" @click="resetForm(basicInformationFormRef)">删除任务</el-button>
-            <el-button type="primary" @click="submitForm(basicInformationFormRef)"> 保存 </el-button>
+            <!-- <el-button type="primary" @click="submitForm(basicInformationFormRef)"> 下一项 </el-button> -->
           </el-form-item>
         </el-form>
       </div>
@@ -59,7 +59,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
 <style lang="scss" scoped>
 .basicInformation-wrap {
   background-color: #f2f5f7;
-  height: calc(100vh - 93px);
+  height: calc(100vh - 207px);
   max-width: 100%;
   padding: 20px 120px 0 120px;
   :deep(.el-card__body) {

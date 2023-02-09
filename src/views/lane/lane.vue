@@ -32,10 +32,29 @@ const handleRemoveFlow = (index: any) => {
 
 <style lang="scss" scoped>
 .flow-groups-container {
-  width: 100vw;
-  height: calc(100vh - 73px);
+  width: 100%;
+  height: calc(100vh - 187px);
   overflow-y: auto;
   background-color: #f2f5f7;
+}
+.flow-groups-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.flow-groups-container::-webkit-scrollbar-button {
+  width: 0px;
+  height: 0px;
+  display: none;
+}
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+.flow-groups-container::-webkit-scrollbar-thumb {
+  border: 4px solid rgba(0, 0, 0, 0);
+  height: 0px;
+  border-radius: 25px;
+  background-clip: padding-box;
+  background-color: rgba(0, 0, 0, 0.3);
 }
 .flow-groups {
   display: flex;
