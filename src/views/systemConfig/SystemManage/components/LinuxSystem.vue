@@ -33,7 +33,7 @@
     </el-table>
 
     <!-- 终端 -->
-    <Termmail v-if="isShowTermail" :termmailInfo="termmailInfo" />
+    <Termmail v-if="isShowTermail" :termmailInfo="termmailInfo" @closeTermmail="cloeConsole(termmailId)" />
 
     <el-dialog v-model="dialogFormVisible" title="添加Linux设备">
       <el-form :model="form" ref="ruleFormRef" :rules="rules">
@@ -89,6 +89,7 @@ const dialogFormVisible = ref(false)
 const isShowTermail = ref(false)
 const formLabelWidth = '140px'
 const termmailInfo = ref({})
+const termmailId = ref(null)
 const form = reactive({
   ip: '',
   username: '',
@@ -193,6 +194,7 @@ const openConsole = async row => {
   //   return
   // }
   // await getDeviceInfo(row)
+  termmailId.value = row
 }
 
 const cloeConsole = row => {

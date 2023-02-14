@@ -25,15 +25,17 @@
     <div class="lan-container">
       <basicInformation v-if="tabName === 'basicInformation'" />
       <Lane v-if="tabName === 'processConfig'" :flows="data.flows" />
+      <TriggerSetting v-if="tabName === 'triggerSetting'" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import Lane from './lane.vue'
 import basicInformation from './basicInformation/index.vue'
-import { useRouter } from 'vue-router'
+import TriggerSetting from './triggerSetting/index.vue'
 
 const router = useRouter()
 const tabName = ref('basicInformation')

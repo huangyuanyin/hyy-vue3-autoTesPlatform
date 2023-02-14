@@ -1,12 +1,14 @@
 <template>
   <div class="console-wrap">
     <div class="console" id="terminal"></div>
+    <el-button type="primary" link @click="closeTermmail">关闭终端</el-button>
   </div>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeMount } from 'vue'
 import Terminal from '../config/Xterm'
 
+const emit = defineEmits(['closeTermmail'])
 const props = defineProps({
   terminal: {
     type: Object,
@@ -34,6 +36,10 @@ const errorRealTerminal = () => {
 }
 const closeRealTerminal = () => {
   console.log('close')
+}
+
+const closeTermmail = () => {
+  emit('closeTermmail')
 }
 
 onMounted(() => {

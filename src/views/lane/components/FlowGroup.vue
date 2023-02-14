@@ -2,15 +2,16 @@
   <div class="flow-group" @mouseenter="isShowIcon = true" @mouseleave="isShowIcon = false">
     <div class="group-head">
       <div class="name">
-        <span v-if="!data.isEditor">{{ flow.name }}</span>
-        <el-input v-else type="text" v-model="data.value" @input="handleInput"></el-input>
+        <span @dblclick="handleEditor" v-if="!data.isEditor">{{ flow.name }}</span>
+        <el-input v-else type="text" v-model="data.value" @input="handleInput" @blur="handleEditor"></el-input>
       </div>
-      <div class="editor" v-show="isShowIcon">
+      <!-- <div class="editor" v-show="isShowIcon">
         <svg-icon @click="handleEditor" v-if="data.isEditor" iconName="icon-danduduihao"></svg-icon>
         <svg-icon @click="handleEditor" v-else iconName="icon-bianji"></svg-icon>
-      </div>
+      </div> -->
       <div class="delete" v-show="isShowIcon">
-        <svg-icon @click="openDeleteGroupDialog" iconName="icon-changyonggoupiaorenshanchu"></svg-icon>
+        <svg-icon class="grayDelete" @click="openDeleteGroupDialog" iconName="icon-changyonggoupiaorenshanchu"></svg-icon>
+        <svg-icon class="redDelete" @click="openDeleteGroupDialog" iconName="icon-changyonggoupiaorenshanchu-copy"></svg-icon>
       </div>
     </div>
     <div class="stages">
@@ -67,6 +68,7 @@ const handleInput = (e: any) => {
 }
 
 const handleEditor = () => {
+  console.log(`output->'DA'`, 'DA')
   if (data.isEditor) {
     data.isEditor = false
     props.flow.name = data.value
@@ -115,13 +117,32 @@ const submitDelete = () => {
     span {
       color: #8b8b8b;
     }
+    :deep(.el-input__wrapper) {
+      max-width: 100px;
+      box-shadow: 0 0 0 0px #dcdfe6 inset;
+    }
   }
   .editor {
     margin: 0 10px;
   }
-  .editor,
-  .delete:hover {
-    cursor: pointer;
+  .delete {
+    margin-left: 10px;
+    display: inline-block;
+    .grayDelete {
+      display: inline-block;
+    }
+    .redDelete {
+      display: none;
+    }
+    &:hover {
+      cursor: pointer;
+      .grayDelete {
+        display: none;
+      }
+      .redDelete {
+        display: inline-block;
+      }
+    }
   }
 }
 

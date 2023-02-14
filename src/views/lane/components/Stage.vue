@@ -22,9 +22,25 @@
               <svg-icon v-else="isExitHover_one" iconName="icon-jiahao-copy-copy"></svg-icon>
             </el-tooltip>
           </div>
-          <div class="job3" @click="openTaskDetailDrawer(parallel.name, index)">
-            {{ parallel.name }}
-          </div>
+          <el-dropdown
+            trigger="contextmenu"
+            @command="
+              command => {
+                handleCommand(command, index)
+              }
+            "
+            popper-class="contextmenu"
+            placement="top-end"
+          >
+            <div class="job3" @click="openTaskDetailDrawer(parallel.name, index)">
+              {{ parallel.name }}
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item :icon="RemoveFilled" command="delete">删除</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
           <div
             class="job4"
             @mouseenter="isExitHover_two = true"
@@ -51,6 +67,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import TaskDetailDrawer from '@/components/TestTask/TaskDetailDrawer.vue'
+import { ElMessage } from 'element-plus'
+import { RemoveFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({
   stage: {
@@ -85,6 +103,7 @@ const handleRemoveParallel = (id: any) => {
     emit('removeStage')
   }
   closeDrawer([false])
+  ElMessage.success('删除成功！')
 }
 
 const triggerMethod = (value: boolean) => {
@@ -102,6 +121,14 @@ const closeDrawer = (value?: any) => {
     props.stage[taskId.value].name = value[1].name
   }
   taskDetailDrawer.value = value[0]
+}
+
+const handleCommand = (command: string | number | object, id: string) => {
+  switch (command) {
+    case 'delete':
+      handleRemoveParallel(id)
+      break
+  }
 }
 </script>
 
@@ -171,6 +198,9 @@ const closeDrawer = (value?: any) => {
     .job3 {
       border: 1px solid #fff;
     }
+    :deep(.el-dropdown-menu__item .el-icon svg) {
+      color: red;
+    }
     // position: absolute;
     // left: 50px;
 
@@ -220,4 +250,10 @@ const closeDrawer = (value?: any) => {
 }
 </style>
 
-<style lang="scss"></style>
+<style lang="scss">
+.contextmenu {
+  .el-dropdown-menu__item .el-icon {
+    color: red;
+  }
+}
+</style>

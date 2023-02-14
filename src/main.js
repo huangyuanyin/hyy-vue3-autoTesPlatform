@@ -20,6 +20,9 @@ import './assets/iconfont/iconfont.js'
 const pinia = createPinia()
 const app = createApp(App)
 
+import copys from './directives/v-copy.js'
+app.directive('copy', copys)
+
 app.config.globalProperties.$echarts = echarts
 
 app.component('SvgIcon', SvgIcon)
