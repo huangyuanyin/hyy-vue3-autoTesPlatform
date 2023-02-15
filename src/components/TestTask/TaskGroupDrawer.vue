@@ -13,7 +13,7 @@
               <el-card
                 class="group-name-item"
                 shadow="hover"
-                @click="addStage({ name: '主机部署' })"
+                @click="addStage(item)"
                 v-for="(item, index) in deployList"
                 :key="'deployList' + index"
               >
@@ -47,22 +47,44 @@
               </el-card>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="代码扫描">
-            <span class="group-name">代码扫描</span>
-            <el-card class="group-name-item" shadow="hover" @click="addStage(data)">
-              <div class="group-name-item-detail">
-                <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
-                <div class="group-name-item-detail-right">
-                  <span class="detail-name">{{ data.name }}</span>
-                  <p>{{ data.desc }}</p>
+          <el-tab-pane label="执行命令">
+            <span class="group-name">执行命令</span>
+            <div class="group-name-list">
+              <el-card
+                class="group-name-item"
+                shadow="hover"
+                @click="addStage(item)"
+                v-for="(item, index) in orderList"
+                :key="'orderList' + index"
+              >
+                <div class="group-name-item-detail">
+                  <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
+                  <div class="group-name-item-detail-right">
+                    <span class="detail-name">{{ item.name }}</span>
+                    <p>{{ item.desc }}</p>
+                  </div>
                 </div>
-              </div>
-            </el-card>
+              </el-card>
+            </div>
           </el-tab-pane>
-          <el-tab-pane label="构建">构建</el-tab-pane>
-          <el-tab-pane label="测试构建">测试构建</el-tab-pane>
-          <el-tab-pane label="镜像构建">镜像构建</el-tab-pane>
-          <el-tab-pane label="工具">工具</el-tab-pane>
+          <el-tab-pane label="代码扫描" :disabled="true">
+            <span class="group-name">代码扫描</span>
+            <div class="group-name-list">
+              <el-card class="group-name-item" shadow="hover" @click="addStage(data)">
+                <div class="group-name-item-detail">
+                  <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
+                  <div class="group-name-item-detail-right">
+                    <span class="detail-name">{{ data.name }}</span>
+                    <p>{{ data.desc }}</p>
+                  </div>
+                </div>
+              </el-card>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="构建" :disabled="true">构建</el-tab-pane>
+          <el-tab-pane label="测试构建" :disabled="true">测试构建</el-tab-pane>
+          <el-tab-pane label="镜像构建" :disabled="true">镜像构建</el-tab-pane>
+          <el-tab-pane label="工具" :disabled="true">工具</el-tab-pane>
         </el-tabs>
       </template>
     </el-drawer>
@@ -99,12 +121,14 @@ const testList = ref([
 ])
 const deployList = ref([
   {
-    name: '主机部署',
+    name: 'NetSign主机部署',
     desc: '这是一段主机部署'
-  },
+  }
+])
+const orderList = ref([
   {
-    name: '被测设备安装',
-    desc: '这是一段被测设备安装'
+    name: '执行命令',
+    desc: '用于执行命令'
   }
 ])
 

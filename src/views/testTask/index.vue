@@ -8,6 +8,53 @@
       <el-table-column prop="type" label="产品型号" />
       <el-table-column prop="username" label="版本" />
       <el-table-column prop="password" label="任务状态" />
+      <el-table-column label="最近运行状态" align="center">
+        <template #default="item">
+          <div class="pipe-status">
+            <ul>
+              <el-tooltip popper-class="box-item" effect="customized" content="第二次运行" placement="top">
+                <li><span>#2</span></li>
+              </el-tooltip>
+              <li>-</li>
+              <el-tooltip popper-class="box-item" effect="customized" content="运行失败" placement="top">
+                <li>
+                  <el-icon><CircleCloseFilled /></el-icon>
+                </li>
+              </el-tooltip>
+            </ul>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="最近运行阶段" align="center" prop="pipeHistory">
+        <template #default="item">
+          <div class="pipe-history">
+            <el-tooltip popper-class="box-item" effect="customized" content="构建：运行中" placement="top">
+              <div class="group-status">
+                <div class="content">
+                  <div class="title">构建</div>
+                  <div class="point active"></div>
+                </div>
+              </div>
+            </el-tooltip>
+            <el-tooltip popper-class="box-item" effect="customized" content="部署：未运行" placement="top">
+              <div class="group-status">
+                <div class="content">
+                  <div class="title">部署</div>
+                  <div class="point init"></div>
+                </div>
+              </div>
+            </el-tooltip>
+            <el-tooltip popper-class="box-item" effect="customized" content="活动校验：未运行" placement="top">
+              <div class="group-status">
+                <div class="content">
+                  <div class="title">活动校验</div>
+                  <div class="point init"></div>
+                </div>
+              </div>
+            </el-tooltip>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="item">
           <el-button link type="primary" size="small"> 编辑 </el-button>
@@ -20,7 +67,7 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
-import { CirclePlus } from '@element-plus/icons-vue'
+import { CirclePlus, CircleCloseFilled } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -67,5 +114,97 @@ const addTask = () => {
 <style lang="scss" scoped>
 .testTask-wrap {
   margin: 20px 0 0 20px;
+  .pipe-status {
+    display: flex;
+    justify-content: flex-start;
+    ul {
+      display: flex;
+      padding-left: 0px;
+      justify-content: center;
+      width: 100%;
+      li {
+        list-style: none;
+        margin-right: 8px;
+        .el-icon {
+          height: 23px;
+          line-height: 23px;
+          color: #e62412;
+        }
+      }
+    }
+  }
+  .pipe-history {
+    display: flex;
+    justify-content: space-around;
+    .group-status {
+      display: flex;
+      position: relative;
+      text-align: center;
+      -webkit-box-pack: center;
+      -webkit-box-align: end;
+      align-items: flex-end;
+      margin-bottom: 5px;
+      .content {
+        width: 55px;
+        max-width: 55px;
+        white-space: nowrap;
+        overflow: hidden;
+        .title {
+          color: #383838;
+          margin-bottom: 10px;
+        }
+        .point {
+          display: block;
+          width: 8px;
+          height: 8px;
+          // border: 1px solid #1b9aee;
+          border-radius: 100%;
+          text-align: center;
+          margin: 0 auto;
+          // color: #d8d8d8;
+          // background: #1b9aee;
+        }
+        .active {
+          border: 1px solid #1b9aee;
+          color: #d8d8d8;
+          background: #1b9aee;
+        }
+        .init {
+          border: 2px solid #d8d8d8 !important;
+          color: #d8d8d8;
+          background: #fff;
+        }
+      }
+      &::after {
+        content: '-';
+        display: inline-block;
+        width: 50px;
+        color: transparent;
+        border-bottom: 1px solid #e9edf0;
+        vertical-align: middle;
+        height: 1px;
+        margin-left: -20px;
+        margin-right: -45px;
+        margin-bottom: 3px;
+      }
+      &:last-child:after {
+        // width: 0;
+        display: none;
+      }
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+.box-item {
+  padding: 6px 12px !important;
+  background: linear-gradient(90deg, rgb(98, 101, 111), rgb(98, 101, 111)) !important;
+  color: #fff;
+}
+
+.box-item .el-popper__arrow::before {
+  background: linear-gradient(45deg, #626f6f, #626f6f) !important;
+  right: 0 !important;
 }
 </style>
