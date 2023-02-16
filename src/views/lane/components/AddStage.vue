@@ -5,11 +5,14 @@
       <svg-icon v-else="isExitHover" iconName="icon-jiahao-copy-copy"></svg-icon>
       并行任务
     </div>
+
+    <TaskGroupDrawer :drawer="drawer" @changeDrawer="changeDrawer" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 
 const props = defineProps({
   stages: {
@@ -19,13 +22,28 @@ const props = defineProps({
 })
 
 const isExitHover = ref(false)
+const drawer = ref(false)
 
 const handleAddParaller = () => {
-  props.stages.push([
-    {
-      name: '新并行'
-    }
-  ])
+  drawer.value = true
+  // props.stages.push([
+  //   {
+  //     name: '新并行'
+  //   }
+  // ])
+}
+
+const changeDrawer = (value: any) => {
+  if (!value) return (drawer.value = value)
+  drawer.value = value[0]
+  if (!drawer.value) {
+    const name = value[1]
+    props.stages.push([
+      {
+        name: name
+      }
+    ])
+  }
 }
 </script>
 

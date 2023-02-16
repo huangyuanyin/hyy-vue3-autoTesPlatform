@@ -167,12 +167,12 @@ const taskDetailForm = reactive({
   deployType: '',
   deployVersion: '',
   patchVersion: '',
-  ifha: '',
-  ispbc: '',
-  useNewDataType: '',
-  isrbc: '',
-  ifback: '',
-  ifrs: '',
+  ifha: 'y',
+  ispbc: 'y',
+  useNewDataType: 'y',
+  isrbc: 'y',
+  ifback: 'y',
+  ifrs: 'y',
   startMidwareType: ''
 })
 const taskDetailFormRules = reactive<FormRules>({

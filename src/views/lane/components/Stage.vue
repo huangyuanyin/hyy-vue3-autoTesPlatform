@@ -56,17 +56,21 @@
       </template>
     </div>
   </div>
+
   <TaskDetailDrawer
     :taskDetailName="taskDetailName"
     :taskDetailDrawer="taskDetailDrawer"
     @closeDrawer="closeDrawer"
     @deleteTask="handleRemoveParallel(taskId)"
   />
+
+  <TaskGroupDrawer :drawer="drawer" @changeDrawer="changeDrawer" />
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 import TaskDetailDrawer from '@/components/TestTask/TaskDetailDrawer.vue'
+import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 import { ElMessage } from 'element-plus'
 import { RemoveFilled } from '@element-plus/icons-vue'
 
@@ -85,15 +89,19 @@ const emit = defineEmits(['removeStage'])
 const isExitHover_one = ref(false)
 const isExitHover_two = ref(false)
 const automatic = ref(true)
+const drawer = ref(false)
 const taskDetailDrawer = ref(false)
 const taskDetailName = ref('')
 const taskId = ref('')
+const stageID = ref(null)
 
 const handleAddParallel = (position: any, index: any) => {
   index = position === 'before' ? index : index + 1
-  props.stage.splice(index, 0, {
-    name: '新串行'
-  })
+  stageID.value = index
+  drawer.value = true
+  // props.stage.splice(index, 0, {
+  //   name: '新串行'
+  // })
 }
 
 const handleRemoveParallel = (id: any) => {
@@ -128,6 +136,27 @@ const handleCommand = (command: string | number | object, id: string) => {
     case 'delete':
       handleRemoveParallel(id)
       break
+  }
+}
+
+const changeDrawer = (value: any) => {
+  if (!value) return (drawer.value = value)
+  drawer.value = value[0]
+  if (!drawer.value) {
+    const name = value[1]
+    props.stage.splice(stageID.value, 0, {
+      name: name
+    })
+    // emit('add-stage', {
+    //   name,
+    //   stages: [
+    //     [
+    //       {
+    //         name: name
+    //       }
+    //     ]
+    //   ]
+    // })
   }
 }
 </script>

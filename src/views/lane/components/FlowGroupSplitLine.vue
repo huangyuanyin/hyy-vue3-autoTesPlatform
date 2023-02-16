@@ -30,7 +30,7 @@ const changeDrawer = (value: any) => {
       stages: [
         [
           {
-            name: '并行1'
+            name: name
           }
         ]
       ]

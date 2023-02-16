@@ -8,7 +8,7 @@ import path from 'path'
 
 export default defineConfig(({ mode }) => {
   return {
-    base: '/autoTestPlatform/',
+    base: mode === 'development' ? '/' : '/netautotestplatform/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src')

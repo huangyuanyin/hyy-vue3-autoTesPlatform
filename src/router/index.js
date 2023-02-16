@@ -115,7 +115,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHashHistory('/autoTestPlatform/'),
+  history: createWebHashHistory('/netautotestplatform/'),
   routes
 })
 
