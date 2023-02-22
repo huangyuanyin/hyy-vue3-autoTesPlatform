@@ -1,8 +1,8 @@
 <template>
   <div class="LinuxSystem-wrap">
-    <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="addLinux"> 添加设备</el-button>
+    <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="addLinux"> 添加</el-button>
     <el-table :data="linuxTableData" border style="width: 100%">
-      <el-table-column prop="ip" label="设备IP" width="180" />
+      <el-table-column prop="serverIP" label="设备IP" width="180" />
       <el-table-column prop="status" label="设备状态" width="180" />
       <el-table-column prop="type" label="设备类型" />
       <el-table-column prop="user" label="使用人" />
@@ -37,14 +37,17 @@
 
     <el-dialog v-model="dialogFormVisible" title="添加Linux设备">
       <el-form :model="form" ref="ruleFormRef" :rules="rules">
-        <el-form-item label="设备ip" :label-width="formLabelWidth" prop="ip">
-          <el-input v-model="form.ip" autocomplete="off" />
+        <el-form-item label="设备ip" :label-width="formLabelWidth" prop="serverIP">
+          <el-input v-model="form.serverIP" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="设备用户名" :label-width="formLabelWidth" prop="username">
-          <el-input v-model="form.username" autocomplete="off" />
+        <el-form-item label="设备用户名" :label-width="formLabelWidth" prop="userName">
+          <el-input v-model="form.userName" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="设备密码" :label-width="formLabelWidth" prop="password">
-          <el-input v-model="form.password" autocomplete="off" />
+        <el-form-item label="设备密码" :label-width="formLabelWidth" prop="serverPasswd">
+          <el-input v-model="form.serverPasswd" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="设备端口" :label-width="formLabelWidth" prop="serverPort">
+          <el-input v-model="form.serverPort" autocomplete="off" />
         </el-form-item>
         <el-form-item label="设备编码" :label-width="formLabelWidth" prop="coding">
           <el-input v-model="form.coding" autocomplete="off" />
@@ -52,21 +55,21 @@
         <el-form-item label="密码卡" :label-width="formLabelWidth" prop="passCard">
           <el-input v-model="form.passCard" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="设备型号" :label-width="formLabelWidth" prop="model">
-          <el-input v-model="form.model" autocomplete="off" />
+        <el-form-item label="设备型号" :label-width="formLabelWidth" prop="modelCode">
+          <el-input v-model="form.modelCode" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="设备类型" :label-width="formLabelWidth" prop="region">
-          <el-select v-model="form.region" placeholder="请选择Linux设备类型">
+        <el-form-item label="设备类型" :label-width="formLabelWidth" prop="machineType">
+          <el-select v-model="form.machineType" placeholder="请选择Linux设备类型">
             <el-option label="自动化平台使用" value="shanghai" />
             <el-option label="临时设备" value="beijing" />
           </el-select>
         </el-form-item>
-        <el-form-item label="产品线" :label-width="formLabelWidth" prop="product">
+        <!-- <el-form-item label="产品线" :label-width="formLabelWidth" prop="product">
           <el-select v-model="form.product" placeholder="请选择产品线">
             <el-option label="签名" value="shanghai" />
             <el-option label="CA" value="beijing" />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -91,71 +94,71 @@ const formLabelWidth = '140px'
 const termmailInfo = ref({})
 const termmailId = ref(null)
 const form = reactive({
-  ip: '',
-  username: '',
-  password: '',
+  serverIP: '',
+  userName: '',
+  serverPasswd: '',
+  serverPort: null,
   coding: '',
   passCard: '',
-  model: '',
-  product: '',
-  region: ''
+  modelCode: '',
+  machineType: ''
 })
 const ruleFormRef = ref<FormInstance>()
 const rules = reactive<FormRules>({
-  ip: [{ required: true, message: '请输入设备ip', trigger: 'blur' }],
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  serverIP: [{ required: true, message: '请输入设备ip', trigger: 'blur' }],
+  userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  serverPasswd: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  serverPort: [{ required: true, message: '请输入设备端口', trigger: 'blur' }],
   coding: [{ required: true, message: '请输入设备编码', trigger: 'blur' }],
   passCard: [{ required: true, message: '请输入密码卡', trigger: 'blur' }],
-  model: [{ required: true, message: '请输入设备型号', trigger: 'blur' }],
-  product: [{ required: true, message: '请选择产品线', trigger: 'blur' }],
-  region: [{ required: true, message: '请选择设备类型', trigger: 'blur' }]
+  modelCode: [{ required: true, message: '请输入设备型号', trigger: 'blur' }],
+  machineType: [{ required: true, message: '请选择设备类型', trigger: 'blur' }]
 })
 const linuxTableData = ref([
   {
-    ip: '10.4.150.55',
+    serverIP: '10.4.150.55',
     user: 'admin',
     update: '2016-05-03',
     type: '自动化平台使用',
     status: '空闲'
   },
   {
-    ip: '10.4.150.55',
+    serverIP: '10.4.150.55',
     user: 'admin',
     update: '2016-05-03',
     type: '自动化平台使用',
     status: '空闲'
   },
   {
-    ip: '10.4.150.55',
+    serverIP: '10.4.150.55',
     user: 'admin',
     update: '2016-05-03',
     type: '自动化平台使用',
     status: '空闲'
   },
   {
-    ip: '10.4.150.55',
+    serverIP: '10.4.150.55',
     user: 'admin',
     update: '2016-05-03',
     type: '自动化平台使用',
     status: '空闲'
   },
   {
-    ip: '10.4.150.55',
+    serverIP: '10.4.150.55',
     user: 'admin',
     update: '2016-05-03',
     type: '自动化平台使用',
     status: '空闲'
   },
   {
-    ip: '10.4.150.55',
+    serverIP: '10.4.150.55',
     user: 'admin',
     update: '2016-05-03',
     type: '自动化平台使用',
     status: '空闲'
   },
   {
-    ip: '10.4.150.55',
+    serverIP: '10.4.150.55',
     user: 'admin',
     update: '2016-05-03',
     type: '自动化平台使用',

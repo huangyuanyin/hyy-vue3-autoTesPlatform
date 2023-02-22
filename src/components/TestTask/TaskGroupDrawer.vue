@@ -67,6 +67,26 @@
               </el-card>
             </div>
           </el-tab-pane>
+          <el-tab-pane label="版本构建">
+            <span class="group-name">版本构建</span>
+            <div class="group-name-list">
+              <el-card
+                class="group-name-item"
+                shadow="hover"
+                @click="addStage(item)"
+                v-for="(item, index) in buildList"
+                :key="'orderList' + index"
+              >
+                <div class="group-name-item-detail">
+                  <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
+                  <div class="group-name-item-detail-right">
+                    <span class="detail-name">{{ item.name }}</span>
+                    <p>{{ item.desc }}</p>
+                  </div>
+                </div>
+              </el-card>
+            </div>
+          </el-tab-pane>
           <el-tab-pane label="代码扫描" :disabled="true">
             <span class="group-name">代码扫描</span>
             <div class="group-name-list">
@@ -121,14 +141,24 @@ const testList = ref([
 ])
 const deployList = ref([
   {
-    name: 'NetSign主机部署',
-    desc: '这是一段主机部署'
+    name: 'NetSign基线部署',
+    desc: '这是一段NetSign基线部署'
+  },
+  {
+    name: 'NetSign项目部署',
+    desc: '这是一段NetSign项目部署'
   }
 ])
 const orderList = ref([
   {
     name: '执行命令',
     desc: '用于执行命令'
+  }
+])
+const buildList = ref([
+  {
+    name: '版本构建',
+    desc: '用于版本构建'
   }
 ])
 

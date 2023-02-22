@@ -3,12 +3,12 @@
     <div class="group-head">
       <div class="name">
         <span @dblclick="handleEditor" v-if="!data.isEditor">{{ flow.name }}</span>
-        <el-input v-else type="text" v-model="data.value" @input="handleInput" @blur="handleEditor"></el-input>
+        <el-input v-else type="text" v-model="data.value"></el-input>
       </div>
-      <!-- <div class="editor" v-show="isShowIcon">
+      <div class="editor" v-show="isShowIcon">
         <svg-icon @click="handleEditor" v-if="data.isEditor" iconName="icon-danduduihao"></svg-icon>
         <svg-icon @click="handleEditor" v-else iconName="icon-bianji"></svg-icon>
-      </div> -->
+      </div>
       <div class="delete" v-show="isShowIcon">
         <svg-icon class="grayDelete" @click="openDeleteGroupDialog" iconName="icon-changyonggoupiaorenshanchu"></svg-icon>
         <svg-icon class="redDelete" @click="openDeleteGroupDialog" iconName="icon-changyonggoupiaorenshanchu-copy"></svg-icon>
@@ -68,7 +68,6 @@ const handleInput = (e: any) => {
 }
 
 const handleEditor = () => {
-  console.log(`output->'DA'`, 'DA')
   if (data.isEditor) {
     data.isEditor = false
     props.flow.name = data.value
@@ -124,6 +123,9 @@ const submitDelete = () => {
   }
   .editor {
     margin: 0 10px;
+    &:hover {
+      cursor: pointer;
+    }
   }
   .delete {
     margin-left: 10px;

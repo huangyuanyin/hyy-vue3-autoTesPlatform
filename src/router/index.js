@@ -42,7 +42,7 @@ const routes = [
             name: 'Overview',
             meta: {
               title: '概览',
-              keepAlive: true
+              keepAlive: false
             },
             component: () => import('@/views/overview/index.vue')
           },
@@ -51,7 +51,7 @@ const routes = [
             name: 'SystemConfig',
             meta: {
               title: '系统配置',
-              keepAlive: true
+              keepAlive: false
             },
             component: () => import('@/views/systemConfig/index.vue')
           },
@@ -60,7 +60,7 @@ const routes = [
             name: 'TestTask',
             meta: {
               title: '测试任务',
-              keepAlive: true
+              keepAlive: false
             },
             component: () => import('@/views/testTask/index.vue')
           },
@@ -78,7 +78,7 @@ const routes = [
             name: 'TestResult',
             meta: {
               title: '测试结果',
-              keepAlive: true
+              keepAlive: false
             },
             component: () => import('@/views/testResult/index.vue')
           }

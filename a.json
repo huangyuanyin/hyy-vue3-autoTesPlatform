@@ -1,0 +1,29 @@
+{
+  "deployConfigs": [
+    {
+      "serverConfig": {
+        "serverIP": "10.20.85.30",
+        "serverPasswd": "inf0sec312",
+        "userName": "root",
+        "serverPort": 22,
+        "machineType": "3500",
+        "modelCode": "Z213NAJ",
+        "configCode": "XASL21000A"
+      },
+      "deployVersion": "sar_2_2",
+      "deployType": "full",
+      "patchVersion": "SAR4.1_NetSignServer5.6.50.2_patch1.0",
+      "deviceConfig": {
+        "machineSN": "123456789",
+        "productID": "123456",
+        "ifha": "y",
+        "ispbc": "y",
+        "isrbc": "y",
+        "useNewDataType": "y",
+        "ifback": "n",
+        "ifrs": "y",
+        "startMidwareType": "Tomcat"
+      }
+    }
+  ]
+}

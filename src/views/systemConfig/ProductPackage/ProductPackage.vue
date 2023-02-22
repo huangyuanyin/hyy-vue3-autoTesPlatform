@@ -1,11 +1,10 @@
 <template>
   <el-card class="build-card" shadow="never">
-    <el-upload class="upload-demo" :show-file-list="false" action="action" :http-request="handleUpload" :on-success="handleSuccess">
-      <el-button type="primary" style="margin-bottom: 20px" :auto-upload="false"> 上传包 </el-button>
-    </el-upload>
-    <el-button type="primary" @click="openDownloadDialog = true" style="margin-left: 20px" :auto-upload="false"> 拉取包 </el-button>
+    <el-button type="primary" @click="openUploadDialog = true" style="margin-bottom: 20px"> 上传包 </el-button>
+    <el-button type="primary" @click="openDownloadDialog = true" style="margin-left: 20px; margin-bottom: 20px"> 拉取包 </el-button>
     <el-table :data="state.buildData" border stripe height="62vh">
       <el-table-column prop="name" label="包名称" align="center" />
+      <el-table-column prop="type" label="包类别" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-popconfirm
@@ -32,48 +31,35 @@
       @current-change="handleBuildCurrentChange"
     />
   </el-card>
+  <UploadPackage :dialog="openUploadDialog" @cancel="closeUploadPackage" />
+  <PullPackage :dialog="openDownloadDialog" @cancel="closePullPackage" />
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive } from 'vue'
-import { ElMessage } from 'element-plus'
-import type { UploadProps } from 'element-plus'
+import PullPackage from './components/PullPackage.vue'
+import UploadPackage from './components/UploadPackage.vue'
 
 const openDownloadDialog = ref(false)
+const openUploadDialog = ref(false)
 const buildCurrentPage = ref(1)
 const buildPageSize = ref(10)
 const buildTotal = ref(0)
 const state: any = reactive({
   buildData: [
-    { name: 'ArrayOS-Rel_APV_10_4_2_43.array' },
-    { name: 'ArrayOS-Rel_APV_10_4_2_43.array' },
-    { name: 'ArrayOS-Rel_APV_10_4_2_43.array' },
-    { name: 'ArrayOS-Rel_APV_10_4_2_43.array' },
-    { name: 'ArrayOS-Rel_APV_10_4_2_43.array' },
-    { name: 'ArrayOS-Rel_APV_10_4_2_43.array' },
-    { name: 'ArrayOS-Rel_APV_10_4_2_43.array' },
-    { name: 'ArrayOS-Rel_APV_10_4_2_43.array' }
+    { name: 'ArrayOS-Rel_APV_10_4_2_43.array', type: '全量包' },
+    { name: 'ArrayOS-Rel_APV_10_4_2_43.array', type: '全量包' },
+    { name: 'ArrayOS-Rel_APV_10_4_2_43.array', type: '全量包' },
+    { name: 'ArrayOS-Rel_APV_10_4_2_43.array', type: '全量包' },
+    { name: 'ArrayOS-Rel_APV_10_4_2_43.array', type: '全量包' },
+    { name: 'ArrayOS-Rel_APV_10_4_2_43.array', type: '全量包' },
+    { name: 'ArrayOS-Rel_APV_10_4_2_43.array', type: '全量包' },
+    { name: 'ArrayOS-Rel_APV_10_4_2_43.array', type: '全量包' }
   ] // 包列表数据
 })
 
 // 删除
 const handleDelete = (type, id) => {}
-
-// 文件上传
-const handleUpload = async files => {
-  if (state.buildName.includes(files.file.name)) {
-    ElMessage.error('请勿重复上传该文件！')
-    return false
-  }
-  let formData = new FormData()
-  formData.append('file', files.file)
-  formData.append('filetype', 'apvbuild')
-  // buildUpload(formData)
-}
-
-const handleSuccess: UploadProps['onSuccess'] = () => {
-  // getBuild()
-}
 
 const handleBuildSizeChange = (val: number) => {
   console.log(`${val} items per page`)
@@ -81,6 +67,14 @@ const handleBuildSizeChange = (val: number) => {
 const handleBuildCurrentChange = (val: number) => {
   // groupCurrentPage.value = val
   // getD_group(groupCurrentPage.value)
+}
+
+const closePullPackage = val => {
+  openDownloadDialog.value = val
+}
+
+const closeUploadPackage = val => {
+  openUploadDialog.value = val
 }
 </script>
 

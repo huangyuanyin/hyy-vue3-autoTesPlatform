@@ -3,10 +3,7 @@
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="addTask"> 新建任务</el-button>
     <el-table :data="taskTableData" border style="width: 100%">
       <el-table-column prop="name" label="任务名称" width="180" />
-      <el-table-column prop="ip" label="用例总数" width="180" />
-      <el-table-column prop="date" label="失败数" width="180" />
       <el-table-column prop="type" label="产品型号" />
-      <el-table-column prop="username" label="版本" />
       <el-table-column prop="password" label="任务状态" />
       <el-table-column label="最近运行状态" align="center">
         <template #default="item">
@@ -57,6 +54,7 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="item">
+          <el-button link type="primary" size="small"> 详情 </el-button>
           <el-button link type="primary" size="small"> 编辑 </el-button>
           <el-button link type="danger" size="small"> 删除 </el-button>
         </template>
@@ -72,6 +70,14 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const taskTableData = reactive([
+  {
+    name: '任务模板一',
+    ip: '000',
+    date: '333',
+    type: '任务示例参考',
+    username: 'admin',
+    password: '运行中'
+  },
   {
     name: '任务1',
     ip: '222',
