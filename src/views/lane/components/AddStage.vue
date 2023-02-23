@@ -40,6 +40,7 @@ const changeDrawer = (value: any) => {
     const name = value[1]
     props.stages.push([
       {
+        id: value[2],
         name: name
       }
     ])

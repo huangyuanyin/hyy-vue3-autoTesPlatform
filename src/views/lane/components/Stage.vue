@@ -32,7 +32,7 @@
             popper-class="contextmenu"
             placement="top-end"
           >
-            <div class="job3" @click="openTaskDetailDrawer(parallel.name, index)">
+            <div class="job3" @click="openTaskDetailDrawer(parallel, index)">
               {{ parallel.name }}
             </div>
             <template #dropdown>
@@ -60,6 +60,12 @@
   <TaskDetailDrawer
     :taskDetailName="taskDetailName"
     :taskDetailDrawer="taskDetailDrawer"
+    @closeDrawer="closeDrawer"
+    @deleteTask="handleRemoveParallel(taskId)"
+  />
+  <NetSignProjectDeploy
+    :taskDetailName="taskDetailName"
+    :taskDetailDrawer="NetSignProjectDeployDrawer"
     @closeDrawer="closeDrawer"
     @deleteTask="handleRemoveParallel(taskId)"
   />
@@ -91,6 +97,7 @@ const isExitHover_two = ref(false)
 const automatic = ref(true)
 const drawer = ref(false)
 const taskDetailDrawer = ref(false)
+const NetSignProjectDeployDrawer = ref(false)
 const taskDetailName = ref('')
 const taskId = ref('')
 const stageID = ref(null)
@@ -118,10 +125,18 @@ const triggerMethod = (value: boolean) => {
   automatic.value = value
 }
 
-const openTaskDetailDrawer = (value: any, id: any) => {
+const openTaskDetailDrawer = (item: any, id: any) => {
+  console.log(`output->ietm.id`, item)
+  switch (item.id) {
+    case '10':
+      taskDetailDrawer.value = true
+      break
+    case '11':
+      NetSignProjectDeployDrawer.value = true
+      break
+  }
   taskId.value = id
-  taskDetailDrawer.value = true
-  taskDetailName.value = value
+  taskDetailName.value = item.name
 }
 
 const closeDrawer = (value?: any) => {
@@ -129,6 +144,7 @@ const closeDrawer = (value?: any) => {
     props.stage[taskId.value].name = value[1].name
   }
   taskDetailDrawer.value = value[0]
+  NetSignProjectDeployDrawer.value = value[0]
 }
 
 const handleCommand = (command: string | number | object, id: string) => {
@@ -145,6 +161,7 @@ const changeDrawer = (value: any) => {
   if (!drawer.value) {
     const name = value[1]
     props.stage.splice(stageID.value, 0, {
+      id: value[2],
       name: name
     })
     // emit('add-stage', {

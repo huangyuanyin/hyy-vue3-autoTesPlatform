@@ -190,7 +190,10 @@
                 </el-select>
               </el-form-item>
               <el-collapse class="collapseItem">
-                <el-collapse-item title="更多设置" name="1">
+                <el-collapse-item name="1">
+                  <template #title>
+                    <el-button text type="primary"> 高级设置 </el-button>
+                  </template>
                   <el-form-item label="是否安装HA" prop="ifha">
                     <el-radio-group v-model="item.ifha" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
@@ -527,16 +530,28 @@ const deleteDevice = (id: number) => {
       .collapseItem {
         border: none;
         width: 520px;
+        margin-bottom: 20px;
       }
       .el-collapse .el-collapse-item {
         background-color: #f5f5f5 !important;
-        border: none;
+        // border: none;
       }
       .el-collapse .el-collapse-item__header {
         border: none;
         color: #606266;
         font-size: 14px;
         background-color: #f5f5f5 !important;
+        .el-button {
+          padding-left: 0px;
+          padding-right: 0px;
+          span {
+            font-weight: 600;
+          }
+        }
+        .el-collapse-item__arrow {
+          margin-left: 3px;
+          color: #409eff;
+        }
       }
       .el-collapse .el-collapse-item__wrap {
         background-color: #f5f5f5 !important;
@@ -548,6 +563,9 @@ const deleteDevice = (id: number) => {
       }
       .el-collapse-item__wrap {
         border: none;
+      }
+      .el-collapse-item__content {
+        padding-bottom: 0px;
       }
     }
   }

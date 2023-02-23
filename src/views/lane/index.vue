@@ -18,7 +18,7 @@
         </el-col>
         <el-col class="saveButton" :span="4">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="primary">保存并创建任务</el-button>
+          <el-button type="primary" @click="sumbitTask">保存并创建任务</el-button>
         </el-col>
       </el-row>
     </div>
@@ -56,6 +56,10 @@ const data = reactive({
 
 const changeTab = (e: any) => {
   tabName.value = e
+}
+
+const sumbitTask = () => {
+  console.log(`保存任务`, data.flows)
 }
 </script>
 

@@ -54,7 +54,7 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="item">
-          <el-button link type="primary" size="small"> 详情 </el-button>
+          <el-button link type="primary" size="small" @click="toDetail(item.row)"> 详情 </el-button>
           <el-button link type="primary" size="small"> 编辑 </el-button>
           <el-button link type="danger" size="small"> 删除 </el-button>
         </template>
@@ -113,6 +113,10 @@ const taskTableData = reactive([
 ])
 
 const addTask = () => {
+  router.push({ path: '/testTask/addTestTask' })
+}
+
+const toDetail = item => {
   router.push({ path: '/testTask/addTestTask' })
 }
 </script>
