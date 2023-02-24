@@ -60,8 +60,11 @@
                   </template>
                   <ul>
                     <li v-for="(item, index) in serverConfigList" :key="'serverConfigList' + index">
-                      <div>
-                        {{ item.label }}<span>{{ item.value }}</span>
+                      <div class="detail">
+                        {{ item.label }}
+                        <el-tooltip class="box-item" effect="dark" :content="item.value" placement="top">
+                          <span>{{ item.value }}</span>
+                        </el-tooltip>
                       </div>
                     </li>
                   </ul>
@@ -130,10 +133,9 @@ const emit = defineEmits(['closeDrawer', 'deleteTask'])
 const ishowDrawer = ref(false)
 const serverConfigList = [
   { label: '设备IP：', value: '10.20.85.30' },
-  { label: '用户名：', value: 'root' },
-  { label: '端口：', value: '22' },
+  { label: '主板类型:', value: 'x86' },
   { label: '设备型号：', value: '3500' },
-  { label: '设备编码：', value: 'Z213NAJ' },
+  { label: '设备编码：', value: 'Z213NAJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ' },
   { label: '密码卡：', value: '国密' }
 ]
 const taskDetailFormRef = ref<FormInstance>()
@@ -303,6 +305,10 @@ const deleteDevice = (id: number) => {
           li {
             width: 45%;
             span {
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              width: 130px;
+              overflow: hidden;
               color: #67c23a;
             }
           }
@@ -348,6 +354,10 @@ const deleteDevice = (id: number) => {
             li {
               width: 45%;
               span {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                width: 130px;
+                overflow: hidden;
                 color: #67c23a;
               }
             }
@@ -401,5 +411,9 @@ const deleteDevice = (id: number) => {
     font-size: 14px;
     margin-right: 10px;
   }
+}
+.detail {
+  display: flex !important;
+  white-space: nowrap !important;
 }
 </style>

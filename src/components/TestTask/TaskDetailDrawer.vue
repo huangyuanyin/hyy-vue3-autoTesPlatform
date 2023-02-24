@@ -153,7 +153,10 @@
                   <ul>
                     <li v-for="(item, index) in serverConfigList" :key="'serverConfigList' + index">
                       <div class="detail">
-                        {{ item.label }}<span>{{ item.value }}</span>
+                        {{ item.label }}
+                        <el-tooltip :disabled="isShowToolTip" class="box-item" effect="dark" :content="item.value" placement="top">
+                          <span @mouseenter="onMouseenter">{{ item.value }}</span>
+                        </el-tooltip>
                       </div>
                     </li>
                   </ul>
@@ -268,11 +271,12 @@ const props = defineProps({
 
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
 const ishowDrawer = ref(false)
+const isShowToolTip = ref(false)
 const serverConfigList = [
   { label: '设备IP：', value: '10.20.85.30' },
   { label: '主板类型：', value: 'x86' },
   { label: '设备型号：', value: '3500' },
-  { label: '设备编码：', value: 'Z213NAJ' },
+  { label: '设备编码：', value: 'Z213NAJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ' },
   { label: '密码卡：', value: '国密' }
 ]
 const taskDetailFormRef = ref<FormInstance>()
@@ -423,6 +427,12 @@ const addDeviceForm = () => {
 const deleteDevice = (id: number) => {
   if (deviceList.value.length === 1) return ElMessage.error('至少保留一个设备配置！')
   deviceList.value.splice(id, 1)
+}
+
+const onMouseenter = e => {
+  const parentWidth = e.target.offsetWidth
+  const contentWidth = e.target.scrollWidth
+  isShowToolTip.value = contentWidth < parentWidth
 }
 </script>
 
