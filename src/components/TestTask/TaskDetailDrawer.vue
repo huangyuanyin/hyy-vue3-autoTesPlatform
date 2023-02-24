@@ -28,7 +28,7 @@
         label-position="top"
         status-icon
       >
-        <el-form-item label="阶段名称" prop="name">
+        <el-form-item label="任务名称" prop="name">
           <el-input v-model="taskDetailForm.name" placeholder="请输入阶段名称" />
         </el-form-item>
         <!-- <el-form-item label="可选设备" prop="name">
@@ -318,7 +318,7 @@ const deviceList = ref([
     ispbc: 'y',
     useNewDataType: 'y',
     isrbc: 'y',
-    ifback: 'y',
+    ifback: 'n',
     ifrs: 'y',
     startMidwareType: ''
   }
@@ -333,7 +333,7 @@ const cloneDeviceObj = ref({
   ispbc: 'y',
   useNewDataType: 'y',
   isrbc: 'y',
-  ifback: 'y',
+  ifback: 'n',
   ifrs: 'y',
   startMidwareType: ''
 })
@@ -364,7 +364,7 @@ const closeDrawer = (value?: any) => {
       ispbc: 'y',
       useNewDataType: 'y',
       isrbc: 'y',
-      ifback: 'y',
+      ifback: 'n',
       ifrs: 'y',
       startMidwareType: ''
     }

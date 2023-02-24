@@ -9,7 +9,7 @@
         </el-col>
         <el-col :span="16">
           <div class="grid-content ep-bg-purple" />
-          <el-tabs v-model="tabName" tab-position="top" style="height: 200px" class="lane-tabs" @tab-change="changeTab">
+          <el-tabs v-model="tabName" tab-position="top" class="lane-tabs" @tab-change="changeTab">
             <el-tab-pane name="basicInformation" label="基本信息"></el-tab-pane>
             <el-tab-pane name="processConfig" label="流程配置"></el-tab-pane>
             <el-tab-pane name="triggerSetting" label="触发设置"></el-tab-pane>
@@ -18,7 +18,7 @@
         </el-col>
         <el-col class="saveButton" :span="4">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="primary" @click="sumbitTask">保存并创建任务</el-button>
+          <el-button v-if="!isTemplate" type="primary" @click="sumbitTask">保存并创建任务</el-button>
         </el-col>
       </el-row>
     </div>
@@ -31,14 +31,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import Lane from './lane.vue'
 import basicInformation from './basicInformation/index.vue'
 import TriggerSetting from './triggerSetting/index.vue'
 
 const router = useRouter()
+const route = useRoute()
 const tabName = ref('basicInformation')
+const isTemplate = ref(false)
 const data = reactive({
   flows: [
     // {
@@ -61,6 +63,15 @@ const changeTab = (e: any) => {
 const sumbitTask = () => {
   console.log(`保存任务`, data.flows)
 }
+
+onMounted(() => {
+  if (route.query.id === '000') {
+    isTemplate.value = true
+    data.flows = JSON.parse(localStorage.getItem('taskTemplateObj'))
+  } else {
+    isTemplate.value = false
+  }
+})
 </script>
 
 <style lang="scss" scoped>

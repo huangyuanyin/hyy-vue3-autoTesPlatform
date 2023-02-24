@@ -1,7 +1,7 @@
 <template>
   <div class="testTask-wrap">
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="addTask"> 新建任务</el-button>
-    <el-table :data="taskTableData" border style="width: 100%">
+    <el-table :data="taskTableData" border style="width: 100%" stripe>
       <el-table-column prop="name" label="任务名称" width="180" />
       <el-table-column prop="type" label="产品型号" />
       <el-table-column prop="password" label="任务状态" />
@@ -56,7 +56,7 @@
         <template #default="item">
           <el-button link type="primary" size="small" @click="toDetail(item.row)"> 详情 </el-button>
           <el-button link type="primary" size="small"> 编辑 </el-button>
-          <el-button link type="danger" size="small"> 删除 </el-button>
+          <el-button link type="danger" size="small" :disabled="item.row.disabledDelete"> 删除 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -72,15 +72,16 @@ const router = useRouter()
 const taskTableData = reactive([
   {
     name: '任务模板一',
-    ip: '000',
+    id: '000',
     date: '333',
     type: '任务示例参考',
     username: 'admin',
-    password: '运行中'
+    password: '运行中',
+    disabledDelete: true
   },
   {
     name: '任务1',
-    ip: '222',
+    id: '222',
     date: '333',
     type: '自动化平台使用',
     username: 'admin',
@@ -88,7 +89,7 @@ const taskTableData = reactive([
   },
   {
     date: '333',
-    ip: '222',
+    id: '222',
     name: '任务2',
     type: '自动化平台使用',
     username: 'admin',
@@ -96,7 +97,7 @@ const taskTableData = reactive([
   },
   {
     date: '333',
-    ip: '222',
+    id: '222',
     name: '任务3',
     type: '自动化平台使用',
     username: 'admin',
@@ -104,7 +105,7 @@ const taskTableData = reactive([
   },
   {
     date: '333',
-    ip: '222',
+    id: '222',
     name: '任务4',
     type: '自动化平台使用',
     username: 'admin',
@@ -117,7 +118,80 @@ const addTask = () => {
 }
 
 const toDetail = item => {
-  router.push({ path: '/testTask/addTestTask' })
+  if (item.id === '000') {
+    const obj = [
+      {
+        name: '部署',
+        stages: [
+          [
+            {
+              id: '10',
+              name: 'NetSign基线部署'
+            },
+            {
+              id: '11',
+              name: 'NetSign项目部署'
+            }
+          ],
+          [
+            {
+              id: '10',
+              name: 'NetSign基线部署'
+            },
+            {
+              id: '11',
+              name: 'NetSign项目部署'
+            }
+          ],
+          [
+            {
+              id: '10',
+              name: 'NetSign基线部署'
+            }
+          ]
+        ]
+      },
+      {
+        name: '测试',
+        stages: [
+          [
+            {
+              id: '20',
+              name: '接口测试'
+            },
+            {
+              id: '21',
+              name: 'UI测试'
+            }
+          ]
+        ]
+      },
+      {
+        name: '执行命令',
+        stages: [
+          [
+            {
+              id: '30',
+              name: '执行命令'
+            }
+          ]
+        ]
+      },
+      {
+        name: '版本构建',
+        stages: [
+          [
+            {
+              id: '40',
+              name: '版本构建'
+            }
+          ]
+        ]
+      }
+    ]
+    localStorage.getItem('taskTemplateObj') ? '' : localStorage.setItem('taskTemplateObj', JSON.stringify(obj))
+  }
+  router.push({ path: '/testTask/addTestTask', query: { id: item.id } })
 }
 </script>
 

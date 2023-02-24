@@ -28,7 +28,7 @@
         label-position="top"
         status-icon
       >
-        <el-form-item label="阶段名称" prop="name">
+        <el-form-item label="任务名称" prop="name">
           <el-input v-model="taskDetailForm.name" placeholder="请输入阶段名称" />
         </el-form-item>
       </el-form>
@@ -73,22 +73,25 @@
                   <!-- <el-option label="SongJiang1.1_NetSignServer5.6.50.4-full.zip" value="SongJiang1.1_NetSignServer5.6.50.4-full.zip" /> -->
                 </el-select>
               </el-form-item>
-              <!-- <el-collapse class="collapseItem">
-                <el-collapse-item title="更多设置" name="1"> -->
-              <el-form-item label="是否生产部门安装" prop="ifback">
-                <el-radio-group v-model="item.ifback" class="ml-4" :key="index">
-                  <el-radio label="y">是</el-radio>
-                  <el-radio label="n">否</el-radio>
-                </el-radio-group>
-              </el-form-item>
-              <el-form-item label="是否重启服务" prop="ifrs">
-                <el-radio-group v-model="item.ifrs" class="ml-4" :key="index">
-                  <el-radio label="y">是</el-radio>
-                  <el-radio label="n">否</el-radio>
-                </el-radio-group>
-              </el-form-item>
-              <!-- </el-collapse-item>
-              </el-collapse> -->
+              <el-collapse class="collapseItem">
+                <el-collapse-item name="1">
+                  <template #title>
+                    <el-button text type="primary"> 高级设置 </el-button>
+                  </template>
+                  <el-form-item label="是否生产部门安装" prop="ifback">
+                    <el-radio-group v-model="item.ifback" class="ml-4" :key="index">
+                      <el-radio label="y">是</el-radio>
+                      <el-radio label="n">否</el-radio>
+                    </el-radio-group>
+                  </el-form-item>
+                  <el-form-item label="是否重启服务" prop="ifrs">
+                    <el-radio-group v-model="item.ifrs" class="ml-4" :key="index">
+                      <el-radio label="y">是</el-radio>
+                      <el-radio label="n">否</el-radio>
+                    </el-radio-group>
+                  </el-form-item>
+                </el-collapse-item>
+              </el-collapse>
             </el-form>
           </div>
           <div class="device-space-item">
@@ -150,7 +153,7 @@ const deviceList = ref([
     packageName: '',
     main_bord_type: '',
     deployType: '',
-    ifback: 'y',
+    ifback: 'n',
     ifrs: 'y'
   }
 ])
@@ -159,7 +162,7 @@ const cloneDeviceObj = ref({
   packageName: '',
   main_bord_type: '',
   deployType: '',
-  ifback: 'y',
+  ifback: 'n',
   ifrs: 'y'
 })
 const deviceFormRules = reactive<FormRules>({})
@@ -184,7 +187,7 @@ const closeDrawer = (value?: any) => {
       packageName: '',
       main_bord_type: '',
       deployType: '',
-      ifback: 'y',
+      ifback: 'n',
       ifrs: 'y'
     }
   ]
@@ -354,16 +357,28 @@ const deleteDevice = (id: number) => {
       .collapseItem {
         border: none;
         width: 520px;
+        margin-bottom: 20px;
       }
       .el-collapse .el-collapse-item {
         background-color: #f5f5f5 !important;
-        border: none;
+        // border: none;
       }
       .el-collapse .el-collapse-item__header {
         border: none;
         color: #606266;
         font-size: 14px;
         background-color: #f5f5f5 !important;
+        .el-button {
+          padding-left: 0px;
+          padding-right: 0px;
+          span {
+            font-weight: 600;
+          }
+        }
+        .el-collapse-item__arrow {
+          margin-left: 3px;
+          color: #409eff;
+        }
       }
       .el-collapse .el-collapse-item__wrap {
         background-color: #f5f5f5 !important;
@@ -375,6 +390,9 @@ const deleteDevice = (id: number) => {
       }
       .el-collapse-item__wrap {
         border: none;
+      }
+      .el-collapse-item__content {
+        padding-bottom: 0px;
       }
     }
   }

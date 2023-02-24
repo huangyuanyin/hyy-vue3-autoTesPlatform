@@ -2,8 +2,8 @@
   <div class="flow-group" @mouseenter="isShowIcon = true" @mouseleave="isShowIcon = false">
     <div class="group-head">
       <div class="name">
-        <span @dblclick="handleEditor" v-if="!data.isEditor">{{ flow.name }}</span>
-        <el-input v-else type="text" v-model="data.value"></el-input>
+        <span @dblclick="handleEditor" v-if="!data.isEditor">{{ FlowName }}</span>
+        <el-input v-else type="text" v-model="FlowName"></el-input>
       </div>
       <div class="editor" v-show="isShowIcon">
         <svg-icon @click="handleEditor" v-if="data.isEditor" iconName="icon-danduduihao"></svg-icon>
@@ -34,13 +34,12 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import Stage from './Stage.vue'
 import AddStage from './AddStage.vue'
 import DeleteGroupDialog from '@/components/TestTask/DeleteGroupDialog.vue'
 
 const emit = defineEmits(['removeFlow'])
-
 const props = defineProps({
   flow: {
     type: Object,
@@ -48,9 +47,25 @@ const props = defineProps({
   }
 })
 
+const FlowName = ref('')
 const data = reactive({
   isEditor: false,
-  value: props.flow.name
+  value: FlowName.value
+})
+
+onMounted(() => {
+  if (props.flow.name.includes('部署')) {
+    FlowName.value = '部署'
+  }
+  if (props.flow.name.includes('测试')) {
+    FlowName.value = '测试'
+  }
+  if (props.flow.name.includes('执行命令')) {
+    FlowName.value = '执行命令'
+  }
+  if (props.flow.name.includes('版本构建')) {
+    FlowName.value = '版本构建'
+  }
 })
 const isShowIcon = ref(false)
 const isShowDeleteGroupDialog = ref(false)
@@ -63,18 +78,14 @@ const handleRemoveStage = (index: any) => {
   props.flow.stages.splice(index, 1)
 }
 
-const handleInput = (e: any) => {
-  data.value = e
-}
-
 const handleEditor = () => {
   if (data.isEditor) {
     data.isEditor = false
-    props.flow.name = data.value
+    props.flow.name = FlowName.value
     return
   }
   data.isEditor = true
-  data.value = props.flow.name
+  data.value = FlowName.value
 }
 
 const openDeleteGroupDialog = () => {
