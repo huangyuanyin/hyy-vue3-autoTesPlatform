@@ -159,12 +159,12 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="主板类型" prop="main_bord_type">
+              <!-- <el-form-item label="主板类型" prop="main_bord_type">
                 <el-select v-model="item.main_bord_type" placeholder="请选择主板类型" :key="index">
                   <el-option label="C4600" value="C4600" />
                   <el-option label="x86" value="x86" />
                 </el-select>
-              </el-form-item>
+              </el-form-item> -->
               <el-form-item label="部署类型" prop="deployType">
                 <el-select v-model="item.deployType" placeholder="请选择部署类型" :key="index">
                   <el-option label="全量基线" value="full" />
@@ -270,8 +270,7 @@ const emit = defineEmits(['closeDrawer', 'deleteTask'])
 const ishowDrawer = ref(false)
 const serverConfigList = [
   { label: '设备IP：', value: '10.20.85.30' },
-  { label: '用户名：', value: 'root' },
-  { label: '端口：', value: '22' },
+  { label: '主板类型：', value: 'x86' },
   { label: '设备型号：', value: '3500' },
   { label: '设备编码：', value: 'Z213NAJ' },
   { label: '密码卡：', value: '国密' }

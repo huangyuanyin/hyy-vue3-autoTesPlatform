@@ -57,20 +57,35 @@
         <el-form-item label="设备端口" :label-width="formLabelWidth" prop="serverPort">
           <el-input v-model="form.serverPort" autocomplete="off" :disabled="disabled" />
         </el-form-item>
-        <el-form-item label="设备编码" :label-width="formLabelWidth" prop="coding">
-          <el-input v-model="form.coding" autocomplete="off" :disabled="disabled" />
+        <el-form-item label="型号编码" :label-width="formLabelWidth" prop="mode_code">
+          <el-input v-model="form.mode_code" autocomplete="off" :disabled="disabled" />
         </el-form-item>
-        <el-form-item label="密码卡" :label-width="formLabelWidth" prop="passCard">
-          <el-input v-model="form.passCard" autocomplete="off" :disabled="disabled" />
+        <el-form-item label="配置编码" :label-width="formLabelWidth" prop="config_code">
+          <el-input v-model="form.config_code" autocomplete="off" :disabled="disabled" />
         </el-form-item>
-        <el-form-item label="设备型号" :label-width="formLabelWidth" prop="modelCode">
-          <el-input v-model="form.modelCode" autocomplete="off" :disabled="disabled" />
+        <el-form-item label="主板类型" :label-width="formLabelWidth" prop="main_bord_type">
+          <el-input v-model="form.main_bord_type" autocomplete="off" :disabled="disabled" />
+        </el-form-item>
+        <el-form-item label="cavium类型" :label-width="formLabelWidth" prop="cavium_card_type">
+          <el-input v-model="form.cavium_card_type" autocomplete="off" :disabled="disabled" />
+        </el-form-item>
+        <el-form-item label="国密卡类型" :label-width="formLabelWidth" prop="gm_card_varchar">
+          <el-input v-model="form.gm_card_varchar" autocomplete="off" :disabled="disabled" />
         </el-form-item>
         <el-form-item label="设备类型" :label-width="formLabelWidth" prop="machineType">
           <el-select v-model="form.machineType" placeholder="请选择Linux设备类型" :disabled="disabled">
             <el-option label="自动化平台使用" value="shanghai" />
             <el-option label="临时设备" value="beijing" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="设备组" :label-width="formLabelWidth" prop="device_group">
+          <el-select v-model="form.device_group" placeholder="请选择设备组" :disabled="disabled">
+            <el-option label="自动化组" value="zidong" />
+            <el-option label="签名组" value="qianming" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
+          <el-input v-model="form.remark" autocomplete="off" :disabled="disabled" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -102,10 +117,16 @@ const form = reactive({
   userName: '',
   serverPasswd: '',
   serverPort: null,
+  mode_code: '',
   coding: '',
   passCard: '',
-  modelCode: '',
-  machineType: ''
+  config_code: '',
+  cavium_card_type: '',
+  gm_card_varchar: '',
+  main_bord_type: '',
+  machineType: '',
+  device_group: '',
+  remark: ''
 })
 const ruleFormRef = ref<FormInstance>()
 const rules = reactive<FormRules>({
@@ -115,8 +136,13 @@ const rules = reactive<FormRules>({
   serverPort: [{ required: true, message: '请输入设备端口', trigger: 'blur' }],
   coding: [{ required: true, message: '请输入设备编码', trigger: 'blur' }],
   passCard: [{ required: true, message: '请输入密码卡', trigger: 'blur' }],
-  modelCode: [{ required: true, message: '请输入设备型号', trigger: 'blur' }],
-  machineType: [{ required: true, message: '请选择设备类型', trigger: 'blur' }]
+  mode_code: [{ required: true, message: '请输入型号编码', trigger: 'blur' }],
+  config_code: [{ required: true, message: '请输入配置编码', trigger: 'blur' }],
+  main_bord_type: [{ required: true, message: '请输入主板类型', trigger: 'blur' }],
+  cavium_card_type: [{ required: true, message: '请输入cavium卡类型', trigger: 'blur' }],
+  gm_card_varchar: [{ required: true, message: '请输入国密卡类型', trigger: 'blur' }],
+  machineType: [{ required: true, message: '请选择设备类型', trigger: 'blur' }],
+  device_group: [{ required: true, message: '请选择设备组', trigger: 'blur' }]
 })
 const linuxTableData = ref([
   {
