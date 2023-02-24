@@ -243,6 +243,10 @@ const changeDrawer = (value: any) => {
     margin-right: 10px;
     .job3 {
       border: 1px solid #fff;
+      min-width: 130px !important;
+    }
+    .ignore-jon3-width {
+      min-width: 130px;
     }
     :deep(.el-dropdown-menu__item .el-icon svg) {
       color: red;
@@ -278,7 +282,6 @@ const changeDrawer = (value: any) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 130px;
     height: 40px;
     padding: 0 12px;
     margin: 0 10px;

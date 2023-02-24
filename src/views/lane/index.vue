@@ -2,12 +2,12 @@
   <div class="lane_wrap">
     <div class="lane-top">
       <el-row :gutter="20">
-        <el-col class="backButton" :span="4">
+        <el-col class="backButton" :span="5">
           <div class="grid-content ep-bg-purple" />
           <el-button @click="router.go(-1)">返回</el-button>
           <span>流水线 2023-02-08</span>
         </el-col>
-        <el-col :span="16">
+        <el-col :span="15">
           <div class="grid-content ep-bg-purple" />
           <el-tabs v-model="tabName" tab-position="top" class="lane-tabs" @tab-change="changeTab">
             <el-tab-pane name="basicInformation" label="基本信息"></el-tab-pane>

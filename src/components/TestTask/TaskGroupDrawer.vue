@@ -18,7 +18,9 @@
                 :key="'deployList' + index"
               >
                 <div class="group-name-item-detail">
-                  <img src="https://img.alicdn.com/tfs/TB1JRQ_wKH2gK0jSZJnXXaT1FXa-88-88.png" alt="" />
+                  <div>
+                    <img src="https://img.alicdn.com/tfs/TB1JRQ_wKH2gK0jSZJnXXaT1FXa-88-88.png" alt="" />
+                  </div>
                   <div class="group-name-item-detail-right">
                     <span class="detail-name">{{ item.name }}</span>
                     <p>{{ item.desc }}</p>
@@ -227,11 +229,16 @@ const closeDrawer = () => {
           margin-right: 12px;
         }
         .group-name-item-detail-right {
-          max-width: 120px;
+          max-width: 110px;
           .detail-name {
+            display: block;
             font-size: 14px;
             color: #292929;
             font-weight: 500;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            -o-text-overflow: ellipsis;
           }
           p {
             font-size: 12px;

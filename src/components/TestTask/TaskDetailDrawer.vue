@@ -152,7 +152,7 @@
                   </template>
                   <ul>
                     <li v-for="(item, index) in serverConfigList" :key="'serverConfigList' + index">
-                      <div>
+                      <div class="detail">
                         {{ item.label }}<span>{{ item.value }}</span>
                       </div>
                     </li>
@@ -479,6 +479,7 @@ const deleteDevice = (id: number) => {
           justify-content: space-between;
           li {
             width: 45%;
+
             span {
               color: #67c23a;
             }
@@ -520,6 +521,10 @@ const deleteDevice = (id: number) => {
             li {
               width: 45%;
               span {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                width: 130px;
+                overflow: hidden;
                 color: #67c23a;
               }
             }
@@ -573,5 +578,9 @@ const deleteDevice = (id: number) => {
     font-size: 14px;
     margin-right: 10px;
   }
+}
+.detail {
+  display: flex !important;
+  white-space: nowrap !important;
 }
 </style>
