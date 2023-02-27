@@ -22,7 +22,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="最近运行阶段" align="center" prop="pipeHistory">
+      <el-table-column label="最近运行阶段" align="center" prop="pipeHistory" width="300">
         <template #default="item">
           <div class="pipe-history">
             <el-tooltip popper-class="box-item" effect="customized" content="构建：运行中" placement="top">
@@ -44,7 +44,7 @@
             <el-tooltip popper-class="box-item" effect="customized" content="活动校验：未运行" placement="top">
               <div class="group-status">
                 <div class="content">
-                  <div class="title">活动校验</div>
+                  <div class="title" style="font-size: 12px">活动校验</div>
                   <div class="point init"></div>
                 </div>
               </div>
@@ -52,7 +52,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" align="center">
+      <el-table-column fixed="right" label="操作" align="center" width="180">
         <template #default="item">
           <el-button link type="primary" size="small" @click="toDetail(item.row)"> 详情 </el-button>
           <el-button link type="primary" size="small"> 编辑 </el-button>
@@ -60,6 +60,28 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!--模板弹窗-->
+    <el-dialog v-model="taskTemplateDialogVisible" title="任务模板" width="77%">
+      <el-table :data="tableData" style="width: 100%">
+        <el-table-column prop="name" label="模板名称" width="100" align="center" />
+        <el-table-column label="模板预览" width="1220" align="center">
+          <template #default="scope">
+            <el-image style="" :src="scope.row.url" fit="contain" :zoom-rate="1.2" :preview-src-list="[scope.row.url]" />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="100">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="handleUse(scope.$index, scope.row)">使用此模板</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="noUseTemplate">不使用模板，直接新建</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -67,18 +89,18 @@
 import { reactive, ref } from 'vue'
 import { CirclePlus, CircleCloseFilled } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { getAssetsFile } from '@/utils/util.js'
+
+interface User {
+  id: string
+  name: string
+  url: string
+  obj: string
+}
 
 const router = useRouter()
+const taskTemplateDialogVisible = ref(false)
 const taskTableData = reactive([
-  {
-    name: '任务模板一',
-    id: '000',
-    date: '333',
-    type: '任务示例参考',
-    username: 'admin',
-    password: '运行中',
-    disabledDelete: true
-  },
   {
     name: '任务1',
     id: '222',
@@ -112,14 +134,12 @@ const taskTableData = reactive([
     password: '运行中'
   }
 ])
-
-const addTask = () => {
-  router.push({ path: '/testTask/addTestTask' })
-}
-
-const toDetail = item => {
-  if (item.id === '000') {
-    const obj = [
+const tableData = [
+  {
+    id: '0',
+    name: '模板一',
+    url: getAssetsFile('/preview1.png'),
+    obj: [
       {
         name: '部署',
         stages: [
@@ -131,22 +151,6 @@ const toDetail = item => {
             {
               id: '11',
               name: 'NetSign项目部署'
-            }
-          ],
-          [
-            {
-              id: '10',
-              name: 'NetSign基线部署'
-            },
-            {
-              id: '11',
-              name: 'NetSign项目部署'
-            }
-          ],
-          [
-            {
-              id: '10',
-              name: 'NetSign基线部署'
             }
           ]
         ]
@@ -189,8 +193,69 @@ const toDetail = item => {
         ]
       }
     ]
-    localStorage.getItem('taskTemplateObj') ? '' : localStorage.setItem('taskTemplateObj', JSON.stringify(obj))
+  },
+  {
+    id: '1',
+    name: '模板二',
+    url: getAssetsFile('/preview2.png'),
+    obj: [
+      {
+        name: '部署',
+        stages: [
+          [
+            {
+              id: '10',
+              name: 'NetSign基线部署'
+            },
+            {
+              id: '11',
+              name: 'NetSign项目部署'
+            }
+          ]
+        ]
+      },
+      {
+        name: '测试',
+        stages: [
+          [
+            {
+              id: '20',
+              name: '接口测试'
+            }
+          ]
+        ]
+      },
+      {
+        name: '版本构建',
+        stages: [
+          [
+            {
+              id: '40',
+              name: '版本构建'
+            }
+          ]
+        ]
+      }
+    ]
   }
+]
+
+const addTask = () => {
+  taskTemplateDialogVisible.value = true
+}
+
+const noUseTemplate = () => {
+  taskTemplateDialogVisible.value = false
+  router.push({ path: '/testTask/addTestTask' })
+}
+
+const handleUse = (index: number, row: User) => {
+  router.push({ path: '/testTask/addTestTask', query: { id: index } })
+  console.log(index, row)
+  localStorage.setItem('taskTemplateObj', JSON.stringify(row.obj))
+}
+
+const toDetail = item => {
   router.push({ path: '/testTask/addTestTask', query: { id: item.id } })
 }
 </script>
@@ -219,8 +284,9 @@ const toDetail = item => {
   }
   .pipe-history {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     .group-status {
+      width: 80px;
       display: flex;
       position: relative;
       text-align: center;
@@ -262,7 +328,7 @@ const toDetail = item => {
       &::after {
         content: '-';
         display: inline-block;
-        width: 50px;
+        width: 80px;
         color: transparent;
         border-bottom: 1px solid #e9edf0;
         vertical-align: middle;

@@ -65,7 +65,7 @@ const sumbitTask = () => {
 }
 
 onMounted(() => {
-  if (route.query.id === '000') {
+  if (route.query.id === '0' || route.query.id === '1') {
     isTemplate.value = true
     data.flows = JSON.parse(localStorage.getItem('taskTemplateObj'))
   } else {

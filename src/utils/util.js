@@ -46,14 +46,19 @@ export const getNowDate = () => {
 }
 
 // 现在距离某时间还有多少天时分秒
-export const computer = (date) => {
-  let now = new Date()//获取当前时间戳
-  let future = new Date(date)//距离的时间
+export const computer = date => {
+  let now = new Date() //获取当前时间戳
+  let future = new Date(date) //距离的时间
   let index = (future - now) / 1000 / (60 * 60 * 24)
-  let day = parseInt(index)//天
-  let h = parseInt((index - day) * 24)//时
-  let m = parseInt((index - day - h / 24) * 24 * 60)//分
-  let s = parseInt((index - day - h / 24 - m / 60 / 24) * 24 * 60 * 60)//秒
-  let str = day + "天" + h + "小时" + m + "分" + s + "秒"
+  let day = parseInt(index) //天
+  let h = parseInt((index - day) * 24) //时
+  let m = parseInt((index - day - h / 24) * 24 * 60) //分
+  let s = parseInt((index - day - h / 24 - m / 60 / 24) * 24 * 60 * 60) //秒
+  let str = day + '天' + h + '小时' + m + '分' + s + '秒'
   return { day, h, m, s }
+}
+
+// 获取assets静态资源
+export const getAssetsFile = url => {
+  return new URL(`../assets/${url}`, import.meta.url).href
 }
