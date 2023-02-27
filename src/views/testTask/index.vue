@@ -89,7 +89,8 @@
 import { reactive, ref } from 'vue'
 import { CirclePlus, CircleCloseFilled } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
-import { getAssetsFile } from '@/utils/util.js'
+import preview1 from '@/assets/preview1.png'
+import preview2 from '@/assets/preview2.png'
 
 interface User {
   id: string
@@ -138,7 +139,7 @@ const tableData = [
   {
     id: '0',
     name: '模板一',
-    url: getAssetsFile('/preview1.png'),
+    url: preview1,
     obj: [
       {
         name: '部署',
@@ -197,7 +198,7 @@ const tableData = [
   {
     id: '1',
     name: '模板二',
-    url: getAssetsFile('/preview2.png'),
+    url: preview2,
     obj: [
       {
         name: '部署',
