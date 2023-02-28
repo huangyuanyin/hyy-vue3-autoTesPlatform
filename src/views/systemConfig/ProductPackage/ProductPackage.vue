@@ -2,7 +2,7 @@
   <el-card class="build-card" shadow="never">
     <el-button type="primary" @click="openUploadDialog = true" style="margin-bottom: 20px"> 上传包 </el-button>
     <el-button type="primary" @click="openDownloadDialog = true" style="margin-left: 20px; margin-bottom: 20px"> 拉取包 </el-button>
-    <el-table :data="state.buildData" border stripe height="62vh">
+    <el-table :data="state.buildData" border stripe>
       <el-table-column prop="name" label="包名称" align="center" />
       <el-table-column prop="type" label="包类别" align="center" />
       <el-table-column fixed="right" label="操作" align="center">

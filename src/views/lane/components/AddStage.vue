@@ -1,6 +1,6 @@
 <template>
   <div class="add-stage-container">
-    <div class="add-stage" @mouseenter="isExitHover = true" @mouseleave="isExitHover = false" @click="handleAddParaller">
+    <div class="add-stage ignore-add-stage" @mouseenter="isExitHover = true" @mouseleave="isExitHover = false" @click="handleAddParaller">
       <svg-icon v-if="!isExitHover" iconName="icon-jiahao"></svg-icon>
       <svg-icon v-else="isExitHover" iconName="icon-jiahao-copy-copy"></svg-icon>
       并行任务
@@ -73,18 +73,21 @@ const changeDrawer = (value: any) => {
     border-right: 1px solid #1b9aee;
     border-bottom: 1px solid #1b9aee;
   }
-  .add-stage {
+  .ignore-add-stage {
     border: 1px solid #1b9aee;
   }
 }
 .add-stage {
   position: absolute;
-  left: 94px;
+  left: 100px;
+}
+
+.ignore-add-stage {
   top: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 130px;
+  width: 140px;
   height: 40px;
   padding: 0 12px;
   color: #292929;

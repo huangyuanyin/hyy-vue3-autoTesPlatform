@@ -32,7 +32,7 @@
             popper-class="contextmenu"
             placement="top-end"
           >
-            <div class="job3" @click="openTaskDetailDrawer(parallel, index)">
+            <div class="ignore-jon3-width" @click="openTaskDetailDrawer(parallel, index)">
               {{ parallel.name }}
             </div>
             <template #dropdown>
@@ -241,7 +241,7 @@ const changeDrawer = (value: any) => {
     align-items: center;
     margin-left: 10px;
     margin-right: 10px;
-    .job3 {
+    .ignore-jon3-width {
       border: 1px solid #fff;
       min-width: 140px !important;
     }
@@ -255,7 +255,7 @@ const changeDrawer = (value: any) => {
     // left: 50px;
 
     &:hover {
-      .job3 {
+      .ignore-jon3-width {
         border: 1px solid #1b9aee;
       }
       .job2,
@@ -275,7 +275,7 @@ const changeDrawer = (value: any) => {
     z-index: 2;
   }
 
-  .job3 {
+  .ignore-jon3-width {
     // position: absolute;
     // left: 30px;
     // top: 10px;

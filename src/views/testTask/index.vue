@@ -2,9 +2,9 @@
   <div class="testTask-wrap">
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="addTask"> 新建任务</el-button>
     <el-table :data="taskTableData" border style="width: 100%" stripe>
-      <el-table-column prop="name" label="任务名称" width="180" />
-      <el-table-column prop="type" label="产品型号" />
-      <el-table-column prop="password" label="任务状态" />
+      <el-table-column prop="name" label="任务名称" width="180" align="center" />
+      <el-table-column prop="type" label="产品型号" align="center" />
+      <el-table-column prop="password" label="任务状态" align="center" />
       <el-table-column label="最近运行状态" align="center">
         <template #default="item">
           <div class="pipe-status">
@@ -67,10 +67,10 @@
         <el-table-column prop="name" label="模板名称" width="100" align="center" />
         <el-table-column label="模板预览" width="1220" align="center">
           <template #default="scope">
-            <el-image style="" :src="scope.row.url" fit="contain" :zoom-rate="1.2" :preview-src-list="[scope.row.url]" />
+            <el-image style="" :src="scope.row.url" fit="contain" :zoom-rate="1.2" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="100">
+        <el-table-column label="操作" align="center" width="100" fixed="right">
           <template #default="scope">
             <el-button link type="primary" size="small" @click="handleUse(scope.$index, scope.row)">使用此模板</el-button>
           </template>
@@ -296,8 +296,7 @@ const toDetail = item => {
       align-items: flex-end;
       margin-bottom: 5px;
       .content {
-        width: 55px;
-        max-width: 55px;
+        width: 100%;
         white-space: nowrap;
         overflow: hidden;
         .title {
@@ -334,7 +333,7 @@ const toDetail = item => {
         border-bottom: 1px solid #e9edf0;
         vertical-align: middle;
         height: 1px;
-        margin-left: -20px;
+        margin-left: -35px;
         margin-right: -45px;
         margin-bottom: 3px;
       }

@@ -1,10 +1,10 @@
 <template>
   <el-dialog v-model="dialogFormVisible" title="上传包">
     <el-form :model="form" ref="ruleFormRef" :rules="rules">
-      <el-form-item label="" label-width="140px">
+      <el-form-item label="文件上传" label-width="140px">
         <el-upload
-          class="upload-demo"
-          style="width: 28%"
+          class="uploadFile-demo"
+          style="width: 214px"
           drag
           action=""
           multiple

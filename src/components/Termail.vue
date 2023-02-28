@@ -83,10 +83,10 @@ onBeforeMount(() => {
 .console-wrap {
   display: flex;
   flex-direction: column;
-  margin-top: 5px;
+  margin-top: 10px;
   .console {
-    margin-top: 25px;
-    height: 500px;
+    margin-top: 40px;
+    // height: 500px;
     :deep(.xterm-text-layer) {
       width: 100%;
       height: 100%;

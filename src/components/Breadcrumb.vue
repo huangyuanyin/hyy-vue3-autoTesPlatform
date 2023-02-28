@@ -67,6 +67,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .breadcrumb {
+  display: flex;
+  align-items: center;
   padding-bottom: 20px;
   cursor: pointer;
 
