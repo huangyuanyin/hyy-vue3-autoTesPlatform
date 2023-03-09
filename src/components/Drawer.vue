@@ -2,15 +2,15 @@
   <div class="drawer-wrapper">
     <el-drawer v-model="isDrawer" :direction="direction" :append-to-body="false" :z-index="10 ** 10000" :with-header="false" size="60%">
       <el-row>
-        <el-col :span="4">
+        <el-col :span="5">
           <el-menu default-active="prodandserver" @select="handleSelect">
             <el-menu-item index="prodandserver">
               <el-icon>
                 <Grid />
               </el-icon>
-              <template #title
-                >产品与服务
-                <el-icon style="margin-left: 40px">
+              <template #title>
+                产品与服务
+                <el-icon class="icon-margin">
                   <ArrowRight />
                 </el-icon>
               </template>
@@ -51,8 +51,8 @@
             </el-menu-item>
           </el-menu>
         </el-col>
-        <el-col :span="20">
-          <el-card body-style="{ padding: '60px' }" :style="{ height: height }">
+        <el-col :span="19">
+          <el-card body-style="{ padding: '60px' }">
             <template #header>
               <el-input v-model="filter" style="width: 80%" placeholder="请输入服务名称"></el-input>
               <el-icon class="closeStyle" @click="handleClose">
@@ -247,6 +247,22 @@ const handleClose = () => {
     margin-bottom: 0px;
     padding: 0px;
     display: flex !important;
+    align-items: center;
+  }
+  :deep(.el-menu) {
+    height: 100vh;
+  }
+  :deep(.el-card) {
+    border: none;
+    height: 99vh;
+  }
+  .icon-margin {
+    margin-left: 20px;
+  }
+
+  :deep(.el-card__header) {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
   }
 

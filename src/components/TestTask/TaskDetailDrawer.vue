@@ -186,11 +186,17 @@
                   <el-option label="NS_5.5.40.16_u2.0" value="NS_5.5.40.16_u2.0" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="开机自启中间件" prop="startMidwareType" v-if="item.main_bord_type && item.main_bord_type !== 'x86'">
+              <el-form-item label="开机自启中间件" prop="startMidwareType" v-if="serverConfigList[1].value !== 'x86'">
                 <el-select v-model="item.startMidwareType" placeholder="请选择开机自启中间件" :key="index">
                   <el-option label="Tomcat" value="Tomcat" />
                   <el-option label="Tongweb" value="Tongweb" />
                 </el-select>
+              </el-form-item>
+              <el-form-item label="是否需要进行系统还原" prop="isSysRest">
+                <el-radio-group v-model="item.isSysRest" class="ml-4">
+                  <el-radio :label="true">是</el-radio>
+                  <el-radio :label="false">否</el-radio>
+                </el-radio-group>
               </el-form-item>
               <el-collapse class="collapseItem">
                 <el-collapse-item name="1">
@@ -308,37 +314,40 @@ const taskDetailFormRules = reactive<FormRules>({
   isrbc: [{ required: true, message: '是否安装农信银模块为必填项', trigger: 'change' }],
   ifha: [{ required: true, message: '是否安装HA为必填项', trigger: 'change' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }],
-  startMidwareType: [{ required: true, message: '请选择开机自启中间件', trigger: 'change' }]
+  startMidwareType: [{ required: true, message: '请选择开机自启中间件', trigger: 'change' }],
+  isSysRest: [{ required: true, message: '请选择是否需要进行系统还原', trigger: 'change' }]
 })
 const deviceList = ref([
   {
     serverName: '',
     main_bord_type: '',
     deployType: '',
-    deployVersion: '',
-    patchVersion: '',
+    deployVersion: 'netsign_5_6_2',
+    patchVersion: 'NS_5.5.40.12_u32.1',
     ifha: 'y',
     ispbc: 'y',
     useNewDataType: 'y',
     isrbc: 'y',
     ifback: 'n',
     ifrs: 'y',
-    startMidwareType: ''
+    startMidwareType: '',
+    isSysRest: true
   }
 ])
 const cloneDeviceObj = ref({
   serverName: '',
   main_bord_type: '',
   deployType: '',
-  deployVersion: '',
-  patchVersion: '',
+  deployVersion: 'netsign_5_6_2',
+  patchVersion: 'NS_5.5.40.12_u32.1',
   ifha: 'y',
   ispbc: 'y',
   useNewDataType: 'y',
   isrbc: 'y',
   ifback: 'n',
   ifrs: 'y',
-  startMidwareType: ''
+  startMidwareType: '',
+  isSysRest: true
 })
 const deviceFormRules = reactive<FormRules>({})
 watch(
@@ -361,15 +370,16 @@ const closeDrawer = (value?: any) => {
       serverName: '',
       main_bord_type: '',
       deployType: '',
-      deployVersion: '',
-      patchVersion: '',
+      deployVersion: 'netsign_5_6_2',
+      patchVersion: 'NS_5.5.40.12_u32.1',
       ifha: 'y',
       ispbc: 'y',
       useNewDataType: 'y',
       isrbc: 'y',
       ifback: 'n',
       ifrs: 'y',
-      startMidwareType: ''
+      startMidwareType: '',
+      isSysRest: true
     }
   ]
   emit('closeDrawer', [false, value])

@@ -4,10 +4,10 @@
     <el-table :data="linuxTableData" border style="width: 100%" stripe>
       <el-table-column prop="server_ip" label="设备IP" width="180" />
       <el-table-column prop="machine_type" label="设备类型" width="150" />
-      <el-table-column prop="mode_code" label="型号编码" width="150" />
-      <el-table-column prop="config_code" label="配置编码" width="150" />
-      <el-table-column prop="cavium_card_type" label="cavium卡类型" width="150" />
+      <!-- <el-table-column prop="mode_code" label="型号编码" width="150" />
+      <el-table-column prop="config_code" label="配置编码" width="150" /> -->
       <el-table-column prop="main_bord_type" label="主板类型" width="150" />
+      <el-table-column prop="cavium_card_type" label="cavium卡类型" width="150" />
       <el-table-column prop="gm_card_varchar" label="国密卡类型" width="150" />
       <el-table-column prop="usage_status" label="使用状态" width="180" />
       <el-table-column prop="device_user" label="使用人" width="150" />
@@ -43,51 +43,57 @@
     <Termmail v-if="isShowTermail" :termmailInfo="termmailInfo" @closeTermmail="cloeConsole(termmailId)" />
 
     <!--linux弹窗-->
-    <el-dialog v-model="dialogFormVisible" :title="LinuxTitle">
-      <el-form :model="form" ref="ruleFormRef" :rules="rules">
-        <el-form-item label="设备ip" :label-width="formLabelWidth" prop="server_ip">
-          <el-input v-model="form.server_ip" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="设备用户名" :label-width="formLabelWidth" prop="userName">
-          <el-input v-model="form.userName" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="设备密码" :label-width="formLabelWidth" prop="serverPasswd">
-          <el-input v-model="form.serverPasswd" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="设备端口" :label-width="formLabelWidth" prop="serverPort">
-          <el-input v-model="form.serverPort" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="型号编码" :label-width="formLabelWidth" prop="mode_code">
-          <el-input v-model="form.mode_code" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="配置编码" :label-width="formLabelWidth" prop="config_code">
-          <el-input v-model="form.config_code" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="主板类型" :label-width="formLabelWidth" prop="main_bord_type">
-          <el-input v-model="form.main_bord_type" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="cavium类型" :label-width="formLabelWidth" prop="cavium_card_type">
-          <el-input v-model="form.cavium_card_type" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="国密卡类型" :label-width="formLabelWidth" prop="gm_card_varchar">
-          <el-input v-model="form.gm_card_varchar" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-        <el-form-item label="设备类型" :label-width="formLabelWidth" prop="machineType">
-          <el-select v-model="form.machineType" placeholder="请选择Linux设备类型" :disabled="disabled">
-            <el-option label="自动化平台使用" value="shanghai" />
-            <el-option label="临时设备" value="beijing" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="设备组" :label-width="formLabelWidth" prop="device_group">
-          <el-select v-model="form.device_group" placeholder="请选择设备组" :disabled="disabled">
-            <el-option label="自动化组" value="zidong" />
-            <el-option label="签名组" value="qianming" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
-          <el-input v-model="form.remark" autocomplete="off" :disabled="disabled" />
-        </el-form-item>
-      </el-form>
+    <el-dialog v-model="dialogFormVisible" :title="LinuxTitle" width="55%">
+      <el-row>
+        <el-form :model="form" ref="ruleFormRef" :rules="rules">
+          <el-col :span="12">
+            <el-form-item label="设备ip" :label-width="formLabelWidth" prop="server_ip">
+              <el-input v-model="form.server_ip" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="设备用户名" :label-width="formLabelWidth" prop="userName">
+              <el-input v-model="form.userName" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="设备密码" :label-width="formLabelWidth" prop="serverPasswd">
+              <el-input v-model="form.serverPasswd" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="设备端口" :label-width="formLabelWidth" prop="serverPort">
+              <el-input v-model="form.serverPort" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="型号编码" :label-width="formLabelWidth" prop="mode_code">
+              <el-input v-model="form.mode_code" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="配置编码" :label-width="formLabelWidth" prop="config_code">
+              <el-input v-model="form.config_code" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="主板类型" :label-width="formLabelWidth" prop="main_bord_type">
+              <el-input v-model="form.main_bord_type" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="cavium类型" :label-width="formLabelWidth" prop="cavium_card_type">
+              <el-input v-model="form.cavium_card_type" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="国密卡类型" :label-width="formLabelWidth" prop="gm_card_varchar">
+              <el-input v-model="form.gm_card_varchar" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="设备类型" :label-width="formLabelWidth" prop="machineType">
+              <el-select v-model="form.machineType" placeholder="请选择Linux设备类型" :disabled="disabled">
+                <el-option label="自动化平台使用" value="shanghai" />
+                <el-option label="临时设备" value="beijing" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="设备组" :label-width="formLabelWidth" prop="device_group">
+              <el-select v-model="form.device_group" placeholder="请选择设备组" :disabled="disabled">
+                <el-option label="自动化组" value="zidong" />
+                <el-option label="签名组" value="qianming" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
+              <el-input v-model="form.remark" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+          </el-col>
+        </el-form>
+      </el-row>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="resetForm(ruleFormRef)">取消</el-button>
@@ -283,10 +289,10 @@ const cloeConsole = row => {
 .LinuxSystem-wrap {
   margin: 15px 0 0 20px;
   .el-select {
-    width: 400px;
+    width: 300px;
   }
   .el-input {
-    width: 400px;
+    width: 300px;
   }
 }
 .moreButton {

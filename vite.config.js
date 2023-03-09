@@ -9,7 +9,7 @@ import postcsspxtoviewport from 'postcss-px-to-viewport'
 
 export default defineConfig(({ mode }) => {
   return {
-    base: mode === 'development' ? '/' : '/netautotestplatform/',
+    base: mode === 'development' ? '/' : '/netDevOps/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src')

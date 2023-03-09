@@ -1,6 +1,6 @@
 <template>
   <div class="stage">
-    <div class="task-container">
+    <div class="task-container ignore-task-container-margin">
       <div class="job1">
         <el-tooltip class="item" content="自动触发" placement="top" :offset="20">
           <svg-icon v-show="automatic" iconName="icon-shandian" @click="triggerMethod(false)"></svg-icon>
@@ -206,14 +206,18 @@ const changeDrawer = (value: any) => {
     border-radius: 0 0 16px 16px;
   }
 }
+.ignore-task-container-margin {
+  margin-top: 8px;
+}
 
 .task-container {
   font-size: 14px;
   position: relative;
   display: flex;
   align-items: center;
-  margin: 0 14px;
   height: 100%;
+  margin-left: 14px;
+  margin-right: 14px;
 
   .job1 {
     display: flex;

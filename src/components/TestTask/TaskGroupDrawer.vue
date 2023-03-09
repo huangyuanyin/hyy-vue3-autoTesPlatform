@@ -146,8 +146,8 @@ const testList = ref([
 const deployList = ref([
   {
     id: '10',
-    name: 'NetSign基线部署',
-    desc: '这是一段NetSign基线部署'
+    name: 'NetSign环境准备',
+    desc: '这是一段NetSign环境准备'
   },
   {
     id: '11',

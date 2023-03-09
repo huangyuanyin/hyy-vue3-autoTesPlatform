@@ -147,7 +147,7 @@ const tableData = [
           [
             {
               id: '10',
-              name: 'NetSign基线部署'
+              name: 'NetSign环境准备'
             },
             {
               id: '11',
