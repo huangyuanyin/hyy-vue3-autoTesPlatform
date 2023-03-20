@@ -87,9 +87,9 @@ const toLink = index => {
       break
   }
 }
-
 const toWork = () => {
-  // router.push("/workbench")
+  let url = import.meta.env.VITE_APP_CONSOLE_URL
+  window.location.href = url
 }
 
 const changeDrawer = drawer => {

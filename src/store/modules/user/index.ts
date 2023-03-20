@@ -23,12 +23,14 @@ export const useUserStore = defineStore({
       this.userInfo = jwt_decode(token)
       localStorage.setItem('userInfo', JSON.stringify(this.userInfo))
       this.token = token
-      setToken(this.token)
+      // setToken(this.token)
+      localStorage.setItem('token', this.token)
       return token
     },
     async LoginOut() {
-      await removeToken()
+      // await removeToken()
       localStorage.removeItem('userInfo')
+      localStorage.removeItem('token')
     }
   }
 })

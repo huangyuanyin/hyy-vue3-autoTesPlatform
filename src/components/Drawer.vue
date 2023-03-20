@@ -1,104 +1,45 @@
 <template>
   <div class="drawer-wrapper">
-    <el-drawer v-model="isDrawer" :direction="direction" :append-to-body="false" :z-index="10 ** 10000" :with-header="false" size="60%">
+    <el-drawer v-model="isDrawer" :direction="direction" :append-to-body="false" :z-index="10 ** 10000" :with-header="false" size="65%">
       <el-row>
-        <el-col :span="5">
-          <el-menu default-active="prodandserver" @select="handleSelect">
-            <el-menu-item index="prodandserver">
-              <el-icon>
-                <Grid />
-              </el-icon>
+        <el-col :span="4">
+          <el-menu class="elMenu-wrap" default-active="" style="width: 200px">
+            <el-menu-item class="mainMenu" index="prodandserver" :disabled="true">
+              <el-icon :size="22"><Grid /></el-icon>
               <template #title>
-                产品与服务
-                <el-icon class="icon-margin">
-                  <ArrowRight />
-                </el-icon>
+                <div class="mainMenu-item">
+                  <span>产品与服务</span>
+                  <el-icon class="arrowRight"><CaretRight /></el-icon>
+                </div>
               </template>
             </el-menu-item>
-            <el-menu-item index="netpts">
-              <el-icon>
-                <Monitor />
-              </el-icon>
-              <template #title>性能压测</template>
-            </el-menu-item>
-            <el-menu-item index="apitest">
-              <el-icon>
-                <Suitcase />
-              </el-icon>
-              <template #title>接口测试</template>
-            </el-menu-item>
-            <el-menu-item index="Agile">
-              <el-icon>
-                <Position />
-              </el-icon>
-              <template #title>敏捷测试</template>
-            </el-menu-item>
-            <el-menu-item index="netforum">
-              <el-icon>
-                <Notebook />
-              </el-icon>
-              <template #title>信安知识库</template>
-            </el-menu-item>
-            <el-menu-item index="netcmt">
-              <el-icon>
-                <Platform />
-              </el-icon>
-              <template #title>信安云网管</template>
-            </el-menu-item>
-            <el-menu-item index="netapv">
-              <el-icon><TrendCharts /></el-icon>
-              <template #title>APV自动化</template>
-            </el-menu-item>
+            <div style="height: calc(100vh - 160px)">
+              <template v-for="(item, index) in productList" :key="'productList' + index">
+                <el-menu-item :index="item.name" v-if="item.is_domain" @click="handleSelect(item)">
+                  <svg-icon :iconName="item.icon" className="icon" style="min-width: 20px"></svg-icon>
+                  <template #title>
+                    <span class="title-name" style="margin-right: 5px">{{ item.name }}</span>
+                    <span class="title-name">{{ item.tag }}</span>
+                  </template>
+                </el-menu-item>
+              </template>
+            </div>
           </el-menu>
         </el-col>
-        <el-col :span="19">
-          <el-card body-style="{ padding: '60px' }">
+        <el-col :span="20">
+          <el-card class="right-menu" style="left: 200px; width: calc(100% - 200px)">
             <template #header>
-              <el-input v-model="filter" style="width: 80%" placeholder="请输入服务名称"></el-input>
-              <el-icon class="closeStyle" @click="handleClose">
-                <Close />
-              </el-icon>
+              <div class="header-warp">
+                <el-input v-model="filter" placeholder="请输入服务名称"></el-input>
+                <el-icon class="closeButton" @click="handleCloseCard"><Close /></el-icon>
+              </div>
             </template>
-            <el-row class="row">
-              <el-col :span="8">
-                <span class="span-title">测试开发服务</span>
-                <div class="button" v-for="(item, index) in testData" :key="index">
-                  <el-button style="margin-top: 5px" text @click="goTo(item.value)">{{ item.label }}</el-button>
-                </div>
-              </el-col>
-              <el-col :span="8">
-                <span class="span-title">监控与运维</span>
-                <div class="button" v-for="(item, index) in monitorData" :key="index">
-                  <el-button style="margin-top: 5px" text @click="goTo(item.value)">{{ item.label }}</el-button>
-                </div>
-              </el-col>
-              <el-col :span="8">
-                <span class="span-title">数据服务</span>
-                <div class="button" v-for="(item, index) in dataServices" :key="index">
-                  <el-button style="margin-top: 5px" text @click="goTo(item.value)">{{ item.label }}</el-button>
-                </div>
-              </el-col>
-            </el-row>
-            <el-row class="row">
-              <el-col :span="8">
-                <span class="span-title">安全服务</span>
-                <div class="button" v-for="(item, index) in securityData" :key="index">
-                  <el-button style="margin-top: 5px" text @click="goTo(item.value)">{{ item.label }}</el-button>
-                </div>
-              </el-col>
-              <el-col :span="8">
-                <span class="span-title">测试工具</span>
-                <div class="button" v-for="(item, index) in toolData" :key="index">
-                  <el-button style="margin-top: 5px" text @click="goTo(item.value)">{{ item.label }}</el-button>
-                </div>
-              </el-col>
-              <el-col :span="8">
-                <span class="span-title">容器与虚拟机服务</span>
-                <div class="button" v-for="(item, index) in containerData" :key="index">
-                  <el-button style="margin-top: 5px" text @click="goTo(item.value)">{{ item.label }}</el-button>
-                </div>
-              </el-col>
-            </el-row>
+            <div class="server-container" v-for="(item, index) in serverList" :key="'serverList' + index" style="margin-bottom: 30px">
+              <span class="span-title">{{ item.name }}</span>
+              <div class="button" v-for="(it, index) in item.children" :key="'item.children' + index">
+                <el-button text @click="goTo(it)">{{ it.name }}</el-button>
+              </div>
+            </div>
           </el-card>
         </el-col>
       </el-row>
@@ -107,11 +48,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Grid, Monitor, ArrowRight, Close, Suitcase, Platform, Notebook, Position, TrendCharts } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
-// import { useAppStore } from "@/store/modules/app";
+import { Grid, CaretRight, Close } from '@element-plus/icons-vue'
+import { getCategoryApi, getProductApi } from '@/api/user'
 
 const props = defineProps({
   drawer: {
@@ -121,110 +61,22 @@ const props = defineProps({
 })
 const emit = defineEmits(['changeDrawer'])
 
-const router = useRouter()
-// const store = useAppStore();
+const serverList = ref([]) // 服务列表
+const productList = ref([]) // 产品列表
 const filter = ref('') // 搜索
-const height = window.innerHeight - 52 + 'px' // 高度
-// 测试模块
-const testData = ref([
-  {
-    value: 'netpts',
-    label: '性能测试'
-  },
-  {
-    value: 'apitest',
-    label: '接口测试'
-  },
-  {
-    value: 'Agile',
-    label: '敏捷测试'
-  },
-  {
-    value: 'netapv',
-    label: 'APV自动化'
-  },
-  {
-    value: 'netpoc',
-    label: 'POC自动化'
-  }
-])
-// 监控与运维服务
-const monitorData = ref([
-  {
-    value: 'netcmt',
-    label: '信安云网管'
-  },
-  {
-    value: 'netmonitor',
-    label: '监控服务'
-  },
-  {
-    value: 'netcfg',
-    label: '混沌演练平台'
-  }
-])
-const dataServices = ref([
-  {
-    value: 'netforum',
-    label: '信安知识库'
-  },
-  {
-    value: 'netevaluate',
-    label: '度量分析'
-  }
-])
-// 容器与虚拟机服务
-const containerData = ref([
-  {
-    value: 'container',
-    label: '容器镜像服务'
-  },
-  {
-    value: 'container',
-    label: '容器服务'
-  },
-  {
-    value: 'vm',
-    label: '虚拟机服务'
-  }
-])
-// 安全服务
-const securityData = ref([
-  {
-    value: 'netpt',
-    label: '渗透测试服务'
-  },
-  {
-    value: 'netvs',
-    label: '漏洞扫描'
-  },
-  {
-    value: 'netdos',
-    label: 'DDos高防'
-  }
-])
-// 测试工具
-const toolData = ref([
-  {
-    value: 'cert',
-    label: '证书服务'
-  }
-])
-// 跳转
-const goTo = value => {
-  ElMessage({
-    type: 'warning',
-    message: '暂不支持！！！'
-  })
+
+// 产品服务链接跳转
+const goTo = (value: any) => {
+  if (!value.enabled) return ElMessage.warning('该服务暂未开放')
+  window.location.href = value.links
+  localStorage.getItem('linkList') ? '' : localStorage.setItem('linkList', JSON.stringify({ link: JSON.stringify(value.links) }))
 }
+
 // 侧边栏响应
 const handleSelect = value => {
-  let url = ''
-  let console_url = sessionStorage.getItem('CONSOLE_URL')
-  localStorage.setItem('token', sessionStorage.getItem('token'))
-  url = console_url + '/' + value
-  window.location.href = url
+  window.location.href = value.links
 }
+
 const direction = ref('ltr')
 const isDrawer = computed({
   get() {
@@ -236,9 +88,45 @@ const isDrawer = computed({
   }
 })
 
-const handleClose = () => {
+const handleCloseCard = () => {
   isDrawer.value = false
 }
+
+// 获取服务分组列表
+const getCategory = async () => {
+  const res = await getCategoryApi()
+  if (res.code === 1000) {
+    serverList.value = res.data || []
+  }
+}
+
+// 获取产品服务列表
+const getProduct = async () => {
+  const res = await getProductApi()
+  if (res.code === 1000) {
+    productList.value = res.data || []
+    handleServerList()
+  }
+}
+
+// 数据处理
+const handleServerList = () => {
+  serverList.value.forEach((item: any) => {
+    productList.value.forEach((item2: any) => {
+      if (item.id === item2.category) {
+        if (!item.children) {
+          item.children = []
+        }
+        item.children.push(item2)
+      }
+    })
+  })
+}
+
+onMounted(async () => {
+  await getCategory()
+  await getProduct()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -249,50 +137,137 @@ const handleClose = () => {
     display: flex !important;
     align-items: center;
   }
-  :deep(.el-menu) {
-    height: 100vh;
-  }
-  :deep(.el-card) {
-    border: none;
-    height: 99vh;
-  }
-  .icon-margin {
-    margin-left: 20px;
-  }
-
-  :deep(.el-card__header) {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
 
   :deep(.el-drawer__body) {
+    ul {
+      height: 100vh;
+    }
     padding: 0px;
   }
-
   :deep(.el-overlay) {
     top: 50px;
   }
-
   .row {
     margin-top: 15px;
   }
-
   .span-title {
     font-weight: 800;
     font-family: '宋体';
   }
-
   .button {
     margin-top: 5px;
   }
-
   .closeStyle {
     float: right;
-  }
-
-  .closeStyle:hover {
     cursor: pointer;
+  }
+  .elMenu-wrap {
+    position: absolute;
+    left: 0px;
+    height: calc(100vh - 50px);
+    z-index: 999999;
+    :deep(.is-disabled) {
+      height: 70px;
+    }
+    .title-name {
+      margin-left: 10px;
+      font-size: 12px;
+      margin-right: 20px;
+      color: #666;
+    }
+    .el-menu-item {
+      font-size: 14px !important;
+      color: #666;
+      font-family: '微软雅黑';
+    }
+    .el-menu-item.is-disabled {
+      cursor: pointer;
+      opacity: 1;
+    }
+    li {
+      display: flex;
+    }
+    .icon {
+      width: 22px;
+      height: 22px;
+      margin-right: 5px;
+    }
+    .mainMenu {
+      position: relative;
+      padding-right: 0px;
+      .mainMenu-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+      }
+      .el-icon {
+        margin-right: 20px;
+      }
+      .arrowRight {
+        font-size: 14px;
+      }
+      &:after {
+        content: ' ';
+        width: 82%;
+        height: 1px;
+        background: #dfe1e6;
+        position: absolute;
+        bottom: -0.1px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+  }
+  .right-menu {
+    box-sizing: border-box;
+    height: calc(100vh - 50px);
+    position: absolute;
+    z-index: 20;
+    min-width: 40%;
+    font-size: 16px !important;
+    font-family: '微软雅黑';
+    border-radius: 0;
+    :deep(.el-card__header) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    :deep(.el-card__body) {
+      display: flex;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      padding: 20px 35px;
+    }
+    :deep(.el-card__header) {
+      height: 70px;
+    }
+    .header-warp {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .closeButton {
+        cursor: pointer;
+        margin-left: 20px;
+        width: 40px;
+      }
+    }
+    .server-container {
+      width: 33%;
+      .span-title {
+        font-weight: 700;
+        font-family: '微软雅黑';
+      }
+      .button {
+        margin-top: 10px;
+        margin-left: 10px;
+        .el-button {
+          font-size: 14px;
+          font-family: '微软雅黑';
+        }
+      }
+    }
   }
 }
 </style>

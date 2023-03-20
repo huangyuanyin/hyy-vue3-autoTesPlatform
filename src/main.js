@@ -15,6 +15,7 @@ import 'vue3-json-viewer/dist/index.css'
 
 import SvgIcon from './components/SvgIcon.vue'
 import './assets/iconfont/iconfont.js'
+import '@/assets/iconfont/iconfont_drawer.js'
 
 // createApp(App).mount('#app')
 const pinia = createPinia()

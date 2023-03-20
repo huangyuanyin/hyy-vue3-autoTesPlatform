@@ -12,6 +12,9 @@
       "src/typings"
    ],
     "downlevelIteration": true,
+    "module": "esnext", // fix 仅当 “--module” 选项为 “es2020”、“es2022”、“esnext”、“system”、“node16” 或 “nodenext” 时，才允许使用 “import.meta” 元属性。
+    "moduleResolution": "node", // fix 仅当 “--module” 选项为 “es2020”、“es2022”、“esnext”、“system”、“node16” 或 “nodenext” 时，才允许使用 “import.meta” 元属性。
+    "types": ["vite/client"], // fix 类型“ImportMeta”上不存在属性“env”。
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue","src/assets"],
 }
