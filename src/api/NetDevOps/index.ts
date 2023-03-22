@@ -6,7 +6,7 @@ export function getDeviceApi(params: any) {
     url: '/machine/device/',
     method: 'get',
     urlType: 'NetDevOps',
-    data: params
+    params
   })
 }
 
@@ -16,5 +16,23 @@ export function addDeviceApi(params: any) {
     method: 'POST',
     urlType: 'NetDevOps',
     data: params
+  })
+}
+
+export function editDeviceApi(params: any) {
+  return request({
+    url: '/machine/device/',
+    method: 'PUT',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function deletetDeviceApi(params) {
+  return request({
+    url: `/machine/device/`,
+    method: 'DELETE',
+    urlType: 'NetDevOps',
+    params
   })
 }
