@@ -56,7 +56,6 @@
 import { onMounted, ref, reactive, toRef, toRefs } from 'vue'
 import { datas } from '@/api/POC/index.js'
 import { getHistoryReportApi } from '@/api/APV/testReport.js'
-import { filterData } from '@/utils/util.js'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getDataApi } from '@/utils/getApi.js'

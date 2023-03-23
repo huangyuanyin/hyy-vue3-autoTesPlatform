@@ -113,7 +113,7 @@ const getProduct = async () => {
 const handleServerList = () => {
   serverList.value.forEach((item: any) => {
     productList.value.forEach((item2: any) => {
-      if (item.id === item2.category) {
+      if (item.id === item2.category?.id) {
         if (!item.children) {
           item.children = []
         }

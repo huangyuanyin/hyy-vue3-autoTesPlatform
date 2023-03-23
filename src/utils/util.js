@@ -1,5 +1,4 @@
-// 过滤对象中属性为空的值
-export function filterData(Data) {
+export const filterData = Data => {
   let params = {}
   for (const item in Data) {
     if (Data[item]) {
@@ -56,9 +55,4 @@ export const computer = date => {
   let s = parseInt((index - day - h / 24 - m / 60 / 24) * 24 * 60 * 60) //秒
   let str = day + '天' + h + '小时' + m + '分' + s + '秒'
   return { day, h, m, s }
-}
-
-// 获取assets静态资源
-export function getAssetsFile(url) {
-  return new URL(`../assets/${url}`, import.meta.url).href
 }
