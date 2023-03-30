@@ -7,6 +7,9 @@
           <el-option label="项目包" value="shanghai" />
         </el-select>
       </el-form-item>
+      <el-form-item label="标识" label-width="140px" prop="tag">
+        <el-input v-model="form.tag" autocomplete="off" placeholder="请输入包的标识" />
+      </el-form-item>
       <el-form-item label="上传方式" label-width="140px">
         <el-radio-group v-model="uploadType">
           <el-radio label="fileType">手动上传</el-radio>
@@ -59,13 +62,15 @@ const dialogFormVisible = ref(false)
 const uploadType = ref('fileType')
 const form = reactive({
   region: '',
-  url: ''
+  url: '',
+  tag: ''
 })
 const uploadFileList = ref([]) //文件列表
 const ruleFormRef = ref<FormInstance>()
 const rules = reactive<FormRules>({
   region: [{ required: true, message: '请选择包类别', trigger: 'change' }],
-  url: [{ required: true, message: '请输入包的拉取地址', trigger: 'blur' }]
+  url: [{ required: true, message: '请输入包的拉取地址', trigger: 'blur' }],
+  tag: [{ required: true, message: '请输入包的标识', trigger: 'blur' }]
 })
 
 watch(

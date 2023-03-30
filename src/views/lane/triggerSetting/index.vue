@@ -10,7 +10,7 @@
         >
           <div class="at-nav-item-main" @click="selectNavItem(index)">
             <span class="text">{{ item.name }}</span>
-            <el-switch v-model="item.status" />
+            <el-switch v-model="item.status" :disabled="item.disabled" />
           </div>
         </li>
       </ul>
@@ -27,10 +27,10 @@ import { ref } from 'vue'
 import WebhookTrigger from './components/WebhookTrigger.vue'
 import TimingTrigger from './components/TimingTrigger.vue'
 
-const currentNavItemIndex = ref(0) //当前索引
+const currentNavItemIndex = ref(1) //当前索引
 const navItems = ref([
-  { name: 'Webhook触发', status: true },
-  { name: '定时触发', status: false }
+  { name: 'Webhook触发', status: false, disabled: true },
+  { name: '定时触发', status: true, disabled: false }
 ])
 
 const selectNavItem = (index: any) => {

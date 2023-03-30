@@ -198,6 +198,12 @@
                   <el-radio :label="false">否</el-radio>
                 </el-radio-group>
               </el-form-item>
+              <el-form-item label="是否需要进行设备重启" prop="isSysRest2">
+                <el-radio-group v-model="item.isSysRest2" class="ml-4">
+                  <el-radio :label="true">是</el-radio>
+                  <el-radio :label="false">否</el-radio>
+                </el-radio-group>
+              </el-form-item>
               <el-collapse class="collapseItem">
                 <el-collapse-item name="1">
                   <template #title>
@@ -283,7 +289,8 @@ const serverConfigList = [
   { label: '主板类型：', value: 'x86' },
   { label: '设备型号：', value: '3500' },
   { label: '设备编码：', value: 'Z213NAJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ' },
-  { label: '密码卡：', value: '国密' }
+  { label: 'cavium卡：', value: 'cavium卡' },
+  { label: '国密卡：', value: '国密卡' }
 ]
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
@@ -315,7 +322,8 @@ const taskDetailFormRules = reactive<FormRules>({
   ifha: [{ required: true, message: '是否安装HA为必填项', trigger: 'change' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }],
   startMidwareType: [{ required: true, message: '请选择开机自启中间件', trigger: 'change' }],
-  isSysRest: [{ required: true, message: '请选择是否需要进行系统还原', trigger: 'change' }]
+  isSysRest: [{ required: true, message: '请选择是否需要进行系统还原', trigger: 'change' }],
+  isSysRest2: [{ required: true, message: '请选择是否需要进行设备重启', trigger: 'change' }]
 })
 const deviceList = ref([
   {
@@ -331,7 +339,8 @@ const deviceList = ref([
     ifback: 'n',
     ifrs: 'y',
     startMidwareType: '',
-    isSysRest: true
+    isSysRest: true,
+    isSysRest2: true
   }
 ])
 const cloneDeviceObj = ref({
@@ -347,7 +356,8 @@ const cloneDeviceObj = ref({
   ifback: 'n',
   ifrs: 'y',
   startMidwareType: '',
-  isSysRest: true
+  isSysRest: true,
+  isSysRest2: true
 })
 const deviceFormRules = reactive<FormRules>({})
 watch(
@@ -379,7 +389,8 @@ const closeDrawer = (value?: any) => {
       ifback: 'n',
       ifrs: 'y',
       startMidwareType: '',
-      isSysRest: true
+      isSysRest: true,
+      isSysRest2: true
     }
   ]
   emit('closeDrawer', [false, value])

@@ -136,7 +136,8 @@ const serverConfigList = [
   { label: '主板类型:', value: 'x86' },
   { label: '设备型号：', value: '3500' },
   { label: '设备编码：', value: 'Z213NAJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ' },
-  { label: '密码卡：', value: '国密' }
+  { label: 'cavium卡：', value: 'cavium卡' },
+  { label: '国密卡：', value: '国密卡' }
 ]
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
