@@ -3,14 +3,29 @@
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="addTask"> 新建任务</el-button>
     <el-table :data="taskTableData" border style="width: 100%" stripe>
       <el-table-column prop="name" label="任务名称" width="180" align="center" />
-      <el-table-column prop="type" label="产品型号" align="center" />
-      <el-table-column prop="password" label="任务状态" align="center" />
+      <el-table-column prop="draft" label="是否草稿" align="center">
+        <template #default="item">
+          <el-tag v-if="item.row.draft === false" type="success">否</el-tag>
+          <el-tag v-else type="warning">是</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" label="任务状态" align="center">
+        <template #default="item">
+          <el-tag v-if="item.row.status === 'not_start'" type="warning">未运行</el-tag>
+          <el-tag v-if="item.row.status === 'success'" type="success">运行成功</el-tag>
+          <el-tag v-if="item.row.status === 'fail'" type="danger">已失败</el-tag>
+          <el-tag v-if="item.row.status === 'in_progress'" type="warning">运行中</el-tag>
+          <el-tag v-if="item.row.status === 'complete'" type="warning">complete</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="最近运行状态" align="center">
         <template #default="item">
           <div class="pipe-status">
             <ul>
-              <el-tooltip popper-class="box-item" effect="customized" content="第二次运行" placement="top">
-                <li><span>#2</span></li>
+              <el-tooltip popper-class="box-item" effect="customized" :content="`第${item.row.run_count}次运行`" placement="top">
+                <li>
+                  <span>{{ item.row.run_count }}</span>
+                </li>
               </el-tooltip>
               <li>-</li>
               <el-tooltip popper-class="box-item" effect="customized" content="运行失败" placement="top">
@@ -86,11 +101,12 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { CirclePlus, CircleCloseFilled } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
 import preview2 from '@/assets/preview2.png'
+import { getTaskInfoApi } from '@/api/NetDevOps/index'
 
 interface User {
   id: string
@@ -101,40 +117,7 @@ interface User {
 
 const router = useRouter()
 const taskTemplateDialogVisible = ref(false)
-const taskTableData = reactive([
-  {
-    name: '任务1',
-    id: '222',
-    date: '333',
-    type: '自动化平台使用',
-    username: 'admin',
-    password: '运行中'
-  },
-  {
-    date: '333',
-    id: '222',
-    name: '任务2',
-    type: '自动化平台使用',
-    username: 'admin',
-    password: '运行中'
-  },
-  {
-    date: '333',
-    id: '222',
-    name: '任务3',
-    type: '自动化平台使用',
-    username: 'admin',
-    password: '运行中'
-  },
-  {
-    date: '333',
-    id: '222',
-    name: '任务4',
-    type: '自动化平台使用',
-    username: 'admin',
-    password: '运行中'
-  }
-])
+const taskTableData = ref([])
 const tableData = [
   {
     id: '0',
@@ -259,6 +242,21 @@ const handleUse = (index: number, row: User) => {
 const toDetail = item => {
   router.push({ path: '/testTask/addTestTask', query: { id: item.id } })
 }
+
+const getTaskInfo = async () => {
+  const params = {
+    page: 1,
+    page_size: 10
+  }
+  let res = await getTaskInfoApi(params)
+  if (res.code === 1000) {
+    taskTableData.value = res.data || []
+  }
+}
+
+onMounted(() => {
+  getTaskInfo()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -6,12 +6,12 @@
     </header>
     <el-form label-position="top" label-width="100px" class="timer-scheduler" :model="formLabelAlign" style="max-width: 460px">
       <el-form-item label="触发方式">
-        <el-radio-group v-model="formLabelAlign.triggerMethod">
-          <el-radio label="cycle">周期触发</el-radio>
-          <el-radio label="one">单次触发</el-radio>
+        <el-radio-group v-model="formLabelAlign.trigger_ways">
+          <el-radio label="period">周期触发</el-radio>
+          <el-radio label="once">单次触发</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="日期选择">
+      <el-form-item label="日期选择" prop="date">
         <div class="weeks">
           <div
             class="weeks-item"
@@ -25,10 +25,20 @@
         </div>
       </el-form-item>
       <el-form-item label="触发时间">
-        <el-input v-model="formLabelAlign.region" />
+        <el-time-picker
+          v-model="trigger_time_period"
+          format="HH:mm"
+          value-format="HH:mm"
+          is-range
+          range-separator="至"
+          start-placeholder="开始时间"
+          end-placeholder="结束时间"
+          v-if="formLabelAlign.trigger_ways === 'period'"
+        />
+        <el-time-picker v-else v-model="trigger_time_once" placeholder="请选择时间" format="HH:mm" value-format="HH:mm" />
       </el-form-item>
-      <el-form-item label="间隔时间" v-if="formLabelAlign.triggerMethod === 'cycle'">
-        <el-select v-model="formLabelAlign.Intervals" placeholder="">
+      <el-form-item label="间隔时间" v-if="formLabelAlign.trigger_ways === 'period'">
+        <el-select v-model="formLabelAlign.trigger_interval" placeholder="">
           <el-option :label="item.label" :value="item.value" v-for="(item, index) in IntervalList" :key="'IntervalList' + index" />
         </el-select>
       </el-form-item>
@@ -36,20 +46,23 @@
     <div class="next-form-item">
       <label>
         <span>代码变更时定时器触发<svg-icon iconName="icon-bangzhu"></svg-icon></span>
-        <el-checkbox v-model="formLabelAlign.checked" label="" size="large" />
+        <el-checkbox v-model="formLabelAlign.checked" label="" size="large" disabled />
       </label>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
+const emit = defineEmits(['formLabelAlign'])
+const trigger_time_period = ref(['15:00', '16:00'])
+const trigger_time_once = ref('15:00')
 const formLabelAlign = ref({
-  triggerMethod: 'cycle',
-  date: <any>[],
-  region: '',
-  Intervals: '5',
+  trigger_ways: 'period',
+  date: <any>[6],
+  trigger_time: null,
+  trigger_interval: '5',
   checked: false
 })
 const IntervalList = ref([
@@ -77,7 +90,7 @@ const selectWeek = (val: Object, index: number) => {
   weeks.value.forEach(item => {
     if (item.active) {
       // 筛选active为true的加到arr中
-      arr.push(item.value)
+      arr.push(Number(item.value))
     }
   })
   formLabelAlign.value.date = arr
@@ -86,6 +99,15 @@ const selectWeek = (val: Object, index: number) => {
     formLabelAlign.value.date = [weeks.value[5].value]
   }
 }
+
+watch(
+  () => formLabelAlign.value,
+  () => {
+    formLabelAlign.value.trigger_time = formLabelAlign.value.trigger_ways === 'period' ? trigger_time_period.value : trigger_time_once.value
+    emit('formLabelAlign', formLabelAlign.value)
+  },
+  { deep: true }
+)
 </script>
 
 <style lang="scss" scoped>

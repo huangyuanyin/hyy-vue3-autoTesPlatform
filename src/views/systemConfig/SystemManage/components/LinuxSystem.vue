@@ -2,16 +2,18 @@
   <div class="LinuxSystem-wrap">
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="openLinuxDialog('add')"> 添加</el-button>
     <el-table :data="linuxTableData" border style="width: 100%" stripe v-loading="loadingTable">
-      <el-table-column prop="server_ip" label="设备IP" align="center" />
+      <el-table-column prop="ip" label="设备IP" align="center" />
       <el-table-column prop="machine_type" label="设备类型" width="200" align="center" />
       <!-- <el-table-column prop="mode_code" label="型号编码" width="150" />
       <el-table-column prop="config_code" label="配置编码" width="150" /> -->
-      <el-table-column prop="main_bord_type" label="主板类型" width="200" align="center" />
+      <el-table-column prop="main_board_type" label="主板类型" width="200" align="center" />
       <!-- <el-table-column prop="cavium_card_type" label="cavium卡类型" width="150" align="center" />
-      <el-table-column prop="gm_card_varchar" label="国密卡类型" width="150" align="center" /> -->
-      <el-table-column prop="status" label="使用状态" width="200" align="center">
+      <el-table-column prop="gm_card_type" label="国密卡类型" width="150" align="center" /> -->
+      <el-table-column prop="using" label="使用状态" width="200" align="center">
         <template #default="scope">
-          <el-tag :type="scope.row.status === true ? 'success' : ''" disable-transitions>使用中</el-tag>
+          <el-tag :type="scope.row.using === true ? 'danger' : ''" disable-transitions>
+            {{ scope.row.using === true ? '使用中' : '空闲中' }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="device_user" label="使用人" width="200" align="center">
@@ -26,7 +28,7 @@
           <el-tag type="info" e-else>暂无备注</el-tag>
         </template>
       </el-table-column> -->
-      <el-table-column prop="update_time" label="更新时间" width="250" align="center" />
+      <el-table-column prop="last_mod_time" label="更新时间" width="250" align="center" />
       <el-table-column fixed="right" label="操作" align="center" width="250">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="openLinuxDialog('detail', scope.row.id)"> 详情 </el-button>
@@ -75,22 +77,22 @@
       <el-row>
         <el-form :model="form" ref="ruleFormRef" :rules="rules">
           <el-col :span="12">
-            <!-- <el-form-item label="设备系统类型" :label-width="formLabelWidth" prop="system_type">
-              <el-select v-model="form.system_type" placeholder="请选择设备系统类型" :disabled="true">
+            <!-- <el-form-item label="设备系统类型" :label-width="formLabelWidth" prop="sys_type">
+              <el-select v-model="form.sys_type" placeholder="请选择设备系统类型" :disabled="true">
                 <el-option label="linux" value="linux" />
               </el-select>
             </el-form-item> -->
-            <el-form-item label="设备ip" :label-width="formLabelWidth" prop="server_ip">
-              <el-input v-model="form.server_ip" autocomplete="off" :disabled="disabled" />
+            <el-form-item label="设备ip" :label-width="formLabelWidth" prop="ip">
+              <el-input v-model="form.ip" autocomplete="off" :disabled="disabled" />
             </el-form-item>
-            <el-form-item label="设备用户名" :label-width="formLabelWidth" prop="user_name">
-              <el-input v-model="form.user_name" autocomplete="off" :disabled="disabled" />
+            <el-form-item label="设备用户名" :label-width="formLabelWidth" prop="username">
+              <el-input v-model="form.username" autocomplete="off" :disabled="disabled" />
             </el-form-item>
-            <el-form-item label="设备密码" :label-width="formLabelWidth" prop="server_passwd">
-              <el-input v-model="form.server_passwd" autocomplete="off" :disabled="disabled" />
+            <el-form-item label="设备密码" :label-width="formLabelWidth" prop="password">
+              <el-input v-model="form.password" autocomplete="off" :disabled="disabled" />
             </el-form-item>
-            <el-form-item label="设备端口" :label-width="formLabelWidth" prop="server_port">
-              <el-input v-model="form.server_port" autocomplete="off" :disabled="disabled" />
+            <el-form-item label="设备端口" :label-width="formLabelWidth" prop="port">
+              <el-input v-model="form.port" autocomplete="off" :disabled="disabled" />
             </el-form-item>
             <el-form-item label="型号编码" :label-width="formLabelWidth" prop="mode_code">
               <el-input v-model="form.mode_code" autocomplete="off" :disabled="disabled" />
@@ -100,34 +102,50 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="主板类型" :label-width="formLabelWidth" prop="main_bord_type">
-              <el-select v-model="form.main_bord_type" placeholder="请选择主板类型" :disabled="disabled">
-                <el-option label="X86" value="shanghai" />
-                <el-option label="其他" value="beijing" />
+            <el-form-item label="主板类型" :label-width="formLabelWidth" prop="main_board_type">
+              <el-select v-model="form.main_board_type" placeholder="请选择主板类型" :disabled="disabled">
+                <el-option label="X86" value="x86" />
+                <el-option label="兆芯C4600-server" value="兆芯C4600-server" />
+                <el-option label="兆芯C4600-desktop" value="兆芯C4600-desktop" />
+                <el-option label="飞腾FT2000" value="飞腾FT2000" />
+                <el-option label="海光HG-3250" value="海光HG-3250" />
+                <el-option label="麒麟" value="麒麟" />
               </el-select>
             </el-form-item>
             <el-form-item label="cavium类型" :label-width="formLabelWidth" prop="cavium_card_type">
               <el-select v-model="form.cavium_card_type" placeholder="请选择cavium类型" :disabled="disabled">
-                <el-option label="类型一" value="shanghai" />
-                <el-option label="类型二" value="beijing" />
+                <el-option label="5560-550" value="5560-550" />
+                <el-option label="5560-550-c25" value="5560-550-c25" />
+                <el-option label="5560-750-c35" value="5560-750-c35" />
+                <el-option label="1620" value="1620" />
+                <el-option label="3510" value="3510" />
+                <el-option label="3530" value="3530" />
+                <el-option label="无" value="无" />
               </el-select>
             </el-form-item>
-            <el-form-item label="国密卡类型" :label-width="formLabelWidth" prop="gm_card_varchar">
-              <el-select v-model="form.gm_card_varchar" placeholder="请选择国密卡类型" :disabled="disabled">
-                <el-option label="类型一" value="shanghai" />
-                <el-option label="类型二" value="beijing" />
+            <el-form-item label="国密卡类型" :label-width="formLabelWidth" prop="gm_card_type">
+              <el-select v-model="form.gm_card_type" placeholder="请选择国密卡类型" :disabled="disabled">
+                <el-option label="渔翁-1.1" value="渔翁-1.1" />
+                <el-option label="渔翁-4.1" value="渔翁-4.1" />
+                <el-option label="渔翁-5.0" value="渔翁-5.0" />
+                <el-option label="无" value="无" />
               </el-select>
             </el-form-item>
             <el-form-item label="设备类型" :label-width="formLabelWidth" prop="machine_type">
               <el-select v-model="form.machine_type" placeholder="请选择Linux设备类型" :disabled="disabled">
-                <el-option label="自动化平台使用" value="shanghai" />
-                <el-option label="临时设备" value="beijing" />
+                <el-option label="3500" value="3500" />
+                <el-option label="6500" value="6500" />
+                <el-option label="15000" value="15000" />
+                <el-option label="25000" value="25000" />
+                <el-option label="7500A-DA" value="7500A-DA" />
+                <el-option label="7500B-DA" value="7500B-DA" />
+                <el-option label="7500C-DA" value="7500C-DA" />
               </el-select>
             </el-form-item>
             <el-form-item label="设备组" :label-width="formLabelWidth" prop="device_group">
               <el-select v-model="form.device_group" placeholder="请选择设备组" :disabled="disabled">
-                <el-option label="自动化组" value="zidong" />
-                <el-option label="签名组" value="qianming" />
+                <el-option label="自动化组" value="automatic" />
+                <el-option label="签名组" value="temporary" />
               </el-select>
             </el-form-item>
             <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
@@ -167,17 +185,17 @@ const systemCurrentPage = ref(1)
 const systemPageSize = ref(10)
 const systemTotal = ref(0)
 const form = reactive({
-  server_ip: '',
-  user_name: '',
-  server_passwd: '',
-  server_port: 22,
+  ip: '',
+  username: '',
+  password: '',
+  port: 22,
   mode_code: '',
   config_code: '',
   cavium_card_type: '',
-  gm_card_varchar: '',
-  main_bord_type: '',
+  gm_card_type: '',
+  main_board_type: '',
   machine_type: '',
-  system_type: 'linux',
+  sys_type: 'linux',
   device_group: '',
   remark: ''
 })
@@ -204,17 +222,17 @@ const validateIp = (rule: any, value: any, callback: any) => {
   }
 }
 const rules = reactive<FormRules>({
-  server_ip: [{ required: true, validator: validateIp, trigger: 'blur' }],
-  user_name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  server_passwd: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-  server_port: [{ required: true, message: '请输入设备端口', trigger: 'blur' }],
+  ip: [{ required: true, validator: validateIp, trigger: 'blur' }],
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  port: [{ required: true, message: '请输入设备端口', trigger: 'blur' }],
   mode_code: [{ required: true, message: '请输入型号编码', trigger: 'blur' }],
   config_code: [{ required: true, message: '请输入配置编码', trigger: 'blur' }],
-  main_bord_type: [{ required: true, message: '请输入主板类型', trigger: 'blur' }],
+  main_board_type: [{ required: true, message: '请输入主板类型', trigger: 'blur' }],
   cavium_card_type: [{ required: true, message: '请输入cavium卡类型', trigger: 'blur' }],
-  gm_card_varchar: [{ required: true, message: '请输入国密卡类型', trigger: 'blur' }],
+  gm_card_type: [{ required: true, message: '请输入国密卡类型', trigger: 'blur' }],
   machine_type: [{ required: true, message: '请选择设备类型', trigger: 'blur' }],
-  system_type: [{ required: true, message: '请选择设备系统类型', trigger: 'blur' }],
+  sys_type: [{ required: true, message: '请选择设备系统类型', trigger: 'blur' }],
   device_group: [{ required: true, message: '请选择设备组', trigger: 'blur' }]
 })
 const linuxTableData = ref([])
@@ -245,14 +263,14 @@ const editDevice = async () => {
   const res = await editDeviceApi(form)
   if (res.code === 1000) {
     ElMessage.success('修改成功')
-    // resetForm(ruleFormRef)
+    resetForm(ruleFormRef.value)
     getDevice()
   }
 }
 
 // 删除设备接口
 const deletetDevice = async row => {
-  const res = await deletetDeviceApi({ id: row })
+  const res = await deletetDeviceApi({ device_manage_id: row })
   if (res.code === 1000) {
     ElMessage.success('删除成功')
     getDevice()
@@ -273,11 +291,11 @@ const openLinuxDialog = (...args) => {
       break
     case 'edit':
       LinuxTitle.value = '编辑Linux设备'
-      getQueryDevice({ id: args[1] })
+      getQueryDevice({ device_manage_id: args[1] })
       break
     case 'detail':
       LinuxTitle.value = 'Linux设备详情'
-      getQueryDevice({ id: args[1] })
+      getQueryDevice({ device_manage_id: args[1] })
       break
   }
   console.log(`output->...args`, args)
@@ -305,10 +323,10 @@ const getQueryDevice = async val => {
   const res = await getDeviceApi(val)
   if (res.code === 1000) {
     // 循环res.data，如果form的key与res.data中的可以相等，则赋值到form
-    for (const key in res.data[0]) {
-      form['id'] = res.data[0].id
+    for (const key in res.data) {
+      form['device_manage_id'] = res.data.id
       if (form.hasOwnProperty(key)) {
-        form[key] = res.data[0][key]
+        form[key] = res.data[key]
       }
     }
   }
@@ -316,13 +334,14 @@ const getQueryDevice = async val => {
 
 const getDevice = async () => {
   loadingTable.value = true
-  const res = await getDeviceApi({})
+  const params = {
+    page: systemCurrentPage.value,
+    page_size: systemPageSize.value
+  }
+  const res = await getDeviceApi(params)
   loadingTable.value = false
   if (res.code === 1000) {
     linuxTableData.value = res.data
-    linuxTableData.value.map(item => {
-      item.update_time = utc2beijing(item.update_time)
-    })
     systemTotal.value = res.total || 0
   }
 }

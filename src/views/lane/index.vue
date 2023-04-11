@@ -18,14 +18,15 @@
         </el-col>
         <el-col class="saveButton" :span="4">
           <div class="grid-content ep-bg-purple" />
-          <el-button v-if="!isTemplate" type="primary" @click="sumbitTask">保存并创建任务</el-button>
+          <el-button v-if="!isTemplate" type="default" @click="sumbitTask(true)">保存为草稿</el-button>
+          <el-button v-if="!isTemplate" type="primary" @click="sumbitTask(false)">保存并创建任务</el-button>
         </el-col>
       </el-row>
     </div>
     <div class="lan-container">
-      <basicInformation v-if="tabName === 'basicInformation'" />
-      <Lane v-if="tabName === 'processConfig'" :flows="data.flows" />
-      <TriggerSetting v-if="tabName === 'triggerSetting'" />
+      <basicInformation v-show="tabName === 'basicInformation'" @submitName="submitName" />
+      <Lane v-show="tabName === 'processConfig'" :flows="data.task_detail_conf" />
+      <TriggerSetting v-show="tabName === 'triggerSetting'" @formLabelAlign="formLabelAlign" />
     </div>
   </div>
 </template>
@@ -36,13 +37,17 @@ import { useRoute, useRouter } from 'vue-router'
 import Lane from './lane.vue'
 import basicInformation from './basicInformation/index.vue'
 import TriggerSetting from './triggerSetting/index.vue'
+import { ElMessage } from 'element-plus'
+import { addTaskInfoApi } from '@/api/NetDevOps/index'
 
 const router = useRouter()
 const route = useRoute()
 const tabName = ref('basicInformation')
 const isTemplate = ref(false)
 const data = reactive({
-  flows: [
+  name: '',
+  draft: '',
+  task_detail_conf: [
     // {
     //   name: '部署',
     //   stages: [
@@ -60,14 +65,44 @@ const changeTab = (e: any) => {
   tabName.value = e
 }
 
-const sumbitTask = () => {
-  console.log(`保存任务`, data.flows)
+const sumbitTask = type => {
+  data.draft = type
+  if (data.name === '') {
+    return ElMessage.error('请输入任务名称')
+  }
+  addTaskInfo()
+  console.log(`保存任务`, data)
+}
+
+const addTaskInfo = async () => {
+  const params = { ...data }
+  params.task_detail_conf = JSON.stringify(data.task_detail_conf)
+  const res = await addTaskInfoApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('任务创建成功')
+    router.push({ path: '/task' })
+  }
+}
+
+const submitName = (e: any) => {
+  data.name = e
+}
+
+const formLabelAlign = (e: any) => {
+  // 循环e中的每一个值，循环data，将值赋给data
+  for (const key in e) {
+    if (Object.prototype.hasOwnProperty.call(e, key)) {
+      const element = e[key]
+      data[key] = element
+    }
+  }
+  console.log(`output->data`, data)
 }
 
 onMounted(() => {
   if (route.query.id === '0' || route.query.id === '1') {
     isTemplate.value = true
-    data.flows = JSON.parse(localStorage.getItem('taskTemplateObj'))
+    data.task_detail_conf = JSON.parse(localStorage.getItem('taskTemplateObj'))
   } else {
     isTemplate.value = false
   }

@@ -15,11 +15,10 @@
           status-icon
         >
           <el-form-item label="任务名称" prop="name">
-            <el-input v-model="basicInformationForm.name" placeholder="请输入任务名称..." />
+            <el-input v-model="basicInformationForm.name" placeholder="请输入任务名称..." @change="submitForm(basicInformationFormRef)" />
           </el-form-item>
           <el-form-item>
             <el-button type="danger" @click="resetForm(basicInformationFormRef)">删除任务</el-button>
-            <!-- <el-button type="primary" @click="submitForm(basicInformationFormRef)"> 下一项 </el-button> -->
           </el-form-item>
         </el-form>
       </div>
@@ -31,10 +30,11 @@
 import { reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 
-const basicInformationFormRef = ref<FormInstance>()
+const emit = defineEmits(['submitName'])
 const basicInformationForm = reactive({
   name: ''
 })
+const basicInformationFormRef = ref<FormInstance>()
 const basicInformationRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入任务名称...', trigger: 'blur' }]
 })
@@ -43,9 +43,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      console.log('submit!')
+      emit('submitName', basicInformationForm.name)
     } else {
-      console.log('error submit!', fields)
+      emit('submitName', basicInformationForm.name)
     }
   })
 }

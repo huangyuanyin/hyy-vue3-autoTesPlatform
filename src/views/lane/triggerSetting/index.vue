@@ -17,16 +17,17 @@
     </div>
     <div class="triggerSetting-warp-right">
       <WebhookTrigger v-if="currentNavItemIndex === 0" />
-      <TimingTrigger v-else />
+      <TimingTrigger v-else @formLabelAlign="formLabelAlign" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import WebhookTrigger from './components/WebhookTrigger.vue'
 import TimingTrigger from './components/TimingTrigger.vue'
 
+const emit = defineEmits(['formLabelAlign'])
 const currentNavItemIndex = ref(1) //当前索引
 const navItems = ref([
   { name: 'Webhook触发', status: false, disabled: true },
@@ -35,6 +36,24 @@ const navItems = ref([
 
 const selectNavItem = (index: any) => {
   currentNavItemIndex.value = index
+}
+
+onMounted(() => {
+  const e = {
+    trigger_ways: 'period',
+    date: [6],
+    trigger_time: ['15:00', '16:00'],
+    trigger_interval: '5',
+    checked: false,
+    type: 'regular'
+  } // 初始化一个事件对象
+  emit('formLabelAlign', e)
+})
+
+const formLabelAlign = (e: any) => {
+  currentNavItemIndex.value === 0 ? (e.type = 'Webhook') : (e.type = 'regular')
+  emit('formLabelAlign', e)
+  console.log(`output->e`, e)
 }
 </script>
 
