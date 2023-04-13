@@ -5,7 +5,7 @@
         <el-col class="backButton" :span="5">
           <div class="grid-content ep-bg-purple" />
           <el-button @click="router.go(-1)">返回</el-button>
-          <span>{{ taskName }} {{ laneTime }}</span>
+          <span>{{ taskName === '' ? '流水线' : taskName }} {{ laneTime }}</span>
         </el-col>
         <el-col :span="13">
           <div class="grid-content ep-bg-purple" />
@@ -54,7 +54,7 @@ const data = reactive({
   task_swim_lanes: [
     // {
     //   name: '部署',
-    //   stages: [
+    //   task_stages: [
     //     [
     //       {
     //         name: '串行'
@@ -74,12 +74,34 @@ const sumbitTask = type => {
   if (data.name === '') {
     return ElMessage.error('请输入任务名称')
   }
+  const isName = data.task_swim_lanes.some(item => {
+    return item.name === ''
+  })
+  if (isName) {
+    return ElMessage.error('请检查是否有空的阶段名称')
+  }
   route.query.tem ? addTaskInfo() : editTaskInfo()
   console.log(`保存任务`, data)
 }
 
 const addTaskInfo = async () => {
-  const params = { ...data }
+  const { task_swim_lanes, ...params } = { ...data }
+  // @ts-ignore
+  params.task_detail_conf = data.task_swim_lanes.map(item => {
+    return {
+      name: item.name,
+      details: item.task_stages.flatMap(item => {
+        return [
+          item.task_details.map(item => {
+            return {
+              name: item.name,
+              dispose: eval(`(${item.dispose})`)
+            }
+          })
+        ]
+      })
+    }
+  })
   const res = await addTaskInfoApi(params)
   if (res.code === 1000) {
     ElMessage.success('任务创建成功')
@@ -88,9 +110,28 @@ const addTaskInfo = async () => {
 }
 
 const editTaskInfo = async () => {
-  const params = { ...data }
+  const { task_swim_lanes, ...params } = { ...data }
   // @ts-ignore
-  params.task_id = route.query.id
+  params.task_id = Number(route.query.id)
+  // @ts-ignore
+  params.task_detail_conf = data.task_swim_lanes.map(item => {
+    return {
+      name: item.name,
+      details: item.task_stages.flatMap(item => {
+        return [
+          item.task_details.map(item => {
+            return {
+              name: item.name,
+              dispose: eval(`(${item.dispose})`)
+            }
+          })
+        ]
+      })
+    }
+  })
+  console.log(`output->修改流水线data`, data)
+  console.log(`output->修改流水线params`, params)
+
   const res = await editTaskInfoApi(params)
   if (res.code === 1000) {
     ElMessage.success('任务编辑成功')
@@ -110,7 +151,6 @@ const formLabelAlign = (e: any) => {
       data[key] = element
     }
   }
-  console.log(`output->data`, data)
 }
 
 const getTaskInfo = async () => {

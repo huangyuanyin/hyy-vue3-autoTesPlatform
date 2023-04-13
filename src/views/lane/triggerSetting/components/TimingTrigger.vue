@@ -25,17 +25,29 @@
         </div>
       </el-form-item>
       <el-form-item label="触发时间">
-        <el-time-picker
-          v-model="trigger_time_period"
-          format="HH:mm"
-          value-format="HH:mm"
-          is-range
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
-          v-if="formLabelAlign.trigger_ways === 'period'"
-        />
-        <el-time-picker v-else v-model="trigger_time_once" placeholder="请选择时间" format="HH:mm" value-format="HH:mm" />
+        <div class="selectTime-wrap">
+          <el-time-select
+            v-model="startTime"
+            :max-time="endTime"
+            class="mr-4"
+            placeholder="开始时间"
+            start="08:30"
+            step="00:15"
+            end="22:30"
+            @change="selectTime1"
+          />
+          <span style="margin: 0 20px" v-if="formLabelAlign.trigger_ways !== 'once'">至</span>
+          <el-time-select
+            v-if="formLabelAlign.trigger_ways !== 'once'"
+            v-model="endTime"
+            :min-time="startTime"
+            placeholder="结束时间"
+            start="08:30"
+            step="00:15"
+            end="22:30"
+            @change="selectTime2"
+          />
+        </div>
       </el-form-item>
       <el-form-item label="间隔时间" v-if="formLabelAlign.trigger_ways === 'period'">
         <el-select v-model="formLabelAlign.trigger_interval" placeholder="">
@@ -57,8 +69,8 @@ import { ref, watch, onMounted } from 'vue'
 import bus from '@/utils/bus'
 
 const emit = defineEmits(['formLabelAlign'])
-const trigger_time_period = ref(['15:00', '16:00'])
-const trigger_time_once = ref('15:00')
+const startTime = ref('08:30')
+const endTime = ref('18:30')
 const formLabelAlign = ref({
   trigger_ways: 'period',
   trigger_week: <any>[6],
@@ -101,10 +113,23 @@ const selectWeek = (val: Object, index: number) => {
   }
 }
 
+function selectTime1(val) {
+  startTime.value = val
+  formLabelAlign.value.trigger_ways === 'period'
+    ? (formLabelAlign.value.trigger_time = [startTime.value, endTime.value])
+    : (formLabelAlign.value.trigger_time = [startTime.value])
+}
+
+function selectTime2(val) {
+  endTime.value = val
+  formLabelAlign.value.trigger_time = [startTime.value, endTime.value]
+}
+
 watch(
   () => formLabelAlign.value,
   () => {
-    formLabelAlign.value.trigger_time = formLabelAlign.value.trigger_ways === 'period' ? trigger_time_period.value : trigger_time_once.value
+    formLabelAlign.value.trigger_time =
+      formLabelAlign.value.trigger_ways === 'period' ? [startTime.value, endTime.value] : [startTime.value]
     emit('formLabelAlign', formLabelAlign.value)
   },
   { deep: true }
@@ -112,12 +137,24 @@ watch(
 
 // 获取缓存触发设置数据
 const getTriggerSettingData = val => {
+  startTime.value = val.trigger_time[0]
+  endTime.value = val.trigger_time[1] ? val.trigger_time[1] : '18:30'
+  mateWeeks(val.trigger_week)
   for (const key in val) {
     if (formLabelAlign.value.hasOwnProperty(key)) {
       formLabelAlign.value[key] = val[key]
     }
   }
-  console.log(`output->触发设置数据`, formLabelAlign.value)
+}
+
+function mateWeeks(val) {
+  for (let i = 0; i < val.length; i++) {
+    for (let j = 0; j < weeks.value.length; j++) {
+      if (val[i] === Number(weeks.value[j].value)) {
+        weeks.value[j].active = true
+      }
+    }
+  }
 }
 
 onMounted(() => {
@@ -147,6 +184,10 @@ onMounted(() => {
         margin-left: 3px;
       }
     }
+  }
+  .selectTime-wrap {
+    display: flex;
+    justify-content: space-between;
   }
   .timer-scheduler {
     margin-top: 10px;

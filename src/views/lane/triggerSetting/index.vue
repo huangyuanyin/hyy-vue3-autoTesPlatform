@@ -53,7 +53,6 @@ onMounted(() => {
 const formLabelAlign = (e: any) => {
   currentNavItemIndex.value === 0 ? (e.type = 'Webhook') : (e.type = 'regular')
   emit('formLabelAlign', e)
-  console.log(`output->e`, e)
 }
 </script>
 

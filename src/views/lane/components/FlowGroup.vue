@@ -2,8 +2,8 @@
   <div class="flow-group" @mouseenter="isShowIcon = true" @mouseleave="isShowIcon = false">
     <div class="group-head">
       <div class="name">
-        <span @dblclick="handleEditor" v-if="!data.isEditor">{{ FlowName }}</span>
-        <el-input v-else type="text" v-model="FlowName"></el-input>
+        <span @dblclick="handleEditor" v-if="!data.isEditor">{{ props.flow.name }}</span>
+        <el-input v-else type="text" v-model="props.flow.name"></el-input>
       </div>
       <div class="editor" v-show="isShowIcon">
         <svg-icon @click="handleEditor" v-if="data.isEditor" iconName="icon-danduduihao"></svg-icon>
@@ -15,8 +15,8 @@
       </div>
     </div>
     <div class="stages">
-      <Stage v-for="(stage, index) in flow.stages" :stage="stage" :flow="flow" @removeStage="handleRemoveStage(index)" />
-      <AddStage :stages="flow.stages" />
+      <Stage v-for="(stage, index) in flow.task_stages" :stage="stage.task_details" :flow="flow" @removeStage="handleRemoveStage(index)" />
+      <AddStage :stages="flow.task_stages" />
     </div>
   </div>
   <DeleteGroupDialog
@@ -47,45 +47,29 @@ const props = defineProps({
   }
 })
 
-const FlowName = ref('')
 const data = reactive({
   isEditor: false,
-  value: FlowName.value
+  value: props.flow.name
 })
 
-onMounted(() => {
-  if (props.flow.name.includes('部署')) {
-    FlowName.value = '部署'
-  }
-  if (props.flow.name.includes('测试')) {
-    FlowName.value = '测试'
-  }
-  if (props.flow.name.includes('执行命令')) {
-    FlowName.value = '执行命令'
-  }
-  if (props.flow.name.includes('版本构建')) {
-    FlowName.value = '版本构建'
-  }
-})
+onMounted(() => {})
 const isShowIcon = ref(false)
 const isShowDeleteGroupDialog = ref(false)
 const flowName = ref('')
 
 const handleRemoveStage = (index: any) => {
-  if (props.flow.stages.length === 1) {
+  if (props.flow.task_stages.length === 1) {
     return emit('removeFlow')
   }
-  props.flow.stages.splice(index, 1)
+  props.flow.task_stages.splice(index, 1)
 }
 
 const handleEditor = () => {
   if (data.isEditor) {
     data.isEditor = false
-    props.flow.name = FlowName.value
     return
   }
   data.isEditor = true
-  data.value = FlowName.value
 }
 
 const openDeleteGroupDialog = () => {

@@ -28,17 +28,10 @@
                 </li>
               </el-tooltip>
               <li>-</li>
-              <el-tooltip
-                popper-class="box-item"
-                effect="customized"
-                :content="`${
-                  item.row.last_result === 'not_start' ? '待运行' : item.row.last_result === 'success' ? '运行成功' : '运行失败'
-                }`"
-                placement="top"
-              >
+              <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[item.row.last_result]}`" placement="top">
                 <li>
                   <el-icon v-if="item.row.last_result === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
-                  <el-icon v-if="item.row.last_result === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
+                  <el-icon v-if="item.row.last_result === 'success'" style="color: #1b9aee"><CircleCheckFilled /></el-icon>
                   <el-icon v-if="item.row.last_result === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
                 </li>
               </el-tooltip>
@@ -52,7 +45,7 @@
             <el-tooltip
               v-for="(item, index) in scope.row.run_phase"
               :key="'run_phase' + index"
-              :content="`${item.name}：${item.status === 'not_start' ? '待运行' : item.status === 'success' ? '运行成功' : '运行失败'}`"
+              :content="`${item.name}：${statusMap[item.status]}`"
               popper-class="box-item"
               effect="customized"
               placement="top"
@@ -154,6 +147,12 @@ const taskLoading = ref(false)
 const isHeight = ref('70vh')
 const taskTemplateDialogVisible = ref(false)
 const taskTableData = ref([])
+const statusMap = {
+  not_start: '待运行',
+  in_progress: '运行中',
+  success: '运行成功',
+  failed: '运行失败'
+}
 const tableData = [
   {
     id: '0',
@@ -386,6 +385,11 @@ onMounted(() => {
           border: 1px solid #f56c6c;
           color: #f56c6c;
           background: #f56c6c;
+        }
+        .in_progress {
+          border: 2px solid #67c23a !important;
+          color: #67c23a;
+          background: #67c23a;
         }
         .not_start {
           border: 2px solid #d8d8d8 !important;

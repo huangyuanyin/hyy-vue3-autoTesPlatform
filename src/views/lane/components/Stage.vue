@@ -162,11 +162,13 @@ const changeDrawer = (value: any) => {
     const name = value[1]
     props.stage.splice(stageID.value, 0, {
       id: value[2],
-      name: name
+      name: name,
+      dispose: "{'任务配置详情自建': '任务配置详情自建'}" // 处理方式
     })
+    console.log(`output->props.stage`, props.stage)
     // emit('add-stage', {
     //   name,
-    //   stages: [
+    //   task_stages: [
     //     [
     //       {
     //         name: name
@@ -181,7 +183,7 @@ const changeDrawer = (value: any) => {
 <style lang="scss" scoped>
 .stage {
   position: relative;
-  height: 60px;
+  height: 70px;
   cursor: pointer;
 
   &::before {
@@ -207,7 +209,7 @@ const changeDrawer = (value: any) => {
   }
 }
 .ignore-task-container-margin {
-  margin-top: 8px;
+  // margin-top: 8px;
 }
 
 .task-container {

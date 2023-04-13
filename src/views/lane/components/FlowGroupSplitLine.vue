@@ -27,13 +27,16 @@ const changeDrawer = (value: any) => {
     const name = value[1]
     emit('add-stage', {
       name,
-      stages: [
-        [
-          {
-            id: value[2],
-            name: name
-          }
-        ]
+      task_stages: [
+        {
+          id: Number(value[2]),
+          task_details: [
+            {
+              name: name,
+              dispose: "{'任务配置详情自建': '任务配置详情自建'}"
+            }
+          ]
+        }
       ]
     })
   }
@@ -61,14 +64,14 @@ const changeDrawer = (value: any) => {
     width: 48px;
     border-top: 1px solid #dbdbdb;
     margin-left: -24px;
-    top: 100px;
+    top: 105px;
   }
 
   > svg {
     position: absolute;
     left: 50%;
     width: 20px;
-    top: 91px;
+    top: 96px;
     margin-left: -10px;
     z-index: 2;
     cursor: pointer;

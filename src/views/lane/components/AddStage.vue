@@ -38,12 +38,15 @@ const changeDrawer = (value: any) => {
   drawer.value = value[0]
   if (!drawer.value) {
     const name = value[1]
-    props.stages.push([
-      {
-        id: value[2],
-        name: name
-      }
-    ])
+    props.stages.push({
+      task_details: [
+        {
+          id: Number(value[2]),
+          name: name,
+          dispose: "{'任务配置详情自建': '任务配置详情自建'}"
+        }
+      ]
+    })
   }
 }
 </script>
@@ -51,7 +54,7 @@ const changeDrawer = (value: any) => {
 <style lang="scss" scoped>
 .add-stage-container {
   position: relative;
-  height: 60px;
+  height: 70px;
   opacity: 0;
   font-size: 14px;
   &::before {
