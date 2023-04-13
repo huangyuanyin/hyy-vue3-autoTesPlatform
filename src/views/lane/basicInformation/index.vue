@@ -28,18 +28,17 @@
         </el-form>
       </div>
     </el-card>
+    <!--确认删除弹窗-->
+    <el-dialog title="提示" v-model="dialogVisible" width="30%" :before-close="handleClose">
+      <span style="color: red; font-size: 16px; font-weight: 600">确认删除该流水线任务？</span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleConfirmDelete(basicInformationFormRef)">确 定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
-
-  <!--确认删除弹窗-->
-  <el-dialog title="提示" v-model="dialogVisible" width="30%" :before-close="handleClose">
-    <span style="color: red; font-size: 16px; font-weight: 600">确认删除该流水线任务？</span>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleConfirmDelete(basicInformationFormRef)">确 定</el-button>
-      </span>
-    </template>
-  </el-dialog>
 </template>
 
 <script lang="ts" setup>
