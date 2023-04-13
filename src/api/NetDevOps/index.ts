@@ -91,3 +91,29 @@ export function addTaskInfoApi(params: any) {
     data: params
   })
 }
+
+export function editTaskInfoApi(params: any) {
+  return request({
+    url: '/devops/task_info/',
+    method: 'put',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function deleteTaskInfoApi(id: number) {
+  return request({
+    url: `/devops/task_info/${id}`,
+    method: 'DELETE',
+    urlType: 'NetDevOps'
+  })
+}
+
+export function runTaskInfoApi(params: any) {
+  return request({
+    url: `/devops/task_info/run`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}

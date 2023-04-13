@@ -11,7 +11,7 @@
           <el-radio label="once">单次触发</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="日期选择" prop="date">
+      <el-form-item label="日期选择">
         <div class="weeks">
           <div
             class="weeks-item"
@@ -53,14 +53,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
+import bus from '@/utils/bus'
 
 const emit = defineEmits(['formLabelAlign'])
 const trigger_time_period = ref(['15:00', '16:00'])
 const trigger_time_once = ref('15:00')
 const formLabelAlign = ref({
   trigger_ways: 'period',
-  date: <any>[6],
+  trigger_week: <any>[6],
   trigger_time: null,
   trigger_interval: '5',
   checked: false
@@ -93,10 +94,10 @@ const selectWeek = (val: Object, index: number) => {
       arr.push(Number(item.value))
     }
   })
-  formLabelAlign.value.date = arr
-  if (formLabelAlign.value.date.length === 0) {
+  formLabelAlign.value.trigger_week = arr
+  if (formLabelAlign.value.trigger_week.length === 0) {
     weeks.value[5].active = true
-    formLabelAlign.value.date = [weeks.value[5].value]
+    formLabelAlign.value.trigger_week = [weeks.value[5].value]
   }
 }
 
@@ -108,6 +109,20 @@ watch(
   },
   { deep: true }
 )
+
+// 获取缓存触发设置数据
+const getTriggerSettingData = val => {
+  for (const key in val) {
+    if (formLabelAlign.value.hasOwnProperty(key)) {
+      formLabelAlign.value[key] = val[key]
+    }
+  }
+  console.log(`output->触发设置数据`, formLabelAlign.value)
+}
+
+onMounted(() => {
+  bus.on('TriggerSettingData', getTriggerSettingData)
+})
 </script>
 
 <style lang="scss" scoped>

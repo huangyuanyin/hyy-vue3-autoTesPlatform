@@ -1,15 +1,15 @@
 <template>
   <div class="testTask-wrap">
-    <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="addTask"> 新建任务</el-button>
-    <el-table :data="taskTableData" border style="width: 100%" stripe>
+    <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="taskTemplateDialogVisible = true"> 新建任务</el-button>
+    <el-table :data="taskTableData" border style="width: 100%" stripe v-loading="taskLoading" :height="isHeight">
       <el-table-column prop="name" label="任务名称" width="180" align="center" />
-      <el-table-column prop="draft" label="是否草稿" align="center">
+      <el-table-column prop="draft" label="是否草稿" align="center" width="180">
         <template #default="item">
           <el-tag v-if="item.row.draft === false" type="success">否</el-tag>
           <el-tag v-else type="warning">是</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="任务状态" align="center">
+      <el-table-column prop="status" label="任务状态" align="center" width="200">
         <template #default="item">
           <el-tag v-if="item.row.status === 'not_start'" type="warning">未运行</el-tag>
           <el-tag v-if="item.row.status === 'success'" type="success">运行成功</el-tag>
@@ -18,7 +18,7 @@
           <el-tag v-if="item.row.status === 'complete'" type="warning">complete</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="最近运行状态" align="center">
+      <el-table-column label="最近运行状态" align="center" width="200">
         <template #default="item">
           <div class="pipe-status">
             <ul>
@@ -28,39 +28,39 @@
                 </li>
               </el-tooltip>
               <li>-</li>
-              <el-tooltip popper-class="box-item" effect="customized" content="运行失败" placement="top">
+              <el-tooltip
+                popper-class="box-item"
+                effect="customized"
+                :content="`${
+                  item.row.last_result === 'not_start' ? '待运行' : item.row.last_result === 'success' ? '运行成功' : '运行失败'
+                }`"
+                placement="top"
+              >
                 <li>
-                  <el-icon><CircleCloseFilled /></el-icon>
+                  <el-icon v-if="item.row.last_result === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
+                  <el-icon v-if="item.row.last_result === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
+                  <el-icon v-if="item.row.last_result === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
                 </li>
               </el-tooltip>
             </ul>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="最近运行阶段" align="center" prop="pipeHistory" width="300">
-        <template #default="item">
+      <el-table-column label="最近运行阶段" align="center" prop="pipeHistory">
+        <template #default="scope">
           <div class="pipe-history">
-            <el-tooltip popper-class="box-item" effect="customized" content="构建：运行中" placement="top">
+            <el-tooltip
+              v-for="(item, index) in scope.row.run_phase"
+              :key="'run_phase' + index"
+              :content="`${item.name}：${item.status === 'not_start' ? '待运行' : item.status === 'success' ? '运行成功' : '运行失败'}`"
+              popper-class="box-item"
+              effect="customized"
+              placement="top"
+            >
               <div class="group-status">
                 <div class="content">
-                  <div class="title">构建</div>
-                  <div class="point active"></div>
-                </div>
-              </div>
-            </el-tooltip>
-            <el-tooltip popper-class="box-item" effect="customized" content="部署：未运行" placement="top">
-              <div class="group-status">
-                <div class="content">
-                  <div class="title">部署</div>
-                  <div class="point init"></div>
-                </div>
-              </div>
-            </el-tooltip>
-            <el-tooltip popper-class="box-item" effect="customized" content="活动校验：未运行" placement="top">
-              <div class="group-status">
-                <div class="content">
-                  <div class="title" style="font-size: 12px">活动校验</div>
-                  <div class="point init"></div>
+                  <div class="title">{{ item.name }}</div>
+                  <div class="point" :class="item.status"></div>
                 </div>
               </div>
             </el-tooltip>
@@ -69,12 +69,42 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" align="center" width="180">
         <template #default="item">
-          <el-button link type="primary" size="small" @click="toDetail(item.row)"> 详情 </el-button>
-          <el-button link type="primary" size="small"> 编辑 </el-button>
-          <el-button link type="danger" size="small" :disabled="item.row.disabledDelete"> 删除 </el-button>
+          <el-popconfirm
+            title="确定执行这个任务流水线?"
+            trigger="click"
+            confirm-button-text="确认执行"
+            cancel-button-text="取消"
+            @confirm="handleRunTask(item.row.id)"
+          >
+            <template #reference>
+              <el-button link type="primary" size="small"> 执行 </el-button>
+            </template>
+          </el-popconfirm>
+          <el-button link type="primary" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
+          <el-button link type="primary" size="small" @click="toDetail('edit', item.row)"> 编辑 </el-button>
+          <el-popconfirm
+            title="确定删除这个任务?"
+            trigger="click"
+            confirm-button-text="确认删除"
+            cancel-button-text="取消"
+            @confirm="handleDelete(item.row.id)"
+          >
+            <template #reference>
+              <el-button link type="danger" size="small"> 删除 </el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      v-model:currentPage="taskCurrentPage"
+      v-model:page-size="taskPageSize"
+      :page-sizes="[10, 20, 30, 40]"
+      layout="total, prev, pager, next, jumper"
+      :total="taskTotal"
+      @size-change="handleTaskSizeChange"
+      @current-change="handleTaskCurrentChange"
+    />
 
     <!--模板弹窗-->
     <el-dialog v-model="taskTemplateDialogVisible" title="任务模板" width="77%">
@@ -87,13 +117,13 @@
         </el-table-column>
         <el-table-column label="操作" align="center" width="100" fixed="right">
           <template #default="scope">
-            <el-button link type="primary" size="small" @click="handleUse(scope.$index, scope.row)">使用此模板</el-button>
+            <el-button link type="primary" size="small" @click="handleAdd('use', scope.$index, scope.row)">使用此模板</el-button>
           </template>
         </el-table-column>
       </el-table>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="noUseTemplate">不使用模板，直接新建</el-button>
+          <el-button @click="handleAdd('noUse')">不使用模板，直接新建</el-button>
         </span>
       </template>
     </el-dialog>
@@ -102,11 +132,12 @@
 
 <script lang="ts" setup>
 import { reactive, ref, onMounted } from 'vue'
-import { CirclePlus, CircleCloseFilled } from '@element-plus/icons-vue'
+import { CirclePlus, CircleCloseFilled, CircleCheckFilled, InfoFilled } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
 import preview2 from '@/assets/preview2.png'
-import { getTaskInfoApi } from '@/api/NetDevOps/index'
+import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi } from '@/api/NetDevOps/index'
+import { ElMessage } from 'element-plus'
 
 interface User {
   id: string
@@ -116,6 +147,11 @@ interface User {
 }
 
 const router = useRouter()
+const taskCurrentPage = ref(1)
+const taskPageSize = ref(10)
+const taskTotal = ref(0)
+const taskLoading = ref(false)
+const isHeight = ref('70vh')
 const taskTemplateDialogVisible = ref(false)
 const taskTableData = ref([])
 const tableData = [
@@ -224,34 +260,62 @@ const tableData = [
   }
 ]
 
-const addTask = () => {
-  taskTemplateDialogVisible.value = true
-}
-
-const noUseTemplate = () => {
+const handleAdd = (type: String, index?: number, row?: User) => {
   taskTemplateDialogVisible.value = false
-  router.push({ path: '/testTask/addTestTask' })
+  if (type === 'noUse') {
+    router.push({ path: '/testTask/addTestTask', query: { tem: 'noUse' } })
+  } else {
+    localStorage.setItem('taskTemplateObj', JSON.stringify(row.obj))
+    console.log(index, row)
+    router.push({ path: '/testTask/addTestTask', query: { tem: index } })
+  }
 }
 
-const handleUse = (index: number, row: User) => {
-  router.push({ path: '/testTask/addTestTask', query: { id: index } })
-  console.log(index, row)
-  localStorage.setItem('taskTemplateObj', JSON.stringify(row.obj))
+const toDetail = (type, item) => {
+  type = type === 'detail' ? 'detail' : undefined
+  router.push({ path: '/testTask/addTestTask', query: { id: item.id, type } })
 }
 
-const toDetail = item => {
-  router.push({ path: '/testTask/addTestTask', query: { id: item.id } })
+const handleRunTask = async id => {
+  let res = await runTaskInfoApi({ task_id: id })
+  if (res.code === 1000) {
+    ElMessage.success('任务执行成功')
+    taskCurrentPage.value = 1
+    getTaskInfo()
+  }
+}
+
+const handleDelete = async id => {
+  let res = await deleteTaskInfoApi(id)
+  if (res.code === 1000) {
+    ElMessage.success('删除成功')
+    taskCurrentPage.value = 1
+    getTaskInfo()
+  }
 }
 
 const getTaskInfo = async () => {
   const params = {
-    page: 1,
-    page_size: 10
+    page: taskCurrentPage.value,
+    page_size: taskPageSize.value
   }
+  taskLoading.value = true
   let res = await getTaskInfoApi(params)
+  taskLoading.value = false
   if (res.code === 1000) {
     taskTableData.value = res.data || []
+    taskTotal.value = res.total
   }
+}
+
+const handleTaskSizeChange = async (val: number) => {
+  taskPageSize.value = val
+  await getTaskInfo()
+}
+
+const handleTaskCurrentChange = async (val: number) => {
+  taskCurrentPage.value = val
+  await getTaskInfo()
 }
 
 onMounted(() => {
@@ -262,6 +326,11 @@ onMounted(() => {
 <style lang="scss" scoped>
 .testTask-wrap {
   margin: 20px 0 0 20px;
+  .el-pagination {
+    display: flex;
+    justify-content: end;
+    margin-top: 25px;
+  }
   .pipe-status {
     display: flex;
     justify-content: flex-start;
@@ -276,7 +345,6 @@ onMounted(() => {
         .el-icon {
           height: 23px;
           line-height: 23px;
-          color: #e62412;
         }
       }
     }
@@ -285,7 +353,7 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     .group-status {
-      width: 80px;
+      min-width: 80px;
       display: flex;
       position: relative;
       text-align: center;
@@ -305,19 +373,21 @@ onMounted(() => {
           display: block;
           width: 8px;
           height: 8px;
-          // border: 1px solid #1b9aee;
           border-radius: 100%;
           text-align: center;
           margin: 0 auto;
-          // color: #d8d8d8;
-          // background: #1b9aee;
         }
-        .active {
+        .success {
           border: 1px solid #1b9aee;
           color: #d8d8d8;
           background: #1b9aee;
         }
-        .init {
+        .fail {
+          border: 1px solid #f56c6c;
+          color: #f56c6c;
+          background: #f56c6c;
+        }
+        .not_start {
           border: 2px solid #d8d8d8 !important;
           color: #d8d8d8;
           background: #fff;

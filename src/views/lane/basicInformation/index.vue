@@ -27,10 +27,18 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch, toRefs } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 
 const emit = defineEmits(['submitName'])
+const props = defineProps({
+  taskName: {
+    type: String,
+    default: ''
+  }
+})
+const { taskName } = toRefs(props)
+
 const basicInformationForm = reactive({
   name: ''
 })
@@ -38,6 +46,17 @@ const basicInformationFormRef = ref<FormInstance>()
 const basicInformationRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入任务名称...', trigger: 'blur' }]
 })
+
+watch(
+  taskName,
+  val => {
+    if (taskName) {
+      basicInformationForm.name = val
+      emit('submitName', basicInformationForm.name)
+    }
+  },
+  { immediate: true }
+)
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return

@@ -14,7 +14,6 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { Edit, Picture, Upload } from '@element-plus/icons-vue'
 import BasicInformation from './components/BasicInformation.vue'
 import ProcessConfig from './components/ProcessConfig.vue'
 

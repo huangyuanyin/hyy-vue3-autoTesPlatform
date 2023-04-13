@@ -5,9 +5,9 @@
         <el-col class="backButton" :span="5">
           <div class="grid-content ep-bg-purple" />
           <el-button @click="router.go(-1)">返回</el-button>
-          <span>流水线 2023-02-08</span>
+          <span>{{ taskName }} {{ laneTime }}</span>
         </el-col>
-        <el-col :span="15">
+        <el-col :span="13">
           <div class="grid-content ep-bg-purple" />
           <el-tabs v-model="tabName" tab-position="top" class="lane-tabs" @tab-change="changeTab">
             <el-tab-pane name="basicInformation" label="基本信息"></el-tab-pane>
@@ -16,16 +16,16 @@
             <el-tab-pane name="variableCache" label="变量和缓存"></el-tab-pane>
           </el-tabs>
         </el-col>
-        <el-col class="saveButton" :span="4">
+        <el-col class="saveButton" :span="6">
           <div class="grid-content ep-bg-purple" />
-          <el-button v-if="!isTemplate" type="default" @click="sumbitTask(true)">保存为草稿</el-button>
-          <el-button v-if="!isTemplate" type="primary" @click="sumbitTask(false)">保存并创建任务</el-button>
+          <el-button v-if="!isDetail" type="default" @click="sumbitTask(true)">保存为草稿</el-button>
+          <el-button v-if="!isDetail" type="primary" @click="sumbitTask(false)">保存并创建任务</el-button>
         </el-col>
       </el-row>
     </div>
     <div class="lan-container">
-      <basicInformation v-show="tabName === 'basicInformation'" @submitName="submitName" />
-      <Lane v-show="tabName === 'processConfig'" :flows="data.task_detail_conf" />
+      <basicInformation v-show="tabName === 'basicInformation'" @submitName="submitName" :taskName="taskName" />
+      <Lane v-show="tabName === 'processConfig'" :flows="data.task_swim_lanes" />
       <TriggerSetting v-show="tabName === 'triggerSetting'" @formLabelAlign="formLabelAlign" />
     </div>
   </div>
@@ -38,16 +38,20 @@ import Lane from './lane.vue'
 import basicInformation from './basicInformation/index.vue'
 import TriggerSetting from './triggerSetting/index.vue'
 import { ElMessage } from 'element-plus'
-import { addTaskInfoApi } from '@/api/NetDevOps/index'
+import { addTaskInfoApi, editTaskInfoApi, getTaskInfoApi } from '@/api/NetDevOps/index'
+import bus from '@/utils/bus.js'
 
 const router = useRouter()
 const route = useRoute()
 const tabName = ref('basicInformation')
-const isTemplate = ref(false)
+const isDetail = ref(true)
+const taskName = ref('')
+const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
+
 const data = reactive({
   name: '',
   draft: '',
-  task_detail_conf: [
+  task_swim_lanes: [
     // {
     //   name: '部署',
     //   stages: [
@@ -70,17 +74,27 @@ const sumbitTask = type => {
   if (data.name === '') {
     return ElMessage.error('请输入任务名称')
   }
-  addTaskInfo()
+  route.query.tem ? addTaskInfo() : editTaskInfo()
   console.log(`保存任务`, data)
 }
 
 const addTaskInfo = async () => {
   const params = { ...data }
-  params.task_detail_conf = JSON.stringify(data.task_detail_conf)
   const res = await addTaskInfoApi(params)
   if (res.code === 1000) {
     ElMessage.success('任务创建成功')
-    router.push({ path: '/task' })
+    router.go(-1)
+  }
+}
+
+const editTaskInfo = async () => {
+  const params = { ...data }
+  // @ts-ignore
+  params.task_id = route.query.id
+  const res = await editTaskInfoApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('任务编辑成功')
+    router.go(-1)
   }
 }
 
@@ -99,12 +113,24 @@ const formLabelAlign = (e: any) => {
   console.log(`output->data`, data)
 }
 
+const getTaskInfo = async () => {
+  const params = { task_id: route.query.id }
+  const res = await getTaskInfoApi(params)
+  if (res.code === 1000) {
+    taskName.value = res.data.name
+    laneTime.value = res.data.created_time
+    bus.emit('TriggerSettingData', res.data)
+    data.task_swim_lanes = res.data.task_swim_lanes
+  }
+}
+
 onMounted(() => {
-  if (route.query.id === '0' || route.query.id === '1') {
-    isTemplate.value = true
-    data.task_detail_conf = JSON.parse(localStorage.getItem('taskTemplateObj'))
-  } else {
-    isTemplate.value = false
+  if (route.query.tem && route.query.tem !== 'noUse') {
+    data.task_swim_lanes = JSON.parse(localStorage.getItem('taskTemplateObj'))
+  }
+  route.query?.type === 'detail' ? (isDetail.value = true) : (isDetail.value = false)
+  if (route.query.id) {
+    getTaskInfo()
   }
 })
 </script>

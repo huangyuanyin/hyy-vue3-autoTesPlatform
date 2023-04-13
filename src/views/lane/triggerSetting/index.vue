@@ -41,7 +41,7 @@ const selectNavItem = (index: any) => {
 onMounted(() => {
   const e = {
     trigger_ways: 'period',
-    date: [6],
+    trigger_week: [6],
     trigger_time: ['15:00', '16:00'],
     trigger_interval: '5',
     checked: false,
