@@ -127,11 +127,11 @@ const triggerMethod = (value: boolean) => {
 
 const openTaskDetailDrawer = (item: any, id: any) => {
   console.log(`output->ietm.id`, item)
-  switch (item.id) {
-    case '10':
+  switch (item.plugin) {
+    case 'netSignPrepare':
       taskDetailDrawer.value = true
       break
-    case '11':
+    case 'netSignArrange':
       NetSignProjectDeployDrawer.value = true
       break
   }
@@ -161,7 +161,7 @@ const changeDrawer = (value: any) => {
   if (!drawer.value) {
     const name = value[1]
     props.stage.splice(stageID.value, 0, {
-      id: value[2],
+      plugin: value[2],
       name: name,
       dispose: "{'任务配置详情自建': '任务配置详情自建'}" // 处理方式
     })

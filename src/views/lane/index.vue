@@ -95,6 +95,7 @@ const addTaskInfo = async () => {
           item.task_details.map(item => {
             return {
               name: item.name,
+              plugin: item.plugin,
               dispose: eval(`(${item.dispose})`)
             }
           })
@@ -122,6 +123,7 @@ const editTaskInfo = async () => {
           item.task_details.map(item => {
             return {
               name: item.name,
+              plugin: item.plugin,
               dispose: eval(`(${item.dispose})`)
             }
           })

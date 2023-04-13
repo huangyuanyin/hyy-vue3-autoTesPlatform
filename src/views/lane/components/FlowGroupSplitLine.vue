@@ -29,9 +29,9 @@ const changeDrawer = (value: any) => {
       name,
       task_stages: [
         {
-          id: Number(value[2]),
           task_details: [
             {
+              plugin: value[2],
               name: name,
               dispose: "{'任务配置详情自建': '任务配置详情自建'}"
             }

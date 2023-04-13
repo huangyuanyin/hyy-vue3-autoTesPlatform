@@ -367,6 +367,12 @@ onMounted(() => {
         .title {
           color: #383838;
           margin-bottom: 10px;
+          // padding: 0 10px;
+          // box-sizing: border-box;
+          // max-width: 100px;
+          // overflow: hidden; //超出的文本隐藏
+          // text-overflow: ellipsis; //溢出用省略号显示
+          // white-space: nowrap; //溢出不换行
         }
         .point {
           display: block;

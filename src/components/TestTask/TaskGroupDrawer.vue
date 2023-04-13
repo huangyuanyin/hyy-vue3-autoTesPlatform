@@ -133,38 +133,38 @@ const data = reactive({
 })
 const testList = ref([
   {
-    id: '20',
+    plugin: 'apiTest',
     name: '接口测试',
     desc: '这是一段接口测试'
   },
   {
-    id: '21',
+    plugin: 'uiTest',
     name: 'UI测试',
     desc: '这是一段UI测试'
   }
 ])
 const deployList = ref([
   {
-    id: '10',
+    plugin: 'netSignPrepare',
     name: 'NetSign环境准备',
     desc: '这是一段NetSign环境准备'
   },
   {
-    id: '11',
+    plugin: 'netSignArrange',
     name: 'NetSign项目部署',
     desc: '这是一段NetSign项目部署'
   }
 ])
 const orderList = ref([
   {
-    id: '30',
+    plugin: 'executeCommand',
     name: '执行命令',
     desc: '用于执行命令'
   }
 ])
 const buildList = ref([
   {
-    id: '40',
+    plugin: 'versionBuild',
     name: '版本构建',
     desc: '用于版本构建'
   }
@@ -178,8 +178,8 @@ watch(
 )
 
 const addStage = (value: any) => {
-  const { name, id } = value
-  emit('changeDrawer', [false, name, id])
+  const { name, plugin } = value
+  emit('changeDrawer', [false, name, plugin])
 }
 
 const closeDrawer = () => {
