@@ -34,7 +34,7 @@ export const cheshiMenuData = [
 export const APVAutoMenuData = [
   {
     id: '01',
-    title: '自动化测试平台',
+    title: '信安云效平台',
     icon: null,
     path: null,
     isDisabled: true,
