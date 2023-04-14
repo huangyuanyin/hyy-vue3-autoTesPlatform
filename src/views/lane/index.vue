@@ -2,12 +2,13 @@
   <div class="lane_wrap">
     <div class="lane-top">
       <el-row :gutter="20">
-        <el-col class="backButton" :span="5">
+        <el-col class="backButton" :span="7">
           <div class="grid-content ep-bg-purple" />
           <el-button @click="router.go(-1)">返回</el-button>
-          <span>{{ taskName === '' ? '流水线' : taskName }} {{ laneTime }}</span>
+          <span style="color: #303133; font-weight: 600; margin-right: 5px">{{ taskName === '' ? '流水线' : taskName }} </span>
+          <span>{{ laneTime }}</span>
         </el-col>
-        <el-col :span="13">
+        <el-col :span="11">
           <div class="grid-content ep-bg-purple" />
           <el-tabs v-model="tabName" tab-position="top" class="lane-tabs" @tab-change="changeTab">
             <el-tab-pane name="basicInformation" label="基本信息"></el-tab-pane>

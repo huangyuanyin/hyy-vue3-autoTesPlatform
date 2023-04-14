@@ -1,6 +1,7 @@
 <template>
   <div class="testTask-wrap">
-    <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="taskTemplateDialogVisible = true"> 新建任务</el-button>
+    <!-- <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="taskTemplateDialogVisible = true"> 新建任务</el-button> -->
+    <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="handleAdd('noUse')"> 新建任务</el-button>
     <el-table :data="taskTableData" border style="width: 100%" stripe v-loading="taskLoading" :height="isHeight">
       <el-table-column prop="name" label="任务名称" width="250" align="center" />
       <el-table-column prop="draft" label="是否草稿" align="center" width="180">
@@ -39,7 +40,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="最近运行阶段" align="center" prop="pipeHistory">
+      <el-table-column label="最近运行阶段" align="center" prop="pipeHistory" min-width="350">
         <template #default="scope">
           <div class="pipe-history">
             <el-tooltip
@@ -70,7 +71,7 @@
             @confirm="handleRunTask(item.row.id)"
           >
             <template #reference>
-              <el-button link type="primary" size="small"> 执行 </el-button>
+              <el-button link type="primary" size="small" v-if="!item.row.draft"> 执行 </el-button>
             </template>
           </el-popconfirm>
           <el-button link type="primary" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>

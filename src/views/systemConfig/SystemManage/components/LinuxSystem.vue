@@ -2,7 +2,7 @@
   <div class="LinuxSystem-wrap">
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="openLinuxDialog('add')"> 添加</el-button>
     <el-table :data="linuxTableData" border style="width: 100%" stripe v-loading="loadingTable">
-      <el-table-column prop="ip" label="设备IP" align="center" />
+      <el-table-column prop="ip" label="设备IP" align="center" width="200" />
       <el-table-column prop="machine_type" label="设备类型" width="200" align="center" />
       <!-- <el-table-column prop="mode_code" label="型号编码" width="150" />
       <el-table-column prop="config_code" label="配置编码" width="150" /> -->
