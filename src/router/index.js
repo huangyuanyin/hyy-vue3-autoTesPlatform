@@ -32,7 +32,7 @@ const routes = [
         path: '/autoTestPlatform',
         name: 'AutoTestPlatform',
         meta: {
-          title: '自动化测试'
+          title: '信安云效平台'
         },
         redirect: '/overview', // 该配置是若点击选择一级菜单时，默认选中并跳转到该一级菜单下的第一个二级菜单
         component: () => import('@/views/index.vue'),
