@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-drawer v-model="ishowDrawer" direction="rtl" custom-class="group-drawer" @close="closeDrawer">
+    <el-drawer v-model="ishowDrawer" direction="rtl" custom-class="group-drawer" @close="closeDrawer" size="35%">
       <template #header>
         <span class="select_group">选择任务组</span>
       </template>
@@ -229,7 +229,7 @@ const closeDrawer = () => {
           margin-right: 12px;
         }
         .group-name-item-detail-right {
-          max-width: 110px;
+          max-width: 75%;
           .detail-name {
             display: block;
             font-size: 14px;

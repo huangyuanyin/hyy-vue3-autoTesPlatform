@@ -10,8 +10,8 @@
       <el-form-item label="标识" label-width="140px" prop="title">
         <el-input v-model="form.title" autocomplete="off" placeholder="请输入包的标识" />
       </el-form-item>
-      <el-form-item label="上传方式" label-width="140px">
-        <el-radio-group v-model="form.upload_type" :disabled="dialogTitle === '编辑'">
+      <el-form-item label="上传方式" label-width="140px" v-if="dialogTitle === '新增'">
+        <el-radio-group v-model="form.upload_type">
           <el-radio label="hands">手动上传</el-radio>
           <el-radio label="url_pull">链接拉取</el-radio>
         </el-radio-group>

@@ -2,7 +2,7 @@
   <div class="testTask-wrap">
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="taskTemplateDialogVisible = true"> 新建任务</el-button>
     <el-table :data="taskTableData" border style="width: 100%" stripe v-loading="taskLoading" :height="isHeight">
-      <el-table-column prop="name" label="任务名称" width="180" align="center" />
+      <el-table-column prop="name" label="任务名称" width="250" align="center" />
       <el-table-column prop="draft" label="是否草稿" align="center" width="180">
         <template #default="item">
           <el-tag v-if="item.row.draft === false" type="success">否</el-tag>

@@ -86,7 +86,7 @@ const changeDrawer = (value: any) => {
 }
 
 .ignore-add-stage {
-  top: 8px;
+  top: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
