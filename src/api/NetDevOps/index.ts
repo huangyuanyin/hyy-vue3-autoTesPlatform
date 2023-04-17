@@ -117,3 +117,13 @@ export function runTaskInfoApi(params: any) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/statistics/ ---------------------------- */
+
+export function getStatisticsApi() {
+  return request({
+    url: '/devops/statistics',
+    method: 'get',
+    urlType: 'NetDevOps'
+  })
+}
