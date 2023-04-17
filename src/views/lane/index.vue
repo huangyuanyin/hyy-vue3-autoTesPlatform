@@ -97,7 +97,8 @@ const addTaskInfo = async () => {
             return {
               name: item.name,
               plugin: item.plugin,
-              dispose: eval(`(${item.dispose})`)
+              dispose: item.dispose
+              // dispose: eval(`(${item.dispose})`)
             }
           })
         ]
@@ -125,7 +126,8 @@ const editTaskInfo = async () => {
             return {
               name: item.name,
               plugin: item.plugin,
-              dispose: eval(`(${item.dispose})`)
+              dispose: item.dispose
+              // dispose: eval(`(${item.dispose})`)
             }
           })
         ]

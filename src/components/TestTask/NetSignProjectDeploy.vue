@@ -126,6 +126,10 @@ const props = defineProps({
   taskDetailName: {
     type: String,
     default: () => ''
+  },
+  taskDetailInfo: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -183,6 +187,15 @@ watch(
   }
 )
 
+watch(
+  () => props.taskDetailInfo,
+  () => {
+    // @ts-ignore
+    deviceList.value = props.taskDetailInfo
+    console.log(`output->dev`, deviceList.value)
+  }
+)
+
 const closeDrawer = (value?: any) => {
   deviceList.value = [
     {
@@ -207,9 +220,10 @@ const confirmClick = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
+      // @ts-ignore
       deviceList.value.push(taskDetailForm.name)
       console.log(`保存`, deviceList.value)
-      closeDrawer(taskDetailForm)
+      closeDrawer(deviceList.value)
     } else {
       console.log('error submit!', fields)
     }

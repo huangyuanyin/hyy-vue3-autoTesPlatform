@@ -59,12 +59,14 @@
 
   <TaskDetailDrawer
     :taskDetailName="taskDetailName"
+    :taskDetailInfo="taskDetailInfo"
     :taskDetailDrawer="taskDetailDrawer"
     @closeDrawer="closeDrawer"
     @deleteTask="handleRemoveParallel(taskId)"
   />
   <NetSignProjectDeploy
     :taskDetailName="taskDetailName"
+    :taskDetailInfo="taskDetailInfo"
     :taskDetailDrawer="NetSignProjectDeployDrawer"
     @closeDrawer="closeDrawer"
     @deleteTask="handleRemoveParallel(taskId)"
@@ -79,6 +81,7 @@ import TaskDetailDrawer from '@/components/TestTask/TaskDetailDrawer.vue'
 import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 import { ElMessage } from 'element-plus'
 import { RemoveFilled } from '@element-plus/icons-vue'
+import { disposeList } from '../data'
 
 const props = defineProps({
   stage: {
@@ -97,6 +100,7 @@ const isExitHover_two = ref(false)
 const automatic = ref(true)
 const drawer = ref(false)
 const taskDetailDrawer = ref(false)
+const taskDetailInfo = ref([])
 const NetSignProjectDeployDrawer = ref(false)
 const taskDetailName = ref('')
 const taskId = ref('')
@@ -137,11 +141,13 @@ const openTaskDetailDrawer = (item: any, id: any) => {
   }
   taskId.value = id
   taskDetailName.value = item.name
+  taskDetailInfo.value = item.dispose
 }
 
 const closeDrawer = (value?: any) => {
   if (value[1]) {
-    props.stage[taskId.value].name = value[1].name
+    props.stage[taskId.value].name = value[1][value[1].length - 1]
+    props.stage[taskId.value].dispose = value[1].slice(0, -1)
   }
   taskDetailDrawer.value = value[0]
   NetSignProjectDeployDrawer.value = value[0]
@@ -163,7 +169,7 @@ const changeDrawer = (value: any) => {
     props.stage.splice(stageID.value, 0, {
       plugin: value[2],
       name: name,
-      dispose: "{'任务配置详情自建': '任务配置详情自建'}" // 处理方式
+      dispose: disposeList[value[2]]
     })
     console.log(`output->props.stage`, props.stage)
     // emit('add-stage', {
@@ -208,6 +214,7 @@ const changeDrawer = (value: any) => {
     border-radius: 0 0 16px 16px;
   }
 }
+
 .ignore-task-container-margin {
   // margin-top: 8px;
 }
@@ -232,6 +239,7 @@ const changeDrawer = (value: any) => {
     border-radius: 50%;
     box-shadow: 0 2px 4px 0 rgb(38 38 38 / 10%);
     z-index: 2;
+
     > svg {
       width: 20px;
       height: 20px;
@@ -247,16 +255,20 @@ const changeDrawer = (value: any) => {
     align-items: center;
     margin-left: 10px;
     margin-right: 10px;
+
     .ignore-jon3-width {
       border: 1px solid #fff;
       min-width: 140px !important;
     }
+
     .ignore-jon3-width {
       min-width: 140px;
     }
+
     :deep(.el-dropdown-menu__item .el-icon svg) {
       color: red;
     }
+
     // position: absolute;
     // left: 50px;
 
@@ -264,6 +276,7 @@ const changeDrawer = (value: any) => {
       .ignore-jon3-width {
         border: 1px solid #1b9aee;
       }
+
       .job2,
       .job4 {
         opacity: 1;

@@ -13,6 +13,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
+import { disposeList } from '../data'
 
 const props = defineProps({
   stages: {
@@ -43,7 +44,7 @@ const changeDrawer = (value: any) => {
         {
           plugin: value[2],
           name: name,
-          dispose: "{'任务配置详情自建': '任务配置详情自建'}"
+          dispose: disposeList[value[2]]
         }
       ]
     })

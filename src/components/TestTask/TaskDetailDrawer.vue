@@ -97,14 +97,14 @@
               </el-form-item>
               <el-form-item label="是否需要进行系统还原" prop="isSysRest">
                 <el-radio-group v-model="item.isSysRest" class="ml-4">
-                  <el-radio :label="true">是</el-radio>
-                  <el-radio :label="false">否</el-radio>
+                  <el-radio label="y">是</el-radio>
+                  <el-radio label="n">否</el-radio>
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="是否需要进行设备重启" prop="isSysRest2">
                 <el-radio-group v-model="item.isSysRest2" class="ml-4">
-                  <el-radio :label="true">是</el-radio>
-                  <el-radio :label="false">否</el-radio>
+                  <el-radio label="y">是</el-radio>
+                  <el-radio label="n">否</el-radio>
                 </el-radio-group>
               </el-form-item>
               <el-collapse class="collapseItem">
@@ -181,6 +181,10 @@ const props = defineProps({
   taskDetailName: {
     type: String,
     default: () => ''
+  },
+  taskDetailInfo: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -230,8 +234,8 @@ const deviceList = ref([
     ifback: 'n',
     ifrs: 'y',
     startMidwareType: '',
-    isSysRest: true,
-    isSysRest2: true
+    isSysRest: 'y',
+    isSysRest2: 'y'
   }
 ])
 const cloneDeviceObj = ref({
@@ -247,8 +251,8 @@ const cloneDeviceObj = ref({
   ifback: 'n',
   ifrs: 'y',
   startMidwareType: '',
-  isSysRest: true,
-  isSysRest2: true
+  isSysRest: 'y',
+  isSysRest2: 'y'
 })
 const deviceFormRef = ref<FormInstance>()
 const deviceFormRules = reactive<FormRules>({
@@ -270,6 +274,15 @@ watch(
   }
 )
 
+watch(
+  () => props.taskDetailInfo,
+  () => {
+    console.log(`output->111`, props.taskDetailInfo)
+    // @ts-ignore
+    deviceList.value = props.taskDetailInfo
+  }
+)
+
 const closeDrawer = (value?: any) => {
   deviceList.value = [
     {
@@ -285,8 +298,8 @@ const closeDrawer = (value?: any) => {
       ifback: 'n',
       ifrs: 'y',
       startMidwareType: '',
-      isSysRest: true,
-      isSysRest2: true
+      isSysRest: 'y',
+      isSysRest2: 'y'
     }
   ]
   emit('closeDrawer', [false, value])
@@ -305,7 +318,7 @@ const confirmClick = async (formEl: FormInstance | undefined) => {
       // @ts-ignore
       deviceList.value.push(taskDetailForm.name)
       console.log(`保存`, deviceList.value)
-      closeDrawer(taskDetailForm)
+      closeDrawer(deviceList.value)
     } else {
       console.log('error submit!', fields)
     }
