@@ -38,6 +38,7 @@
           <div class="device-space-item">
             <el-form
               ref="deviceFormRef"
+              :model="item"
               :rules="deviceFormRules"
               label-width="220px"
               class="device-ruleForm"
@@ -45,7 +46,7 @@
               label-position="top"
               status-icon
             >
-              <el-form-item label="可选设备" prop="name">
+              <el-form-item label="可选设备" prop="serverName" :required="true">
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index">
                   <el-option label="10.20.85.30" value="10.20.85.30" />
                   <el-option label="10.20.85.31" value="10.20.85.31" />
@@ -70,7 +71,7 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="项目包" prop="packageName">
+              <el-form-item label="项目包" prop="packageName" :required="true">
                 <el-select v-model="item.packageName" placeholder="请选择项目包" :key="index">
                   <el-option label="SongJiang1.1_NetSignServer5.6.50.4-full.zip" value="SongJiang1.1_NetSignServer5.6.50.4-full.zip" />
                   <!-- <el-option label="SongJiang1.1_NetSignServer5.6.50.4-full.zip" value="SongJiang1.1_NetSignServer5.6.50.4-full.zip" /> -->
@@ -172,7 +173,11 @@ const cloneDeviceObj = ref({
   ifback: 'n',
   ifrs: 'y'
 })
-const deviceFormRules = reactive<FormRules>({})
+const deviceFormRef = ref([])
+const deviceFormRules = reactive<FormRules>({
+  serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
+  packageName: [{ required: true, message: '请选择项目包', trigger: 'change' }]
+})
 watch(
   () => props.taskDetailDrawer,
   () => {
@@ -218,8 +223,15 @@ const cancelClick = (formEl: FormInstance | undefined) => {
 
 const confirmClick = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
+      const forms = deviceFormRef.value
+      if (forms) {
+        for (const item of forms) {
+          const result = await item.validate()
+          if (!result) return
+        }
+      }
       // @ts-ignore
       deviceList.value.push(taskDetailForm.name)
       console.log(`保存`, deviceList.value)

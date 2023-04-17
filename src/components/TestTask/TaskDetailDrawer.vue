@@ -46,7 +46,7 @@
               label-position="top"
               status-icon
             >
-              <el-form-item label="可选设备" prop="name">
+              <el-form-item label="可选设备" prop="serverName" :required="true">
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index">
                   <el-option label="10.20.85.30" value="10.20.85.30" />
                   <el-option label="10.20.85.31" value="10.20.85.31" />
@@ -71,7 +71,7 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="部署类型" prop="deployType">
+              <el-form-item label="部署类型" prop="deployType" :required="true">
                 <el-select v-model="item.deployType" placeholder="请选择部署类型" :key="index">
                   <el-option label="全量基线" value="full" />
                   <el-option label="项目基线" value="baseline" />
@@ -254,9 +254,9 @@ const cloneDeviceObj = ref({
   isSysRest: 'y',
   isSysRest2: 'y'
 })
-const deviceFormRef = ref<FormInstance>()
+const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
-  name: [{ required: true, message: '请选择设备', trigger: 'change' }],
+  serverName: [{ required: true, message: '请选择设备', trigger: 'change' }],
   deployType: [{ required: true, message: '请选择部署类型', trigger: 'change' }]
 })
 
@@ -315,6 +315,13 @@ const confirmClick = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      const forms = deviceFormRef.value
+      if (forms) {
+        for (const item of forms) {
+          const result = await item.validate()
+          if (!result) return
+        }
+      }
       // @ts-ignore
       deviceList.value.push(taskDetailForm.name)
       console.log(`保存`, deviceList.value)
