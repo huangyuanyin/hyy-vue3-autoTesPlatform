@@ -47,9 +47,19 @@
               status-icon
             >
               <el-form-item label="可选设备" prop="serverName" :required="true">
-                <el-select v-model="item.serverName" placeholder="请选择设备" :key="index">
-                  <el-option label="10.20.85.30" value="10.20.85.30" />
-                  <el-option label="10.20.85.31" value="10.20.85.31" />
+                <el-select
+                  v-model="item.serverName"
+                  placeholder="请选择设备"
+                  :key="index"
+                  @visible-change="selectDevice"
+                  @change="getDeviceInfo"
+                >
+                  <el-option
+                    :label="item.ip"
+                    :value="item.ip"
+                    v-for="(item, index) in selectDeviceList"
+                    :key="'selectDeviceList' + index"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item label="" v-if="item.serverName">
@@ -72,9 +82,13 @@
                 </el-card>
               </el-form-item>
               <el-form-item label="项目包" prop="packageName" :required="true">
-                <el-select v-model="item.packageName" placeholder="请选择项目包" :key="index">
-                  <el-option label="SongJiang1.1_NetSignServer5.6.50.4-full.zip" value="SongJiang1.1_NetSignServer5.6.50.4-full.zip" />
-                  <!-- <el-option label="SongJiang1.1_NetSignServer5.6.50.4-full.zip" value="SongJiang1.1_NetSignServer5.6.50.4-full.zip" /> -->
+                <el-select v-model="item.packageName" placeholder="请选择项目包" :key="index" @visible-change="selectProduct">
+                  <el-option
+                    :label="item.title"
+                    :value="item.title"
+                    v-for="(item, index) in selectProductList"
+                    :key="'selectProductList' + index"
+                  />
                 </el-select>
               </el-form-item>
               <el-collapse class="collapseItem">
@@ -99,7 +113,9 @@
             </el-form>
           </div>
           <div class="device-space-item">
-            <el-icon class="delete-icon" @click="deleteDevice(index)"><Delete /></el-icon>
+            <el-icon class="delete-icon" @click="deleteDevice(index)">
+              <Delete />
+            </el-icon>
           </div>
         </div>
         <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button>
@@ -115,9 +131,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, watch, nextTick, onMounted } from 'vue'
+import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
+import { getDeviceApi, getProductPackageApi } from '@/api/NetDevOps/index'
 
 const props = defineProps({
   taskDetailDrawer: {
@@ -136,14 +153,14 @@ const props = defineProps({
 
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
 const ishowDrawer = ref(false)
-const serverConfigList = [
-  { label: '设备IP：', value: '10.20.85.30' },
-  { label: '主板类型:', value: 'x86' },
-  { label: '设备型号：', value: '3500' },
-  { label: '设备编码：', value: 'Z213NAJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ' },
-  { label: 'cavium卡：', value: 'cavium卡' },
-  { label: '国密卡：', value: '国密卡' }
-]
+const serverConfigList = reactive([
+  { label: '设备IP：', value: '' },
+  { label: '主板类型:', value: '' },
+  { label: '设备型号：', value: '' },
+  { label: '设备编码：', value: '' },
+  { label: 'cavium卡：', value: '' },
+  { label: '国密卡：', value: '' }
+])
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
   name: ''
@@ -178,6 +195,9 @@ const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
   packageName: [{ required: true, message: '请选择项目包', trigger: 'change' }]
 })
+const selectDeviceList = ref([])
+const selectProductList = ref([])
+
 watch(
   () => props.taskDetailDrawer,
   () => {
@@ -276,61 +296,116 @@ const deleteDevice = (id: number) => {
   if (deviceList.value.length === 1) return ElMessage.error('至少保留一个设备配置！')
   deviceList.value.splice(id, 1)
 }
+
+const selectDevice = async val => {
+  if (val) {
+    const params = {
+      page: 1,
+      page_size: 100
+    }
+    let res = await getDeviceApi(params)
+    if (res.code === 1000) {
+      // 过滤掉using为true的设备
+      selectDeviceList.value = res.data.filter(item => item.using === false)
+    }
+  }
+}
+
+const getDeviceInfo = async val => {
+  let res = await getDeviceApi({ device_manage_ip: val })
+  if (res.code === 1000) {
+    serverConfigList[0].value = res.data.ip
+    serverConfigList[1].value = res.data.main_board_type
+    serverConfigList[2].value = res.data.machine_type
+    serverConfigList[3].value = res.data.mode_code
+    serverConfigList[4].value = res.data.cavium_card_type
+    serverConfigList[5].value = res.data.gm_card_type
+  }
+}
+
+const selectProduct = async val => {
+  if (val) {
+    const params = {
+      page: 1,
+      page_size: 100
+    }
+    let res = await getProductPackageApi(params)
+    if (res.code === 1000) {
+      selectProductList.value = res.data
+    }
+  }
+}
 </script>
 
 <style lang="scss">
 .netSignProjectDeploy-drawer {
   width: 35% !important;
+
   .el-drawer__header {
     font-size: 14px;
     border-bottom: 1px solid #dbdbdb !important;
     padding: 0px 10px 0 32px;
     height: 60px;
     margin-bottom: 0px;
+
     svg:hover {
       cursor: pointer;
     }
+
     .changeDelete {
       display: inline-block;
     }
+
     .changeDelete .grayDelete {
       display: inline-block;
     }
+
     .changeDelete .redDelete {
       display: none;
     }
+
     .changeDelete:hover .grayDelete {
       display: none;
     }
+
     .changeDelete:hover .redDelete {
       display: inline-block;
     }
   }
+
   .netSignProjectDeploy-ruleForm {
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
     .text {
       font-size: 14px;
     }
+
     .item {
       margin-bottom: 18px;
     }
+
     .box-card {
       width: 520px;
+
       .el-card__header {
         padding: 9px 14px;
       }
+
       .el-card__body {
         padding: 0px 15px;
+
         ul {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
+
           li {
             width: 45%;
+
             span {
               white-space: nowrap;
               text-overflow: ellipsis;
@@ -343,6 +418,7 @@ const deleteDevice = (id: number) => {
       }
     }
   }
+
   .addButton {
     .title {
       display: block;
@@ -351,6 +427,7 @@ const deleteDevice = (id: number) => {
       font-size: 14px;
       margin-left: 10px;
     }
+
     .device-space {
       justify-content: space-between;
       display: flex;
@@ -359,27 +436,35 @@ const deleteDevice = (id: number) => {
       margin-bottom: 20px;
       position: relative;
       background-color: #f5f5f5;
+
       .device-ruleForm {
         .el-select {
           width: 400px;
         }
       }
+
       .delete-icon {
         cursor: pointer;
       }
+
       .box-card {
         width: 520px;
+
         .el-card__header {
           padding: 9px 14px;
         }
+
         .el-card__body {
           padding: 0px 15px;
+
           ul {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
+
             li {
               width: 45%;
+
               span {
                 white-space: nowrap;
                 text-overflow: ellipsis;
@@ -391,54 +476,66 @@ const deleteDevice = (id: number) => {
           }
         }
       }
+
       .collapseItem {
         border: none;
         width: 520px;
         margin-bottom: 20px;
       }
+
       .el-collapse .el-collapse-item {
         background-color: #f5f5f5 !important;
         // border: none;
       }
+
       .el-collapse .el-collapse-item__header {
         border: none;
         color: #606266;
         font-size: 14px;
         background-color: #f5f5f5 !important;
+
         .el-button {
           padding-left: 0px;
           padding-right: 0px;
+
           span {
             font-weight: 600;
           }
         }
+
         .el-collapse-item__arrow {
           margin-left: 3px;
           color: #409eff;
         }
       }
+
       .el-collapse .el-collapse-item__wrap {
         background-color: #f5f5f5 !important;
       }
+
       .el-collapse-item__header {
         height: 22px;
         line-height: 22px;
         margin-bottom: 8px;
       }
+
       .el-collapse-item__wrap {
         border: none;
       }
+
       .el-collapse-item__content {
         padding-bottom: 0px;
       }
     }
   }
+
   span {
     font-weight: 500;
     font-size: 14px;
     margin-right: 10px;
   }
 }
+
 .detail {
   display: flex !important;
   white-space: nowrap !important;

@@ -122,7 +122,7 @@ export function runTaskInfoApi(params: any) {
 
 export function getStatisticsApi() {
   return request({
-    url: '/devops/statistics',
+    url: '/devops/statistics/total',
     method: 'get',
     urlType: 'NetDevOps'
   })
