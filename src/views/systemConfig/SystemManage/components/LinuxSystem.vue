@@ -94,6 +94,9 @@
             <el-form-item label="设备端口" :label-width="formLabelWidth" prop="port">
               <el-input v-model="form.port" autocomplete="off" :disabled="disabled" />
             </el-form-item>
+            <el-form-item label="设备序列号" :label-width="formLabelWidth" prop="machine_sn">
+              <el-input v-model="form.machine_sn" autocomplete="off" :disabled="disabled" maxlength="9" show-word-limit />
+            </el-form-item>
             <el-form-item label="型号编码" :label-width="formLabelWidth" prop="mode_code">
               <el-input v-model="form.mode_code" autocomplete="off" :disabled="disabled" />
             </el-form-item>
@@ -102,6 +105,9 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
+            <el-form-item label="产品ID" :label-width="formLabelWidth" prop="product_id">
+              <el-input v-model="form.product_id" autocomplete="off" :disabled="disabled" maxlength="6" show-word-limit />
+            </el-form-item>
             <el-form-item label="主板类型" :label-width="formLabelWidth" prop="main_board_type">
               <el-select v-model="form.main_board_type" placeholder="请选择主板类型" :disabled="disabled">
                 <el-option label="X86" value="x86" />
@@ -189,6 +195,8 @@ const form = reactive({
   username: '',
   password: '',
   port: 22,
+  machine_sn: '',
+  product_id: '',
   mode_code: '',
   config_code: '',
   cavium_card_type: '',
@@ -226,6 +234,8 @@ const rules = reactive<FormRules>({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   port: [{ required: true, message: '请输入设备端口', trigger: 'blur' }],
+  machine_sn: [{ required: true, message: '请输入设备序列号', trigger: 'blur' }],
+  product_id: [{ required: true, message: '请输入产品ID', trigger: 'blur' }],
   mode_code: [{ required: true, message: '请输入型号编码', trigger: 'blur' }],
   config_code: [{ required: true, message: '请输入配置编码', trigger: 'blur' }],
   main_board_type: [{ required: true, message: '请输入主板类型', trigger: 'blur' }],

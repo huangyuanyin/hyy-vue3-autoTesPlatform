@@ -35,6 +35,7 @@ const handleAddParaller = () => {
 }
 
 const changeDrawer = (value: any) => {
+  const disposeList2 = JSON.parse(JSON.stringify(disposeList))
   if (!value) return (drawer.value = value)
   drawer.value = value[0]
   if (!drawer.value) {
@@ -44,7 +45,7 @@ const changeDrawer = (value: any) => {
         {
           plugin: value[2],
           name: name,
-          dispose: disposeList[value[2]]
+          dispose: disposeList2[value[2]]
         }
       ]
     })

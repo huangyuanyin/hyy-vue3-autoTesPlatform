@@ -2,7 +2,7 @@
   <el-drawer
     v-model="ishowDrawer"
     direction="rtl"
-    @close="cancelClick(taskDetailFormRef)"
+    :before-close="cancelClick"
     custom-class="taskDetail-drawer"
     :modal="true"
     :close-on-click-modal="false"
@@ -47,9 +47,19 @@
               status-icon
             >
               <el-form-item label="可选设备" prop="serverName" :required="true">
-                <el-select v-model="item.serverName" placeholder="请选择设备" :key="index">
-                  <el-option label="10.20.85.30" value="10.20.85.30" />
-                  <el-option label="10.20.85.31" value="10.20.85.31" />
+                <el-select
+                  v-model="item.serverName"
+                  placeholder="请选择设备"
+                  :key="index"
+                  @visible-change="selectDevice"
+                  @change="getDeviceInfo"
+                >
+                  <el-option
+                    :label="item.ip"
+                    :value="item.ip"
+                    v-for="(item, index) in selectDeviceList"
+                    :key="'selectDeviceList' + index"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item label="" v-if="item.serverName">
@@ -60,11 +70,11 @@
                     </div>
                   </template>
                   <ul>
-                    <li v-for="(item, index) in serverConfigList" :key="'serverConfigList' + index">
+                    <li v-for="(it, index) in item.showServerConfig" :key="'showServerConfig' + index">
                       <div class="detail">
-                        {{ item.label }}
-                        <el-tooltip :disabled="isShowToolTip" class="box-item" effect="dark" :content="item.value" placement="top">
-                          <span @mouseenter="onMouseenter">{{ item.value }}</span>
+                        {{ it.label }}
+                        <el-tooltip class="box-item" effect="dark" :content="it.value" placement="top">
+                          <span>{{ it.value }}</span>
                         </el-tooltip>
                       </div>
                     </li>
@@ -78,33 +88,43 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="全量基线版本列表" prop="deployVersion" v-if="item.deployType === 'full'">
-                <el-select v-model="item.deployVersion" placeholder="请选择全量基线版本" :key="index">
-                  <el-option label="netsign_5_6_2" value="netsign_5_6_2" />
-                  <el-option label="netsign_5_6_4" value="netsign_5_6_4" />
+                <el-select
+                  v-model="item.deployVersion"
+                  placeholder="请选择全量基线版本"
+                  :key="index"
+                  @visible-change="selectDeployVersion(index)"
+                  @change="getDeployVersion"
+                >
+                  <el-option :label="it" :value="it" v-for="(it, index) in deployVersionList" :key="'deployVersionList' + index" />
                 </el-select>
               </el-form-item>
               <el-form-item label="项目基线版本列表" prop="patchVersion" v-if="item.deployType === 'baseline'">
-                <el-select v-model="item.patchVersion" placeholder="请选择项目基线版本" :key="index">
-                  <el-option label="NS_5.5.40.12_u32.1" value="NS_5.5.40.12_u32.1" />
-                  <el-option label="NS_5.5.40.16_u2.0" value="NS_5.5.40.16_u2.0" />
+                <el-select
+                  v-model="item.patchVersion"
+                  placeholder="请选择项目基线版本"
+                  :key="index"
+                  @visible-change="selectDeployVersion(index)"
+                  @change="getDeployVersion"
+                >
+                  <el-option :label="it" :value="it" v-for="(it, index) in deployVersionList" :key="'deployVersionList' + index" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="开机自启中间件" prop="startMidwareType" v-if="serverConfigList[1].value !== 'x86'">
+              <el-form-item label="开机自启中间件" prop="startMidwareType">
                 <el-select v-model="item.startMidwareType" placeholder="请选择开机自启中间件" :key="index">
                   <el-option label="Tomcat" value="Tomcat" />
                   <el-option label="Tongweb" value="Tongweb" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="是否需要进行系统还原" prop="isSysRest">
-                <el-radio-group v-model="item.isSysRest" class="ml-4">
-                  <el-radio label="y">是</el-radio>
-                  <el-radio label="n">否</el-radio>
+              <el-form-item label="是否需要进行系统还原" prop="reboot">
+                <el-radio-group v-model="item.reboot" class="ml-4">
+                  <el-radio :label="true">是</el-radio>
+                  <el-radio :label="false">否</el-radio>
                 </el-radio-group>
               </el-form-item>
-              <el-form-item label="是否需要进行设备重启" prop="isSysRest2">
-                <el-radio-group v-model="item.isSysRest2" class="ml-4">
-                  <el-radio label="y">是</el-radio>
-                  <el-radio label="n">否</el-radio>
+              <el-form-item label="是否需要进行设备重启" prop="sysRest">
+                <el-radio-group v-model="item.sysRest" class="ml-4">
+                  <el-radio :label="true">是</el-radio>
+                  <el-radio :label="false">否</el-radio>
                 </el-radio-group>
               </el-form-item>
               <el-collapse class="collapseItem">
@@ -159,12 +179,12 @@
         <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button>
       </div>
     </template>
-    <template #footer>
+    <!-- <template #footer>
       <div style="flex: auto">
         <el-button @click="cancelClick(taskDetailFormRef)">取消</el-button>
         <el-button type="primary" @click="confirmClick(taskDetailFormRef)">保存</el-button>
       </div>
-    </template>
+    </template> -->
   </el-drawer>
 </template>
 
@@ -172,6 +192,8 @@
 import { ref, reactive, watch, nextTick, onMounted } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
+import { getDeviceApi, getDeployVersionApi } from '@/api/NetDevOps'
+import { disposeList } from '../../views/lane/data'
 
 const props = defineProps({
   taskDetailDrawer: {
@@ -191,14 +213,6 @@ const props = defineProps({
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
 const ishowDrawer = ref(false)
 const isShowToolTip = ref(false)
-const serverConfigList = [
-  { label: '设备IP：', value: '10.20.85.30' },
-  { label: '主板类型：', value: 'x86' },
-  { label: '设备型号：', value: '3500' },
-  { label: '设备编码：', value: 'Z213NAJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ' },
-  { label: 'cavium卡：', value: 'cavium卡' },
-  { label: '国密卡：', value: '国密卡' }
-]
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
   name: ''
@@ -217,48 +231,21 @@ const taskDetailFormRules = reactive<FormRules>({
   ifha: [{ required: true, message: '是否安装HA为必填项', trigger: 'change' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }],
   startMidwareType: [{ required: true, message: '请选择开机自启中间件', trigger: 'change' }],
-  isSysRest: [{ required: true, message: '请选择是否需要进行系统还原', trigger: 'change' }],
-  isSysRest2: [{ required: true, message: '请选择是否需要进行设备重启', trigger: 'change' }]
+  reboot: [{ required: true, message: '请选择是否需要进行系统还原', trigger: 'change' }],
+  sysRest: [{ required: true, message: '请选择是否需要进行设备重启', trigger: 'change' }]
 })
-const deviceList = ref([
-  {
-    serverName: '',
-    main_bord_type: '',
-    deployType: '',
-    deployVersion: 'netsign_5_6_2',
-    patchVersion: 'NS_5.5.40.12_u32.1',
-    ifha: 'y',
-    ispbc: 'y',
-    useNewDataType: 'y',
-    isrbc: 'y',
-    ifback: 'n',
-    ifrs: 'y',
-    startMidwareType: '',
-    isSysRest: 'y',
-    isSysRest2: 'y'
-  }
-])
-const cloneDeviceObj = ref({
-  serverName: '',
-  main_bord_type: '',
-  deployType: '',
-  deployVersion: 'netsign_5_6_2',
-  patchVersion: 'NS_5.5.40.12_u32.1',
-  ifha: 'y',
-  ispbc: 'y',
-  useNewDataType: 'y',
-  isrbc: 'y',
-  ifback: 'n',
-  ifrs: 'y',
-  startMidwareType: '',
-  isSysRest: 'y',
-  isSysRest2: 'y'
-})
+const deviceList = ref(JSON.parse(JSON.stringify(disposeList['netSignPrepare'])))
+const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['netSignPrepare'][0])))
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'change' }],
-  deployType: [{ required: true, message: '请选择部署类型', trigger: 'change' }]
+  deployType: [{ required: true, message: '请选择部署类型', trigger: 'change' }],
+  deployVersion: [{ required: true, message: '请选择全量基线版本', trigger: 'change' }],
+  patchVersion: [{ required: true, message: '请选择项目基线版本', trigger: 'change' }],
+  startMidwareType: [{ required: true, message: '请选择开机自启中间件', trigger: 'change' }]
 })
+const selectDeviceList = ref([])
+const deployVersionList = ref([])
 
 watch(
   () => props.taskDetailDrawer,
@@ -284,31 +271,47 @@ watch(
 )
 
 const closeDrawer = (value?: any) => {
-  deviceList.value = [
-    {
-      serverName: '',
-      main_bord_type: '',
-      deployType: '',
-      deployVersion: 'netsign_5_6_2',
-      patchVersion: 'NS_5.5.40.12_u32.1',
-      ifha: 'y',
-      ispbc: 'y',
-      useNewDataType: 'y',
-      isrbc: 'y',
-      ifback: 'n',
-      ifrs: 'y',
-      startMidwareType: '',
-      isSysRest: 'y',
-      isSysRest2: 'y'
-    }
-  ]
+  deviceList.value = JSON.parse(JSON.stringify(disposeList['netSignPrepare']))
   emit('closeDrawer', [false, value])
 }
 
-const cancelClick = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  formEl.resetFields()
-  closeDrawer()
+const cancelClick = async (done: () => void) => {
+  if (!taskDetailFormRef.value) return
+  // formEl.resetFields()
+  // closeDrawer()
+  await taskDetailFormRef.value.validate(async (valid, fields) => {
+    if (valid) {
+      const forms = deviceFormRef.value
+      if (forms) {
+        for (const item of forms) {
+          const result = await item.validate()
+          if (!result) return
+        }
+      }
+      // 遍历deviceList，将ifback和ifrs加入到deviceConfig中
+      for (const item of deviceList.value) {
+        item.deviceConfig.ifha = item.ifha
+        item.deviceConfig.ispbc = item.ispbc
+        item.deviceConfig.isrbc = item.isrbc
+        item.deviceConfig.useNewDataType = item.useNewDataType
+        item.deviceConfig.ifback = item.ifback
+        item.deviceConfig.ifrs = item.ifrs
+        item.deviceConfig.startMidwareType = item.startMidwareType
+      }
+      deviceList.value.map(item => {
+        if (item.deployType === 'baseline') {
+          item.deployVersion = 'netsign_x10_x11'
+        }
+      })
+      // @ts-ignore
+      deviceList.value.push(taskDetailForm.name)
+      console.log(`保存`, deviceList.value)
+      closeDrawer(deviceList.value)
+      done()
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
 }
 
 const confirmClick = async (formEl: FormInstance | undefined) => {
@@ -371,6 +374,71 @@ const onMouseenter = e => {
   const contentWidth = e.target.scrollWidth
   isShowToolTip.value = contentWidth < parentWidth
 }
+
+const selectDevice = async val => {
+  if (val) {
+    const params = {
+      page: 1,
+      page_size: 100
+    }
+    let res = await getDeviceApi(params)
+    if (res.code === 1000) {
+      // 过滤掉using为true的设备
+      selectDeviceList.value = res.data.filter(item => item.using === false)
+    }
+  }
+}
+
+const getDeviceInfo = async val => {
+  let res = await getDeviceApi({ device_manage_ip: val })
+  if (res.code === 1000) {
+    deviceList.value.map((item, index) => {
+      if (item.serverName === val) {
+        console.log(`output->item`, deviceList.value[index], deviceList.value[index].showServerConfig[7], res.data.product_id)
+        deviceList.value[index].showServerConfig[0].value = res.data.ip
+        deviceList.value[index].showServerConfig[1].value = res.data.main_board_type
+        deviceList.value[index].showServerConfig[2].value = res.data.machine_type
+        deviceList.value[index].showServerConfig[3].value = res.data.mode_code
+        deviceList.value[index].showServerConfig[4].value = res.data.cavium_card_type
+        deviceList.value[index].showServerConfig[5].value = res.data.gm_card_type
+        deviceList.value[index].showServerConfig[6].value = res.data.machine_sn
+        deviceList.value[index].showServerConfig[7].value = res.data.product_id
+
+        // deviceList.value[index].serverConfig.serverIP = res.data.ip
+        // deviceList.value[index].serverConfig.serverPasswd = res.data.password
+        // deviceList.value[index].serverConfig.userName = res.data.username
+        // deviceList.value[index].serverConfig.machineType = res.data.machine_type
+        // deviceList.value[index].serverConfig.modelCode = res.data.mode_code
+        // deviceList.value[index].serverConfig.configCode = res.data.config_code
+        // deviceList.value[index].serverConfig.machineSN = res.data.machineSN
+        // deviceList.value[index].serverConfig.productID = res.data.productID
+      }
+    })
+  }
+}
+
+const selectDeployVersion = async val => {
+  var deploy_typeBefore = ''
+  var device_manage_ipBefore = ''
+  // 遍历deviceList，index和val相等的时候，将该设备的deploy_typeBefore和device_manage_ip赋值
+  deviceList.value.map((item, index) => {
+    if (index === val) {
+      deploy_typeBefore = item.deployType
+      device_manage_ipBefore = item.serverName
+    }
+  })
+  console.log(`output->`, deploy_typeBefore, device_manage_ipBefore)
+  const params = {
+    deploy_type: deploy_typeBefore,
+    device_manage_ip: device_manage_ipBefore
+  }
+  let res = await getDeployVersionApi(params)
+  if (res.code === 1000) {
+    deployVersionList.value = res.data
+  }
+}
+
+const getDeployVersion = async val => {}
 </script>
 
 <style lang="scss">

@@ -19,7 +19,7 @@
           >
             <el-tooltip class="item" content="串行任务" placement="top" :offset="18">
               <svg-icon v-if="!isExitHover_one" iconName="icon-jiahao"></svg-icon>
-              <svg-icon v-else="isExitHover_one" iconName="icon-jiahao-copy-copy"></svg-icon>
+              <svg-icon v-else iconName="icon-jiahao-copy-copy"></svg-icon>
             </el-tooltip>
           </div>
           <el-dropdown
@@ -49,7 +49,7 @@
           >
             <el-tooltip class="item" content="串行任务" placement="top" :offset="18">
               <svg-icon v-if="!isExitHover_two" iconName="icon-jiahao"></svg-icon>
-              <svg-icon v-else="isExitHover_two" iconName="icon-jiahao-copy-copy"></svg-icon>
+              <svg-icon v-else iconName="icon-jiahao-copy-copy"></svg-icon>
             </el-tooltip>
           </div>
         </div>
@@ -130,7 +130,6 @@ const triggerMethod = (value: boolean) => {
 }
 
 const openTaskDetailDrawer = (item: any, id: any) => {
-  console.log(`output->ietm.id`, item)
   switch (item.plugin) {
     case 'netSignPrepare':
       taskDetailDrawer.value = true
@@ -162,6 +161,7 @@ const handleCommand = (command: string | number | object, id: string) => {
 }
 
 const changeDrawer = (value: any) => {
+  const disposeList2 = JSON.parse(JSON.stringify(disposeList))
   if (!value) return (drawer.value = value)
   drawer.value = value[0]
   if (!drawer.value) {
@@ -169,9 +169,8 @@ const changeDrawer = (value: any) => {
     props.stage.splice(stageID.value, 0, {
       plugin: value[2],
       name: name,
-      dispose: disposeList[value[2]]
+      dispose: disposeList2[value[2]]
     })
-    console.log(`output->props.stage`, props.stage)
     // emit('add-stage', {
     //   name,
     //   task_stages: [

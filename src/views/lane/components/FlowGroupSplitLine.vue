@@ -2,7 +2,7 @@
   <div class="flow-group-splitline" @mouseenter="isExitHover = true" @mouseleave="isExitHover = false" @click="handleAddStage">
     <el-tooltip class="item" content="添加新的阶段" placement="top" :offset="18">
       <svg-icon v-if="!isExitHover" iconName="icon-jiahao"></svg-icon>
-      <svg-icon v-else="isExitHover" iconName="icon-jiahao-copy-copy"></svg-icon>
+      <svg-icon v-else iconName="icon-jiahao-copy-copy"></svg-icon>
     </el-tooltip>
   </div>
   <TaskGroupDrawer :drawer="drawer" @changeDrawer="changeDrawer" />
@@ -22,6 +22,8 @@ const handleAddStage = () => {
 }
 
 const changeDrawer = (value: any) => {
+  const disposeList2 = JSON.parse(JSON.stringify(disposeList))
+  console.log(`output->value`, value, disposeList2)
   if (!value) return (drawer.value = value)
   drawer.value = value[0]
   if (!drawer.value) {
@@ -34,7 +36,7 @@ const changeDrawer = (value: any) => {
             {
               plugin: value[2],
               name: name,
-              dispose: disposeList[value[2]]
+              dispose: disposeList2[value[2]]
             }
           ]
         }

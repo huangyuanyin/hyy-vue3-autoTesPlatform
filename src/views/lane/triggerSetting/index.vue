@@ -60,8 +60,9 @@ const formLabelAlign = (e: any) => {
 .triggerSetting-warp {
   padding: 20px 120px;
   background-color: #f2f5f7;
-  height: calc(100vh - 227px);
+  height: 77vh;
   display: flex;
+  box-sizing: border-box;
   .triggerSetting-warp-left {
     max-height: calc(100vh - 100px);
     width: 280px;
@@ -121,7 +122,7 @@ const formLabelAlign = (e: any) => {
     border: 1px solid #e9edf0;
     border-radius: 4px;
     background: #fff;
-    padding: 0 20px 40px;
+    padding: 0 0 15px 40px;
   }
 }
 </style>

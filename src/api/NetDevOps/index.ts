@@ -127,3 +127,14 @@ export function getStatisticsApi() {
     urlType: 'NetDevOps'
   })
 }
+
+/* ---------------------------- /devops/deploy_version/ ---------------------------- */
+
+export function getDeployVersionApi(params) {
+  return request({
+    url: `/devops/deploy_version/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}

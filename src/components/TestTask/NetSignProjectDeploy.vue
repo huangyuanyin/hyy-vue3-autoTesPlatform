@@ -2,7 +2,7 @@
   <el-drawer
     v-model="ishowDrawer"
     direction="rtl"
-    @close="cancelClick(taskDetailFormRef)"
+    :before-close="cancelClick"
     custom-class="netSignProjectDeploy-drawer"
     :modal="true"
     :close-on-click-modal="false"
@@ -70,11 +70,11 @@
                     </div>
                   </template>
                   <ul>
-                    <li v-for="(item, index) in serverConfigList" :key="'serverConfigList' + index">
+                    <li v-for="(it, index) in item.showServerConfig" :key="'serverConfigList' + index">
                       <div class="detail">
-                        {{ item.label }}
-                        <el-tooltip class="box-item" effect="dark" :content="item.value" placement="top">
-                          <span>{{ item.value }}</span>
+                        {{ it.label }}
+                        <el-tooltip class="box-item" effect="dark" :content="it.value" placement="top">
+                          <span>{{ it.value }}</span>
                         </el-tooltip>
                       </div>
                     </li>
@@ -121,12 +121,12 @@
         <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button>
       </div>
     </template>
-    <template #footer>
+    <!-- <template #footer>
       <div style="flex: auto">
         <el-button @click="cancelClick(taskDetailFormRef)">取消</el-button>
         <el-button type="primary" @click="confirmClick(taskDetailFormRef)">保存</el-button>
       </div>
-    </template>
+    </template> -->
   </el-drawer>
 </template>
 
@@ -135,6 +135,7 @@ import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import { getDeviceApi, getProductPackageApi } from '@/api/NetDevOps/index'
+import { disposeList } from '../../views/lane/data'
 
 const props = defineProps({
   taskDetailDrawer: {
@@ -153,14 +154,6 @@ const props = defineProps({
 
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
 const ishowDrawer = ref(false)
-const serverConfigList = reactive([
-  { label: '设备IP：', value: '' },
-  { label: '主板类型:', value: '' },
-  { label: '设备型号：', value: '' },
-  { label: '设备编码：', value: '' },
-  { label: 'cavium卡：', value: '' },
-  { label: '国密卡：', value: '' }
-])
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
   name: ''
@@ -172,24 +165,8 @@ const taskDetailFormRules = reactive<FormRules>({
   ifback: [{ required: true, message: '是否生产部门为必填项', trigger: 'change' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }]
 })
-const deviceList = ref([
-  {
-    serverName: '',
-    packageName: '',
-    main_bord_type: '',
-    deployType: '',
-    ifback: 'n',
-    ifrs: 'y'
-  }
-])
-const cloneDeviceObj = ref({
-  serverName: '',
-  packageName: '',
-  main_bord_type: '',
-  deployType: '',
-  ifback: 'n',
-  ifrs: 'y'
-})
+const deviceList = ref(JSON.parse(JSON.stringify(disposeList['netSignArrange'])))
+const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['netSignArrange'][0])))
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
@@ -217,28 +194,39 @@ watch(
   () => {
     // @ts-ignore
     deviceList.value = props.taskDetailInfo
-    console.log(`output->dev`, deviceList.value)
   }
 )
 
 const closeDrawer = (value?: any) => {
-  deviceList.value = [
-    {
-      serverName: '',
-      packageName: '',
-      main_bord_type: '',
-      deployType: '',
-      ifback: 'n',
-      ifrs: 'y'
-    }
-  ]
+  deviceList.value = JSON.parse(JSON.stringify(disposeList['netSignArrange']))
   emit('closeDrawer', [false, value])
 }
 
-const cancelClick = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  formEl.resetFields()
-  closeDrawer()
+const cancelClick = async (done: () => void) => {
+  if (!taskDetailFormRef.value) return
+  // formEl.resetFields()
+  // closeDrawer()
+  await taskDetailFormRef.value.validate(async (valid, fields) => {
+    if (valid) {
+      const forms = deviceFormRef.value
+      if (forms) {
+        for (const item of forms) {
+          const result = await item.validate()
+          if (!result) return
+        }
+      }
+      for (const item of deviceList.value) {
+        item.deviceConfig.ifback = item.ifback
+        item.deviceConfig.ifrs = item.ifrs
+      }
+      // @ts-ignore
+      deviceList.value.push(taskDetailForm.name)
+      closeDrawer(deviceList.value)
+      done()
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
 }
 
 const confirmClick = async (formEl: FormInstance | undefined) => {
@@ -314,12 +302,23 @@ const selectDevice = async val => {
 const getDeviceInfo = async val => {
   let res = await getDeviceApi({ device_manage_ip: val })
   if (res.code === 1000) {
-    serverConfigList[0].value = res.data.ip
-    serverConfigList[1].value = res.data.main_board_type
-    serverConfigList[2].value = res.data.machine_type
-    serverConfigList[3].value = res.data.mode_code
-    serverConfigList[4].value = res.data.cavium_card_type
-    serverConfigList[5].value = res.data.gm_card_type
+    deviceList.value.map((item, index) => {
+      if (item.serverName === val) {
+        deviceList.value[index].showServerConfig[0].value = res.data.ip
+        deviceList.value[index].showServerConfig[1].value = res.data.main_board_type
+        deviceList.value[index].showServerConfig[2].value = res.data.machine_type
+        deviceList.value[index].showServerConfig[3].value = res.data.mode_code
+        deviceList.value[index].showServerConfig[4].value = res.data.cavium_card_type
+        deviceList.value[index].showServerConfig[5].value = res.data.gm_card_type
+
+        deviceList.value[index].serverConfig.serverIP = res.data.ip
+        deviceList.value[index].serverConfig.serverPasswd = res.data.password
+        deviceList.value[index].serverConfig.userName = res.data.username
+        deviceList.value[index].serverConfig.machineType = res.data.machine_type
+        deviceList.value[index].serverConfig.modelCode = res.data.mode_code
+        deviceList.value[index].serverConfig.configCode = res.data.config_code
+      }
+    })
   }
 }
 

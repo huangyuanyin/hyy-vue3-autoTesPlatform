@@ -112,9 +112,10 @@ const deleteTaskInfo = async id => {
 <style lang="scss" scoped>
 .basicInformation-wrap {
   background-color: #f2f5f7;
-  height: calc(100vh - 207px);
+  height: 77vh;
   max-width: 100%;
   padding: 20px 120px 0 120px;
+  box-sizing: border-box;
   :deep(.el-card__body) {
     padding: 0px;
   }
