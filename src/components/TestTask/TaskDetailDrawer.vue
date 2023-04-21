@@ -88,28 +88,37 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="全量基线版本列表" prop="deployVersion" v-if="item.deployType === 'full'">
-                <el-select
-                  v-model="item.deployVersion"
-                  placeholder="请选择全量基线版本"
-                  :key="index"
-                  @visible-change="selectDeployVersion(index)"
-                  @change="getDeployVersion"
-                >
-                  <el-option :label="it" :value="it" v-for="(it, index) in deployVersionList" :key="'deployVersionList' + index" />
+                <el-select v-model="item.deployVersion" placeholder="请选择全量基线版本" :key="index">
+                  <el-option :label="it" :value="it" v-for="(it, index) in deployVersionFullList" :key="'deployVersionFullList' + index" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="项目基线版本列表" prop="patchVersion" v-if="item.deployType === 'baseline'">
+              <el-form-item label="项目基线版本列表" prop="packageName" v-if="item.deployType === 'baseline'">
                 <el-select
-                  v-model="item.patchVersion"
+                  v-model="item.packageName"
                   placeholder="请选择项目基线版本"
                   :key="index"
                   @visible-change="selectDeployVersion(index)"
                   @change="getDeployVersion"
                 >
-                  <el-option :label="it" :value="it" v-for="(it, index) in deployVersionList" :key="'deployVersionList' + index" />
+                  <el-option
+                    :label="it.title"
+                    :value="it.title"
+                    v-for="(it, index) in deployVersionList"
+                    :key="'deployVersionList' + index"
+                  />
                 </el-select>
               </el-form-item>
-              <el-form-item label="开机自启中间件" prop="startMidwareType">
+              <el-form-item label="项目包路径" prop="packagePath" v-show="false">
+                <el-input v-model="item.packagePath" placeholder="" />
+              </el-form-item>
+              <el-form-item label="项目包ID" prop="packageID" v-show="false">
+                <el-input v-model="item.packageID" placeholder="" />
+              </el-form-item>
+              <el-form-item
+                label="开机自启中间件"
+                prop="startMidwareType"
+                v-if="`${item.showServerConfig[1].value}` !== 'x86' && item.serverName !== ''"
+              >
                 <el-select v-model="item.startMidwareType" placeholder="请选择开机自启中间件" :key="index">
                   <el-option label="Tomcat" value="Tomcat" />
                   <el-option label="Tongweb" value="Tongweb" />
@@ -192,7 +201,7 @@
 import { ref, reactive, watch, nextTick, onMounted } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
-import { getDeviceApi, getDeployVersionApi } from '@/api/NetDevOps'
+import { getDeviceApi, getDeployVersionApi, getProductPackageApi } from '@/api/NetDevOps'
 import { disposeList } from '../../views/lane/data'
 
 const props = defineProps({
@@ -223,7 +232,7 @@ const taskDetailFormRules = reactive<FormRules>({
   main_bord_type: [{ required: true, message: '请选择主板类型', trigger: 'change' }],
   deployType: [{ required: true, message: '请选择部署类型', trigger: 'change' }],
   deployVersion: [{ required: true, message: '请选择全量基线版本', trigger: 'change' }],
-  patchVersion: [{ required: true, message: '请选择项目基线版本', trigger: 'change' }],
+  packageName: [{ required: true, message: '请选择项目基线版本', trigger: 'change' }],
   ifback: [{ required: true, message: '是否生产部门安装项', trigger: 'change' }],
   ispbc: [{ required: true, message: '是否安装人行模块为必填项', trigger: 'change' }],
   useNewDataType: [{ required: true, message: 'WatchDog是否使用新数据类型为必填项', trigger: 'change' }],
@@ -241,11 +250,12 @@ const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'change' }],
   deployType: [{ required: true, message: '请选择部署类型', trigger: 'change' }],
   deployVersion: [{ required: true, message: '请选择全量基线版本', trigger: 'change' }],
-  patchVersion: [{ required: true, message: '请选择项目基线版本', trigger: 'change' }],
+  packageName: [{ required: true, message: '请选择项目基线版本', trigger: 'change' }],
   startMidwareType: [{ required: true, message: '请选择开机自启中间件', trigger: 'change' }]
 })
 const selectDeviceList = ref([])
 const deployVersionList = ref([])
+const deployVersionFullList = ref(['netsign_5_6_2', 'netsign_5_6_4', 'netsign_5_6_8', 'sar_2_2', 'sar_4_1'])
 
 watch(
   () => props.taskDetailDrawer,
@@ -284,8 +294,15 @@ const cancelClick = async (done: () => void) => {
       const forms = deviceFormRef.value
       if (forms) {
         for (const item of forms) {
-          const result = await item.validate()
-          if (!result) return
+          try {
+            const result = await item.validate()
+            if (!result) {
+              return
+            }
+          } catch (error) {
+            ElMessage.error('该阶段有待完善的内容！')
+            return
+          }
         }
       }
       // 遍历deviceList，将ifback和ifrs加入到deviceConfig中
@@ -309,7 +326,7 @@ const cancelClick = async (done: () => void) => {
       closeDrawer(deviceList.value)
       done()
     } else {
-      console.log('error submit!', fields)
+      ElMessage.error('该阶段有待完善的内容！')
     }
   })
 }
@@ -404,41 +421,64 @@ const getDeviceInfo = async val => {
         deviceList.value[index].showServerConfig[6].value = res.data.machine_sn
         deviceList.value[index].showServerConfig[7].value = res.data.product_id
 
-        // deviceList.value[index].serverConfig.serverIP = res.data.ip
-        // deviceList.value[index].serverConfig.serverPasswd = res.data.password
-        // deviceList.value[index].serverConfig.userName = res.data.username
-        // deviceList.value[index].serverConfig.machineType = res.data.machine_type
-        // deviceList.value[index].serverConfig.modelCode = res.data.mode_code
-        // deviceList.value[index].serverConfig.configCode = res.data.config_code
-        // deviceList.value[index].serverConfig.machineSN = res.data.machineSN
-        // deviceList.value[index].serverConfig.productID = res.data.productID
+        deviceList.value[index].serverConfig.serverIP = res.data.ip
+        deviceList.value[index].serverConfig.serverPasswd = res.data.password
+        deviceList.value[index].serverConfig.userName = res.data.username
+        deviceList.value[index].serverConfig.machineType = res.data.machine_type
+        deviceList.value[index].serverConfig.modelCode = res.data.mode_code
+        deviceList.value[index].serverConfig.configCode = res.data.config_code
+        deviceList.value[index].serverConfig.machineSN = res.data.machineSN
+        deviceList.value[index].serverConfig.productID = res.data.productID
       }
     })
   }
 }
 
+let selectId = null
 const selectDeployVersion = async val => {
-  var deploy_typeBefore = ''
-  var device_manage_ipBefore = ''
-  // 遍历deviceList，index和val相等的时候，将该设备的deploy_typeBefore和device_manage_ip赋值
-  deviceList.value.map((item, index) => {
-    if (index === val) {
-      deploy_typeBefore = item.deployType
-      device_manage_ipBefore = item.serverName
+  // var deploy_typeBefore = ''
+  // var device_manage_ipBefore = ''
+  // // 遍历deviceList，index和val相等的时候，将该设备的deploy_typeBefore和device_manage_ip赋值
+  // deviceList.value.map((item, index) => {
+  //   if (index === val) {
+  //     deploy_typeBefore = item.deployType
+  //     device_manage_ipBefore = item.serverName
+  //   }
+  // })
+  // console.log(`output->`, deploy_typeBefore, device_manage_ipBefore)
+  // const params = {
+  //   deploy_type: deploy_typeBefore,
+  //   device_manage_ip: device_manage_ipBefore
+  // }
+  // let res = await getDeployVersionApi(params)
+  // if (res.code === 1000) {
+  //   deployVersionList.value = res.data
+  // }
+  selectId = val
+  if (val || val === 0) {
+    const params = {
+      page: 1,
+      page_size: 100
     }
-  })
-  console.log(`output->`, deploy_typeBefore, device_manage_ipBefore)
-  const params = {
-    deploy_type: deploy_typeBefore,
-    device_manage_ip: device_manage_ipBefore
-  }
-  let res = await getDeployVersionApi(params)
-  if (res.code === 1000) {
-    deployVersionList.value = res.data
+    let res = await getProductPackageApi(params)
+    if (res.code === 1000) {
+      deployVersionList.value = res.data
+    }
   }
 }
 
-const getDeployVersion = async val => {}
+const getDeployVersion = async val => {
+  deviceList.value.map((item, index) => {
+    if (index === selectId) {
+      deployVersionList.value.map(it => {
+        if (it.title === val) {
+          deviceList.value[selectId].packagePath = it.push_path
+          deviceList.value[selectId].packageID = it.id
+        }
+      })
+    }
+  })
+}
 </script>
 
 <style lang="scss">

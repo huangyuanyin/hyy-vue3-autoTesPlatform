@@ -211,8 +211,15 @@ const cancelClick = async (done: () => void) => {
       const forms = deviceFormRef.value
       if (forms) {
         for (const item of forms) {
-          const result = await item.validate()
-          if (!result) return
+          try {
+            const result = await item.validate()
+            if (!result) {
+              return
+            }
+          } catch (error) {
+            ElMessage.error('该任务有待完善的内容！')
+            return
+          }
         }
       }
       for (const item of deviceList.value) {
@@ -225,6 +232,7 @@ const cancelClick = async (done: () => void) => {
       done()
     } else {
       console.log('error submit!', fields)
+      ElMessage.error('该任务有待完善的内容！')
     }
   })
 }
