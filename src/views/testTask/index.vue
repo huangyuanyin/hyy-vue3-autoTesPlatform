@@ -152,7 +152,7 @@ const statusMap = {
   not_start: '待运行',
   in_progress: '运行中',
   success: '运行成功',
-  failed: '运行失败'
+  fail: '运行失败'
 }
 const tableData = [
   {

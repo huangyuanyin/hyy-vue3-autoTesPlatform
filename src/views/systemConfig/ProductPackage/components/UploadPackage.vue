@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="40%" :before-close="closeDialog">
+  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="40%" :before-close="closeDialog" v-loading="isLoading">
     <el-form :model="form" ref="ruleFormRef" :rules="rules">
       <el-form-item label="包名称" label-width="140px" prop="type" v-if="dialogTitle !== '新增'">
         <el-input v-model="form.file_name" :disabled="dialogTitle !== '新增'"></el-input>
@@ -52,8 +52,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, watch, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, watch } from 'vue'
+import { ElMessage, ElLoading } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { addProductPackageApi, editProductPackageApi, getProductPackageApi } from '@/api/NetDevOps/index'
@@ -73,6 +73,7 @@ const props = defineProps({
   }
 })
 const emit = defineEmits(['cancel'])
+
 const dialogFormVisible = ref(false)
 const form = reactive({
   file_name: '',
@@ -126,7 +127,13 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 }
 
 const addProductPackage = async (data: any) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '文件上传中，请稍后...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
   const res = await addProductPackageApi(data)
+  loading.close()
   if (res.code === 1000) {
     form.push_path = ''
     ruleFormRef.value.resetFields()

@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus'
 import { getToken } from './auth'
 import baseUrl from '@/config/api'
 const service = axios.create({
-  timeout: 120000
+  // timeout: 120000
 })
 
 // 添加请求拦截器
