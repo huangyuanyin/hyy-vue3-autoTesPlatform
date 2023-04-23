@@ -48,5 +48,6 @@ export const disposeList = {
       packagePath: '',
       packageName: ''
     }
-  ]
+  ],
+  executeCommand: [{}]
 }

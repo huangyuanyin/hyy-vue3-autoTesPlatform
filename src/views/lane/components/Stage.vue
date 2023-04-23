@@ -71,6 +71,7 @@
     @closeDrawer="closeDrawer"
     @deleteTask="handleRemoveParallel(taskId)"
   />
+  <ExecuteCommand :taskDetailName="taskDetailName" :taskDetailDrawer="executeCommandDrawer" @closeDrawer="closeDrawer" />
 
   <TaskGroupDrawer :drawer="drawer" @changeDrawer="changeDrawer" />
 </template>
@@ -79,6 +80,7 @@
 import { ref } from 'vue'
 import TaskDetailDrawer from '@/components/TestTask/TaskDetailDrawer.vue'
 import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
+import ExecuteCommand from '@/components/TestTask/ExecuteCommand.vue'
 import { ElMessage } from 'element-plus'
 import { RemoveFilled } from '@element-plus/icons-vue'
 import { disposeList } from '../data'
@@ -102,6 +104,7 @@ const drawer = ref(false)
 const taskDetailDrawer = ref(false)
 const taskDetailInfo = ref([])
 const NetSignProjectDeployDrawer = ref(false)
+const executeCommandDrawer = ref(false)
 const taskDetailName = ref('')
 const taskId = ref('')
 const stageID = ref(null)
@@ -137,6 +140,9 @@ const openTaskDetailDrawer = (item: any, id: any) => {
     case 'netSignArrange':
       NetSignProjectDeployDrawer.value = true
       break
+    case 'executeCommand':
+      executeCommandDrawer.value = true
+      break
   }
   taskId.value = id
   taskDetailName.value = item.name
@@ -150,6 +156,7 @@ const closeDrawer = (value?: any) => {
   }
   taskDetailDrawer.value = value[0]
   NetSignProjectDeployDrawer.value = value[0]
+  executeCommandDrawer.value = value[0]
 }
 
 const handleCommand = (command: string | number | object, id: string) => {

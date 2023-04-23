@@ -12,6 +12,7 @@
     "format": "prettier --write src/* src/*/* src/*/*/* src/*/*/*/*"
   },
   "dependencies": {
+    "@codemirror/theme-one-dark": "^6.1.2",
     "@types/node": "^18.0.0",
     "@vueuse/integrations": "^8.6.0",
     "axios": "^0.27.2",
@@ -29,6 +30,7 @@
     "universal-cookie": "^4.0.4",
     "unplugin-element-plus": "^0.4.1",
     "vue": "^3.2.25",
+    "vue-codemirror": "^6.1.1",
     "vue-router": "4",
     "vue3-json-viewer": "^2.2.2",
     "xterm": "^3.1.0"

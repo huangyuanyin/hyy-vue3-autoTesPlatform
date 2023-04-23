@@ -12,11 +12,11 @@
       </el-table-column>
       <el-table-column prop="status" label="任务状态" align="center" width="200">
         <template #default="item">
-          <el-tag v-if="item.row.status === 'not_start'" type="warning">未运行</el-tag>
+          <el-tag v-if="item.row.status === 'not_start'" type="info">未运行</el-tag>
           <el-tag v-if="item.row.status === 'success'" type="success">运行成功</el-tag>
           <el-tag v-if="item.row.status === 'fail'" type="danger">已失败</el-tag>
           <el-tag v-if="item.row.status === 'in_progress'" type="warning">运行中</el-tag>
-          <el-tag v-if="item.row.status === 'complete'" type="warning">complete</el-tag>
+          <el-tag v-if="item.row.status === 'complete'" type="primary">complete</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="最近运行状态" align="center" width="200">
