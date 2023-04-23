@@ -52,7 +52,7 @@
                   placeholder="请选择设备"
                   :key="index"
                   @visible-change="selectDevice"
-                  @change="getDeviceInfo"
+                  @change="getDeviceInfo(item, index)"
                 >
                   <el-option
                     :label="item.ip"
@@ -88,8 +88,19 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="全量基线版本列表" prop="deployVersion" v-if="item.deployType === 'full'">
-                <el-select v-model="item.deployVersion" placeholder="请选择全量基线版本" :key="index">
-                  <el-option :label="it" :value="it" v-for="(it, index) in deployVersionFullList" :key="'deployVersionFullList' + index" />
+                <el-select
+                  v-model="item.deployVersion"
+                  placeholder="请选择全量基线版本"
+                  :key="index"
+                  @visible-change="selectDeployVersion('full', item)"
+                  @change="getDeployVersion('full', item, index)"
+                >
+                  <el-option
+                    :label="it.deploy_version"
+                    :value="it.deploy_version"
+                    v-for="(it, index) in deployVersionFullList"
+                    :key="'deployVersionFullList' + index"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item label="项目基线版本列表" prop="packageName" v-if="item.deployType === 'baseline'">
@@ -97,12 +108,12 @@
                   v-model="item.packageName"
                   placeholder="请选择项目基线版本"
                   :key="index"
-                  @visible-change="selectDeployVersion(index)"
-                  @change="getDeployVersion"
+                  @visible-change="selectDeployVersion('project', item)"
+                  @change="getDeployVersion('project', item, index)"
                 >
                   <el-option
-                    :label="it.title"
-                    :value="it.title"
+                    :label="it.file_name"
+                    :value="it.file_name"
                     v-for="(it, index) in deployVersionList"
                     :key="'deployVersionList' + index"
                   />
@@ -255,7 +266,7 @@ const deviceFormRules = reactive<FormRules>({
 })
 const selectDeviceList = ref([])
 const deployVersionList = ref([])
-const deployVersionFullList = ref(['netsign_5_6_2', 'netsign_5_6_4', 'netsign_5_6_8', 'sar_2_2', 'sar_4_1'])
+const deployVersionFullList = ref([])
 
 watch(
   () => props.taskDetailDrawer,
@@ -406,76 +417,56 @@ const selectDevice = async val => {
   }
 }
 
-const getDeviceInfo = async val => {
-  let res = await getDeviceApi({ device_manage_ip: val })
+const getDeviceInfo = async (val, index) => {
+  let res = await getDeviceApi({ device_manage_ip: val.serverName })
   if (res.code === 1000) {
-    deviceList.value.map((item, index) => {
-      if (item.serverName === val) {
-        console.log(`output->item`, deviceList.value[index], deviceList.value[index].showServerConfig[7], res.data.product_id)
-        deviceList.value[index].showServerConfig[0].value = res.data.ip
-        deviceList.value[index].showServerConfig[1].value = res.data.main_board_type
-        deviceList.value[index].showServerConfig[2].value = res.data.machine_type
-        deviceList.value[index].showServerConfig[3].value = res.data.mode_code
-        deviceList.value[index].showServerConfig[4].value = res.data.cavium_card_type
-        deviceList.value[index].showServerConfig[5].value = res.data.gm_card_type
-        deviceList.value[index].showServerConfig[6].value = res.data.machine_sn
-        deviceList.value[index].showServerConfig[7].value = res.data.product_id
+    console.log(`output->item`, deviceList.value[index], deviceList.value[index].showServerConfig[7], res.data.product_id)
+    deviceList.value[index].showServerConfig[0].value = res.data.ip
+    deviceList.value[index].showServerConfig[1].value = res.data.main_board_type
+    deviceList.value[index].showServerConfig[2].value = res.data.machine_type
+    deviceList.value[index].showServerConfig[3].value = res.data.mode_code
+    deviceList.value[index].showServerConfig[4].value = res.data.cavium_card_type
+    deviceList.value[index].showServerConfig[5].value = res.data.gm_card_type
+    deviceList.value[index].showServerConfig[6].value = res.data.machine_sn
+    deviceList.value[index].showServerConfig[7].value = res.data.product_id
 
-        deviceList.value[index].serverConfig.serverIP = res.data.ip
-        deviceList.value[index].serverConfig.serverPasswd = res.data.password
-        deviceList.value[index].serverConfig.userName = res.data.username
-        deviceList.value[index].serverConfig.machineType = res.data.machine_type
-        deviceList.value[index].serverConfig.modelCode = res.data.mode_code
-        deviceList.value[index].serverConfig.configCode = res.data.config_code
-        deviceList.value[index].serverConfig.machineSN = res.data.machineSN
-        deviceList.value[index].serverConfig.productID = res.data.productID
+    deviceList.value[index].serverConfig.serverIP = res.data.ip
+    deviceList.value[index].serverConfig.serverPasswd = res.data.password
+    deviceList.value[index].serverConfig.userName = res.data.username
+    deviceList.value[index].serverConfig.machineType = res.data.machine_type
+    deviceList.value[index].serverConfig.modelCode = res.data.mode_code
+    deviceList.value[index].serverConfig.configCode = res.data.config_code
+    deviceList.value[index].serverConfig.machineSN = res.data.machineSN
+    deviceList.value[index].serverConfig.productID = res.data.productID
+
+    deviceList.value[index].packageName = ''
+    deviceList.value[index].packagePath = ''
+    deviceList.value[index].packageID = null
+    deviceList.value[index].deployVersion = ''
+  }
+}
+
+const selectDeployVersion = async (type, val) => {
+  const params = {
+    deploy_type: val.deployType,
+    device_manage_ip: val.serverName
+  }
+  let res = await getDeployVersionApi(params)
+  if (res.code === 1000) {
+    type === 'full' ? (deployVersionFullList.value = res.data) : (deployVersionList.value = res.data)
+  }
+}
+
+const getDeployVersion = async (type, val, index) => {
+  deployVersionList.value.map(it => {
+    if (it.file_name === val.packageName) {
+      if (type === 'full') {
+        deviceList.value[index].deployVersion = it.deploy_version
+      } else {
+        deviceList.value[index].deployVersion = 'netsign_x10_x11'
+        deviceList.value[index].packagePath = it.file_path
+        deviceList.value[index].packageID = it.id
       }
-    })
-  }
-}
-
-let selectId = null
-const selectDeployVersion = async val => {
-  // var deploy_typeBefore = ''
-  // var device_manage_ipBefore = ''
-  // // 遍历deviceList，index和val相等的时候，将该设备的deploy_typeBefore和device_manage_ip赋值
-  // deviceList.value.map((item, index) => {
-  //   if (index === val) {
-  //     deploy_typeBefore = item.deployType
-  //     device_manage_ipBefore = item.serverName
-  //   }
-  // })
-  // console.log(`output->`, deploy_typeBefore, device_manage_ipBefore)
-  // const params = {
-  //   deploy_type: deploy_typeBefore,
-  //   device_manage_ip: device_manage_ipBefore
-  // }
-  // let res = await getDeployVersionApi(params)
-  // if (res.code === 1000) {
-  //   deployVersionList.value = res.data
-  // }
-  selectId = val
-  if (val || val === 0) {
-    const params = {
-      page: 1,
-      page_size: 100
-    }
-    let res = await getProductPackageApi(params)
-    if (res.code === 1000) {
-      deployVersionList.value = res.data
-    }
-  }
-}
-
-const getDeployVersion = async val => {
-  deviceList.value.map((item, index) => {
-    if (index === selectId) {
-      deployVersionList.value.map(it => {
-        if (it.title === val) {
-          deviceList.value[selectId].packagePath = it.push_path
-          deviceList.value[selectId].packageID = it.id
-        }
-      })
     }
   })
 }

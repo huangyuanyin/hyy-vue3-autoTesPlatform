@@ -52,7 +52,7 @@
                   placeholder="请选择设备"
                   :key="index"
                   @visible-change="selectDevice"
-                  @change="getDeviceInfo"
+                  @change="getDeviceInfo(item, index)"
                 >
                   <el-option
                     :label="item.ip"
@@ -82,10 +82,16 @@
                 </el-card>
               </el-form-item>
               <el-form-item label="项目包" prop="packageName" :required="true">
-                <el-select v-model="item.packageName" placeholder="请选择项目包" :key="index" @visible-change="selectProduct">
+                <el-select
+                  v-model="item.packageName"
+                  placeholder="请选择项目包"
+                  :key="index"
+                  @visible-change="selectProduct(item)"
+                  @change="getProductInfo(item, index)"
+                >
                   <el-option
-                    :label="item.title"
-                    :value="item.title"
+                    :label="item.file_name"
+                    :value="item.file_name"
                     v-for="(item, index) in selectProductList"
                     :key="'selectProductList' + index"
                   />
@@ -301,46 +307,54 @@ const selectDevice = async val => {
     }
     let res = await getDeviceApi(params)
     if (res.code === 1000) {
-      // 过滤掉using为true的设备
       selectDeviceList.value = res.data.filter(item => item.using === false)
     }
   }
 }
 
-const getDeviceInfo = async val => {
-  let res = await getDeviceApi({ device_manage_ip: val })
+const getDeviceInfo = async (val, index) => {
+  let res = await getDeviceApi({ device_manage_ip: val.serverName })
   if (res.code === 1000) {
-    deviceList.value.map((item, index) => {
-      if (item.serverName === val) {
-        deviceList.value[index].showServerConfig[0].value = res.data.ip
-        deviceList.value[index].showServerConfig[1].value = res.data.main_board_type
-        deviceList.value[index].showServerConfig[2].value = res.data.machine_type
-        deviceList.value[index].showServerConfig[3].value = res.data.mode_code
-        deviceList.value[index].showServerConfig[4].value = res.data.cavium_card_type
-        deviceList.value[index].showServerConfig[5].value = res.data.gm_card_type
+    deviceList.value[index].showServerConfig[0].value = res.data.ip
+    deviceList.value[index].showServerConfig[1].value = res.data.main_board_type
+    deviceList.value[index].showServerConfig[2].value = res.data.machine_type
+    deviceList.value[index].showServerConfig[3].value = res.data.mode_code
+    deviceList.value[index].showServerConfig[4].value = res.data.cavium_card_type
+    deviceList.value[index].showServerConfig[5].value = res.data.gm_card_type
 
-        deviceList.value[index].serverConfig.serverIP = res.data.ip
-        deviceList.value[index].serverConfig.serverPasswd = res.data.password
-        deviceList.value[index].serverConfig.userName = res.data.username
-        deviceList.value[index].serverConfig.machineType = res.data.machine_type
-        deviceList.value[index].serverConfig.modelCode = res.data.mode_code
-        deviceList.value[index].serverConfig.configCode = res.data.config_code
-      }
-    })
+    deviceList.value[index].serverConfig.serverIP = res.data.ip
+    deviceList.value[index].serverConfig.serverPasswd = res.data.password
+    deviceList.value[index].serverConfig.userName = res.data.username
+    deviceList.value[index].serverConfig.machineType = res.data.machine_type
+    deviceList.value[index].serverConfig.modelCode = res.data.mode_code
+    deviceList.value[index].serverConfig.configCode = res.data.config_code
+
+    deviceList.value[index].packageName = ''
+    deviceList.value[index].packagePath = ''
+    deviceList.value[index].packageID = null
   }
 }
 
 const selectProduct = async val => {
-  if (val) {
+  selectProductList.value = []
+  if (val.showServerConfig[1].value) {
     const params = {
-      page: 1,
-      page_size: 100
+      main_board_type: val.showServerConfig[1].value === 'x86' ? 'x86' : 'other'
     }
     let res = await getProductPackageApi(params)
     if (res.code === 1000) {
       selectProductList.value = res.data
     }
   }
+}
+
+const getProductInfo = async (val, index) => {
+  selectProductList.value.map(it => {
+    if (it.file_name === val.packageName) {
+      deviceList.value[index].packagePath = it.file_path
+      deviceList.value[index].packageID = it.id
+    }
+  })
 }
 </script>
 

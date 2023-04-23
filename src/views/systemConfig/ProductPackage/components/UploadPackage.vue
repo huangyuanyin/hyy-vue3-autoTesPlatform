@@ -1,14 +1,20 @@
 <template>
   <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="40%" :before-close="closeDialog">
     <el-form :model="form" ref="ruleFormRef" :rules="rules">
+      <el-form-item label="包名称" label-width="140px" prop="type" v-if="dialogTitle !== '新增'">
+        <el-input v-model="form.file_name" :disabled="dialogTitle !== '新增'"></el-input>
+      </el-form-item>
       <el-form-item label="包类别" label-width="140px" prop="type">
-        <el-select v-model="form.type" placeholder="请选择包类别">
+        <el-select v-model="form.type" placeholder="请选择包类别" :disabled="dialogTitle !== '新增'">
           <el-option label="基线包" value="baseline" />
           <el-option label="项目包" value="project" />
         </el-select>
       </el-form-item>
       <el-form-item label="标识" label-width="140px" prop="title">
-        <el-input v-model="form.title" autocomplete="off" placeholder="请输入包的标识" />
+        <el-select v-model="form.title" placeholder="请选择标识">
+          <el-option label="sar" value="sar" />
+          <el-option label="main" value="main" />
+        </el-select>
       </el-form-item>
       <el-form-item label="上传方式" label-width="140px" v-if="dialogTitle === '新增'">
         <el-radio-group v-model="form.upload_type">
@@ -22,7 +28,7 @@
           style="width: 214px"
           drag
           action=""
-          multiple
+          accept=".zip,.tgz"
           :limit="1"
           :auto-upload="false"
           :on-exceed="handleExceed"
@@ -69,6 +75,7 @@ const props = defineProps({
 const emit = defineEmits(['cancel'])
 const dialogFormVisible = ref(false)
 const form = reactive({
+  file_name: '',
   type: '',
   upload_type: 'hands',
   push_path: '',
@@ -103,6 +110,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
+      delete form.file_name
       if (form.upload_type === 'hands' && uploadFileList.value.length <= 0 && props.dialogTitle === '新增') {
         ElMessage.error('至少上传一个包！')
         return

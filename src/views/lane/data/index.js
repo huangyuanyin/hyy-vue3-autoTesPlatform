@@ -5,7 +5,6 @@ export const disposeList = {
       main_bord_type: '',
       deployType: '',
       deployVersion: 'netsign_5_6_2',
-      // packageName: 'NS_5.5.40.12_u32.1',
       packageName: '',
       ifha: 'y',
       ispbc: 'y',
@@ -24,8 +23,8 @@ export const disposeList = {
         { label: '设备编码：', value: '' },
         { label: 'cavium卡：', value: '' },
         { label: '国密卡：', value: '' },
-        { label: '设备序列号', value: '' },
-        { label: '产品ID', value: '' }
+        { label: '设备序列号：', value: '' },
+        { label: '产品ID：', value: '' }
       ],
       deviceConfig: {}
     }
@@ -46,7 +45,7 @@ export const disposeList = {
       ],
       serverConfig: {},
       deviceConfig: {},
-      packagePath: 'D:\\testInstall',
+      packagePath: '',
       packageName: ''
     }
   ]
