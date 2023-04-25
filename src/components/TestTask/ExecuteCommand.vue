@@ -106,7 +106,7 @@ import { reactive, ref, watch } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { CirclePlusFilled, CaretRight, CaretBottom, RemoveFilled, Plus, CircleCloseFilled } from '@element-plus/icons-vue'
 import CodeMirror from '../CodeMirror.vue'
-import ExecuteCommand from './taskStep/ExecuteCommand.vue'
+import ExecuteCommand from './taskStep/ExecuteCommandStep.vue'
 import { disposeList } from '@/views/lane/data'
 
 const props = defineProps({
@@ -117,6 +117,10 @@ const props = defineProps({
   taskDetailName: {
     type: String,
     default: () => ''
+  },
+  taskDetailInfo: {
+    type: Object,
+    default: () => {}
   }
 })
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
@@ -177,6 +181,17 @@ watch(
   }
 )
 
+watch(
+  () => props.taskDetailInfo,
+  () => {
+    // @ts-ignore
+    deviceList.value = props.taskDetailInfo
+    taskDetailForm.builCluster = (props.taskDetailInfo[0] && props.taskDetailInfo[0].builCluster) || ''
+    taskDetailForm.dowloadPipelineSource = (props.taskDetailInfo[0] && props.taskDetailInfo[0].dowloadPipelineSource) || ''
+    taskDetailForm.pipelineSource = (props.taskDetailInfo[0] && props.taskDetailInfo[0].pipelineSource) || ''
+  }
+)
+
 const closeDrawer = (value?: any) => {
   deviceList.value = JSON.parse(JSON.stringify(disposeList['netSignArrange']))
   emit('closeDrawer', [false, value])
@@ -204,8 +219,7 @@ const cancelClick = async (done: () => void) => {
       //   item.deviceConfig.ifback = item.ifback
       //   item.deviceConfig.ifrs = item.ifrs
       // }
-      // @ts-ignore
-      deviceList.value.push(taskDetailForm.name)
+      deviceList.value = [].concat(taskDetailForm, taskDetailForm.name)
       closeDrawer(deviceList.value)
       done()
     } else {
@@ -216,7 +230,7 @@ const cancelClick = async (done: () => void) => {
 }
 
 const deleteTask = () => {
-  console.log('deleteTask')
+  emit('deleteTask')
 }
 
 const getBuilClusterInfo = (value: string) => {

@@ -71,7 +71,13 @@
     @closeDrawer="closeDrawer"
     @deleteTask="handleRemoveParallel(taskId)"
   />
-  <ExecuteCommand :taskDetailName="taskDetailName" :taskDetailDrawer="executeCommandDrawer" @closeDrawer="closeDrawer" />
+  <ExecuteCommand
+    :taskDetailName="taskDetailName"
+    :taskDetailInfo="taskDetailInfo"
+    :taskDetailDrawer="executeCommandDrawer"
+    @closeDrawer="closeDrawer"
+    @deleteTask="handleRemoveParallel(taskId)"
+  />
 
   <TaskGroupDrawer :drawer="drawer" @changeDrawer="changeDrawer" />
 </template>

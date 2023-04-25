@@ -59,7 +59,8 @@ export default defineConfig(({ mode }) => {
         `monaco-editor/esm/vs/language/css/css.worker`,
         `monaco-editor/esm/vs/language/html/html.worker`,
         `monaco-editor/esm/vs/language/typescript/ts.worker`,
-        `monaco-editor/esm/vs/editor/editor.worker`
+        `monaco-editor/esm/vs/editor/editor.worker`,
+        `codemirror`
       ]
     },
     css: {
