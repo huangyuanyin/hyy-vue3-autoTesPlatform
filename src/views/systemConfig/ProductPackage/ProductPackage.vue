@@ -6,11 +6,16 @@
       <el-table-column prop="file_name" label="包名称" align="center" />
       <el-table-column prop="type" label="包类别" align="center">
         <template #default="scope">
-          <el-tag v-if="scope.row.type === 'baseline'" type="success">基线包</el-tag>
-          <el-tag v-else type="warning">项目包</el-tag>
+          <el-tag v-if="scope.row.type === 'baseline'" type="success">待测版本</el-tag>
+          <el-tag v-else type="warning">release版本</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="title" label="标识" align="center" />
+      <el-table-column prop="title" label="标识" align="center">
+        <template #default="scope">
+          <el-tag v-if="scope.row.title === 'sar'" type="primary">信创</el-tag>
+          <el-tag v-else type="info">非信创</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="last_mod_time" label="更新时间" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">

@@ -6,7 +6,7 @@
       <el-table-column prop="machine_type" label="设备类型" width="200" align="center" />
       <!-- <el-table-column prop="mode_code" label="型号编码" width="150" />
       <el-table-column prop="config_code" label="配置编码" width="150" /> -->
-      <el-table-column prop="main_board_type" label="主板类型" align="center" />
+      <el-table-column prop="main_board_type" label="主板类型" align="center" width="250" />
       <!-- <el-table-column prop="cavium_card_type" label="cavium卡类型" width="150" align="center" />
       <el-table-column prop="gm_card_type" label="国密卡类型" width="150" align="center" /> -->
       <el-table-column prop="using" label="使用状态" width="200" align="center">

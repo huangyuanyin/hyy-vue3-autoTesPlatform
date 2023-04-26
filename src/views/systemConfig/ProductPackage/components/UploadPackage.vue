@@ -6,14 +6,14 @@
       </el-form-item>
       <el-form-item label="包类别" label-width="140px" prop="type">
         <el-select v-model="form.type" placeholder="请选择包类别" :disabled="dialogTitle !== '新增'">
-          <el-option label="基线包" value="baseline" />
-          <el-option label="项目包" value="project" />
+          <el-option label="待测版本" value="baseline" />
+          <el-option label="release版本" value="project" />
         </el-select>
       </el-form-item>
       <el-form-item label="标识" label-width="140px" prop="title">
         <el-select v-model="form.title" placeholder="请选择标识">
-          <el-option label="sar" value="sar" />
-          <el-option label="main" value="main" />
+          <el-option label="信创" value="sar" />
+          <el-option label="非信创" value="main" />
         </el-select>
       </el-form-item>
       <el-form-item label="上传方式" label-width="140px" v-if="dialogTitle === '新增'">

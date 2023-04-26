@@ -196,7 +196,7 @@
             <el-icon class="delete-icon" @click="deleteDevice(index)"><Delete /></el-icon>
           </div>
         </div>
-        <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button>
+        <!-- <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button> -->
       </div>
     </template>
     <!-- <template #footer>
