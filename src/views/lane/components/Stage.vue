@@ -32,8 +32,11 @@
             popper-class="contextmenu"
             placement="top-end"
           >
-            <div class="ignore-jon3-width" @click="openTaskDetailDrawer(parallel, index)">
+            <div class="ignore-jon3-width" :class="[parallel.is_pass ? '' : 'isNoPass']" @click="openTaskDetailDrawer(parallel, index)">
               {{ parallel.name }}
+              <el-tooltip class="item" content="有信息未配置" placement="top" :offset="18">
+                <el-icon v-if="!parallel.is_pass"><WarningFilled /></el-icon>
+              </el-tooltip>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
@@ -88,7 +91,7 @@ import TaskDetailDrawer from '@/components/TestTask/TaskDetailDrawer.vue'
 import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 import ExecuteCommand from '@/components/TestTask/ExecuteCommand.vue'
 import { ElMessage } from 'element-plus'
-import { RemoveFilled } from '@element-plus/icons-vue'
+import { RemoveFilled, WarningFilled } from '@element-plus/icons-vue'
 import { disposeList } from '../data'
 
 const props = defineProps({
@@ -116,6 +119,12 @@ const taskId = ref('')
 const stageID = ref(null)
 
 const handleAddParallel = (position: any, index: any) => {
+  // 判断props.stage中每个对象的plugin是否含有netSignPrepare，如果有则不允许添加串行任务
+  const isNetSignPrepare = props.stage.some((item: any) => item.plugin === 'netSignPrepare')
+  if (isNetSignPrepare) {
+    ElMessage.warning('环境准备阶段不允许添加串行任务！')
+    return
+  }
   index = position === 'before' ? index : index + 1
   stageID.value = index
   drawer.value = true
@@ -142,9 +151,12 @@ const openTaskDetailDrawer = (item: any, id: any) => {
   switch (item.plugin) {
     case 'netSignPrepare':
       taskDetailDrawer.value = true
+      taskDetailInfo.value = [item.dispose[0]]
       break
     case 'netSignArrange':
       NetSignProjectDeployDrawer.value = true
+      // 移除item.dispose中的倒数第二个元素
+      taskDetailInfo.value = item.dispose
       break
     case 'executeCommand':
       executeCommandDrawer.value = true
@@ -152,13 +164,13 @@ const openTaskDetailDrawer = (item: any, id: any) => {
   }
   taskId.value = id
   taskDetailName.value = item.name
-  taskDetailInfo.value = item.dispose
 }
 
 const closeDrawer = (value?: any) => {
   if (value[1]) {
     props.stage[taskId.value].name = value[1][value[1].length - 1]
-    props.stage[taskId.value].dispose = value[1].slice(0, -1)
+    props.stage[taskId.value].dispose = value[1].slice(0, -2)
+    props.stage[taskId.value].is_pass = value[1][value[1].length - 2]
   }
   taskDetailDrawer.value = value[0]
   NetSignProjectDeployDrawer.value = value[0]
@@ -275,6 +287,16 @@ const changeDrawer = (value: any) => {
 
     .ignore-jon3-width {
       min-width: 140px;
+    }
+
+    .isNoPass {
+      border: 1px solid red !important;
+      min-width: 140px !important;
+      .el-icon {
+        color: #f56c6c !important;
+        margin-left: 5px;
+        font-size: 18px;
+      }
     }
 
     :deep(.el-dropdown-menu__item .el-icon svg) {

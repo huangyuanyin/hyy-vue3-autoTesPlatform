@@ -12,7 +12,7 @@
       </el-table-column>
       <el-table-column prop="title" label="标识" align="center">
         <template #default="scope">
-          <el-tag v-if="scope.row.title === 'sar'" type="primary">信创</el-tag>
+          <el-tag v-if="scope.row.title === 'sar'">信创</el-tag>
           <el-tag v-else type="info">非信创</el-tag>
         </template>
       </el-table-column>

@@ -9,22 +9,34 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 import { disposeList } from '../data'
+import { ElMessage } from 'element-plus'
 
 const emit = defineEmits(['add-stage'])
 const isExitHover = ref(false)
 const drawer = ref(false)
+const laneData = ref([]) // 当前流水线的数据
 
 const handleAddStage = () => {
   drawer.value = true
 }
 
+watch(
+  () => drawer.value,
+  val => {
+    laneData.value = JSON.parse(localStorage.getItem('flows'))
+  }
+)
+
 const changeDrawer = (value: any) => {
   const disposeList2 = JSON.parse(JSON.stringify(disposeList))
-  console.log(`output->value`, value, disposeList2)
   if (!value) return (drawer.value = value)
+  if (laneData.value.length === 0 && value[1] === 'NetSign项目部署') {
+    ElMessage.warning('NetSign项目部署阶段需在NetSign环境准备阶段之后')
+    return false
+  }
   drawer.value = value[0]
   if (!drawer.value) {
     const name = value[1]
@@ -36,7 +48,8 @@ const changeDrawer = (value: any) => {
             {
               plugin: value[2],
               name: name,
-              dispose: disposeList2[value[2]]
+              dispose: disposeList2[value[2]],
+              is_pass: false
             }
           ]
         }

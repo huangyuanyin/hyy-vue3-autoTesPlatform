@@ -280,7 +280,7 @@ const editDevice = async () => {
 
 // 删除设备接口
 const deletetDevice = async row => {
-  const res = await deletetDeviceApi({ device_manage_id: row })
+  const res = await deletetDeviceApi(row)
   if (res.code === 1000) {
     ElMessage.success('删除成功')
     getDevice()

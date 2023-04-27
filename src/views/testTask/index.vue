@@ -6,17 +6,16 @@
       <el-table-column prop="name" label="任务名称" width="250" align="center" />
       <el-table-column prop="draft" label="是否草稿" align="center" width="180">
         <template #default="item">
-          <el-tag v-if="item.row.draft === false" type="success">否</el-tag>
-          <el-tag v-else type="warning">是</el-tag>
+          <el-tag v-if="item.row.draft === false" type="info">否</el-tag>
+          <el-tag v-else>是</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="任务状态" align="center" width="200">
         <template #default="item">
-          <el-tag v-if="item.row.status === 'not_start'" type="info">未运行</el-tag>
+          <el-tag v-if="item.row.status === 'not_start'" type="warning">未运行</el-tag>
           <el-tag v-if="item.row.status === 'success'" type="success">运行成功</el-tag>
           <el-tag v-if="item.row.status === 'fail'" type="danger">已失败</el-tag>
-          <el-tag v-if="item.row.status === 'in_progress'" type="warning">运行中</el-tag>
-          <el-tag v-if="item.row.status === 'complete'" type="primary">complete</el-tag>
+          <el-tag v-if="item.row.status === 'in_progress'">运行中</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="最近运行状态" align="center" width="200">
@@ -32,7 +31,7 @@
               <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[item.row.last_result]}`" placement="top">
                 <li>
                   <el-icon v-if="item.row.last_result === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
-                  <el-icon v-if="item.row.last_result === 'success'" style="color: #1b9aee"><CircleCheckFilled /></el-icon>
+                  <el-icon v-if="item.row.last_result === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
                   <el-icon v-if="item.row.last_result === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
                 </li>
               </el-tooltip>
@@ -71,7 +70,7 @@
             @confirm="handleRunTask(item.row.id)"
           >
             <template #reference>
-              <el-button link type="primary" size="small" v-if="!item.row.draft"> 执行 </el-button>
+              <el-button link type="warning" size="small" v-if="!item.row.draft"> 执行 </el-button>
             </template>
           </el-popconfirm>
           <el-button link type="primary" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
@@ -384,9 +383,9 @@ onMounted(() => {
           margin: 0 auto;
         }
         .success {
-          border: 1px solid #1b9aee;
-          color: #d8d8d8;
-          background: #1b9aee;
+          border: 1px solid #67c23a;
+          color: #67c23a;
+          background: #67c23a;
         }
         .fail {
           border: 1px solid #f56c6c;
@@ -394,14 +393,14 @@ onMounted(() => {
           background: #f56c6c;
         }
         .in_progress {
-          border: 2px solid #67c23a !important;
-          color: #67c23a;
-          background: #67c23a;
+          border: 2px solid #1b9aee !important;
+          color: #1b9aee;
+          background: #1b9aee;
         }
         .not_start {
-          border: 2px solid #d8d8d8 !important;
-          color: #d8d8d8;
-          background: #fff;
+          border: 2px solid #e6a23c !important;
+          color: #e6a23c;
+          background: #e6a23c;
         }
       }
       &::after {

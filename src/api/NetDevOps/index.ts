@@ -30,10 +30,9 @@ export function editDeviceApi(params: any) {
 
 export function deletetDeviceApi(params) {
   return request({
-    url: `/devops/device_manage/`,
+    url: `/devops/device_manage/${params}`,
     method: 'DELETE',
-    urlType: 'NetDevOps',
-    params
+    urlType: 'NetDevOps'
   })
 }
 

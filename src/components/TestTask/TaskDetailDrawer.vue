@@ -5,15 +5,21 @@
     :before-close="cancelClick"
     custom-class="taskDetail-drawer"
     :modal="true"
+    :show-close="false"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
   >
     <template #header>
       <div class="header">
-        <span class="">编辑</span>
-        <div class="changeDelete">
-          <svg-icon class="grayDelete" @click="deleteTask" iconName="icon-changyonggoupiaorenshanchu"></svg-icon>
-          <svg-icon class="redDelete" @click="deleteTask" iconName="icon-changyonggoupiaorenshanchu-copy"></svg-icon>
+        <div>
+          <h4 class="edit-h4" style="display: inline-block">编辑</h4>
+          <div class="changeDelete" @click="deleteTask">
+            <svg-icon class="grayDelete" iconName="icon-changyonggoupiaorenshanchu"></svg-icon>
+            <svg-icon class="redDelete" iconName="icon-changyonggoupiaorenshanchu-copy"></svg-icon>
+          </div>
+        </div>
+        <div @click="cancelClick()" class="complete-edit">
+          <h4 class="edit-h4" style="display: inline-block; color: #409eff; font-weight: bold">完成</h4>
         </div>
       </div>
     </template>
@@ -267,6 +273,7 @@ const deviceFormRules = reactive<FormRules>({
 const selectDeviceList = ref([])
 const deployVersionList = ref([])
 const deployVersionFullList = ref([])
+const isPassVerification = ref(true)
 
 watch(
   () => props.taskDetailDrawer,
@@ -285,7 +292,6 @@ watch(
 watch(
   () => props.taskDetailInfo,
   () => {
-    console.log(`output->111`, props.taskDetailInfo)
     // @ts-ignore
     deviceList.value = props.taskDetailInfo
   }
@@ -310,9 +316,9 @@ const cancelClick = async (done: () => void) => {
             if (!result) {
               return
             }
+            isPassVerification.value = true
           } catch (error) {
-            ElMessage.error('该阶段有待完善的内容！')
-            return
+            isPassVerification.value = false
           }
         }
       }
@@ -332,12 +338,14 @@ const cancelClick = async (done: () => void) => {
         }
       })
       // @ts-ignore
+      deviceList.value.push(isPassVerification.value)
+      // @ts-ignore
       deviceList.value.push(taskDetailForm.name)
       console.log(`保存`, deviceList.value)
       closeDrawer(deviceList.value)
       done()
     } else {
-      ElMessage.error('该阶段有待完善的内容！')
+      ElMessage.error('任务名称不能为空！')
     }
   })
 }
@@ -481,6 +489,21 @@ const getDeployVersion = async (type, val, index) => {
     padding: 0px 10px 0 32px;
     height: 60px;
     margin-bottom: 0px;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      padding-right: 15px;
+    }
+    .edit-h4 {
+      display: inline-block;
+      margin-right: 8px;
+    }
+    .complete-edit:hover {
+      cursor: pointer;
+      h4 {
+        background: #ebeef5;
+      }
+    }
     svg:hover {
       cursor: pointer;
     }
@@ -489,6 +512,7 @@ const getDeployVersion = async (type, val, index) => {
     }
     .changeDelete .grayDelete {
       display: inline-block;
+      color: #72767b;
     }
     .changeDelete .redDelete {
       display: none;

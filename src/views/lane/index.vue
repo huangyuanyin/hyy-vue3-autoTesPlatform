@@ -81,6 +81,23 @@ const sumbitTask = type => {
   if (isName) {
     return ElMessage.error('请检查是否有空的阶段名称')
   }
+  if (!type) {
+    let count = 0
+    data.task_swim_lanes.map(item => {
+      // 循环item.task_stages,判断其中的task_details的isPass是否为true，如果为true则放到count加1
+      item.task_stages.map(item => {
+        item.task_details.map(item => {
+          if (!item.is_pass) {
+            count++
+          }
+        })
+      })
+    })
+    if (count > 0) {
+      ElMessage.error(`流水线编排流程保存失败，流程中有${count}个未完成的配置，请检查后再次保存！`)
+      return
+    }
+  }
   route.query.tem ? addTaskInfo() : editTaskInfo()
   console.log(`保存任务`, data)
 }
@@ -97,7 +114,8 @@ const addTaskInfo = async () => {
             return {
               name: item.name,
               plugin: item.plugin,
-              dispose: item.dispose
+              dispose: item.dispose,
+              is_pass: item.is_pass
               // dispose: eval(`(${item.dispose})`)
             }
           })
@@ -126,7 +144,8 @@ const editTaskInfo = async () => {
             return {
               name: item.name,
               plugin: item.plugin,
-              dispose: item.dispose
+              dispose: item.dispose,
+              is_pass: item.is_pass
               // dispose: eval(`(${item.dispose})`)
             }
           })

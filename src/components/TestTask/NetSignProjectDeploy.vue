@@ -5,15 +5,21 @@
     :before-close="cancelClick"
     custom-class="netSignProjectDeploy-drawer"
     :modal="true"
+    :show-close="false"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
   >
     <template #header>
       <div class="header">
-        <span class="">编辑</span>
-        <div class="changeDelete">
-          <svg-icon class="grayDelete" @click="deleteTask" iconName="icon-changyonggoupiaorenshanchu"></svg-icon>
-          <svg-icon class="redDelete" @click="deleteTask" iconName="icon-changyonggoupiaorenshanchu-copy"></svg-icon>
+        <div>
+          <h4 class="edit-h4" style="display: inline-block">编辑</h4>
+          <div class="changeDelete" @click="deleteTask">
+            <svg-icon class="grayDelete" iconName="icon-changyonggoupiaorenshanchu"></svg-icon>
+            <svg-icon class="redDelete" iconName="icon-changyonggoupiaorenshanchu-copy"></svg-icon>
+          </div>
+        </div>
+        <div @click="cancelClick()" class="complete-edit">
+          <h4 class="edit-h4" style="display: inline-block; color: #409eff; font-weight: bold">完成</h4>
         </div>
       </div>
     </template>
@@ -166,7 +172,7 @@ const taskDetailForm = reactive({
 })
 const taskDetailFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
-  packageName: [{ required: true, message: '请选择项目包', trigger: 'change' }],
+  packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
   ifback: [{ required: true, message: '是否生产部门为必填项', trigger: 'change' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }]
@@ -176,11 +182,12 @@ const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['netSignArrange
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
-  packageName: [{ required: true, message: '请选择项目包', trigger: 'change' }]
+  packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }]
 })
 const selectDeviceList = ref([])
 const selectProductList = ref([])
-
+let currentFlows = ref(JSON.parse(localStorage.getItem('flows')))
+const isPassVerification = ref(false)
 watch(
   () => props.taskDetailDrawer,
   () => {
@@ -222,9 +229,9 @@ const cancelClick = async (done: () => void) => {
             if (!result) {
               return
             }
+            isPassVerification.value = true
           } catch (error) {
-            ElMessage.error('该任务有待完善的内容！')
-            return
+            isPassVerification.value = false
           }
         }
       }
@@ -233,12 +240,14 @@ const cancelClick = async (done: () => void) => {
         item.deviceConfig.ifrs = item.ifrs
       }
       // @ts-ignore
+      deviceList.value.push(isPassVerification.value)
+      // @ts-ignore
       deviceList.value.push(taskDetailForm.name)
       closeDrawer(deviceList.value)
       done()
     } else {
       console.log('error submit!', fields)
-      ElMessage.error('该任务有待完善的内容！')
+      ElMessage.error('任务名称不能为空！')
     }
   })
 }
@@ -300,16 +309,30 @@ const deleteDevice = (id: number) => {
 }
 
 const selectDevice = async val => {
-  if (val) {
-    const params = {
-      page: 1,
-      page_size: 100
-    }
-    let res = await getDeviceApi(params)
-    if (res.code === 1000) {
-      selectDeviceList.value = res.data.filter(item => item.using === false)
+  // 循环currentFlows.value，判断哪个对象中的name包含'准备'，就取出该对象的task_stages
+  let task_stages = []
+  selectDeviceList.value = []
+  for (let i = 0; i < currentFlows.value.length; i++) {
+    if (currentFlows.value[i].name.includes('准备')) {
+      task_stages = currentFlows.value[i].task_stages
     }
   }
+  // 循环task_stages中的每个对象
+  task_stages.map(item => {
+    selectDeviceList.value.push({ ip: item.task_details[0].dispose[0].serverName })
+  })
+  // selectDeviceList.value去除重复的ip
+  selectDeviceList.value = Array.from(new Set(selectDeviceList.value))
+  // if (val) {
+  //   const params = {
+  //     page: 1,
+  //     page_size: 100
+  //   }
+  //   let res = await getDeviceApi(params)
+  //   if (res.code === 1000) {
+  //     selectDeviceList.value = res.data.filter(item => item.using === false)
+  //   }
+  // }
 }
 
 const getDeviceInfo = async (val, index) => {
@@ -368,6 +391,21 @@ const getProductInfo = async (val, index) => {
     padding: 0px 10px 0 32px;
     height: 60px;
     margin-bottom: 0px;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      padding-right: 15px;
+    }
+    .edit-h4 {
+      display: inline-block;
+      margin-right: 8px;
+    }
+    .complete-edit:hover {
+      cursor: pointer;
+      h4 {
+        background: #ebeef5;
+      }
+    }
 
     svg:hover {
       cursor: pointer;
@@ -375,9 +413,13 @@ const getProductInfo = async (val, index) => {
 
     .changeDelete {
       display: inline-block;
+      width: 20px;
+      height: 20px;
+      text-align: center;
     }
 
     .changeDelete .grayDelete {
+      color: #72767b;
       display: inline-block;
     }
 

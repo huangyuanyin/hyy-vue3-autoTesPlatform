@@ -28,7 +28,7 @@
     <span>确定删除【{{ flowName }}】阶段吗？</span>
     <div class="deleteTips">
       <span class="tips">注意：</span>
-      <span class="desc">删除后该阶段下的所有任务都将删除!</span>
+      <span class="desc">删除后该阶段下的所有节点都将删除!</span>
     </div>
   </DeleteGroupDialog>
 </template>

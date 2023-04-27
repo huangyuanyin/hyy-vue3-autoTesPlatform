@@ -45,7 +45,8 @@ const changeDrawer = (value: any) => {
         {
           plugin: value[2],
           name: name,
-          dispose: disposeList2[value[2]]
+          dispose: disposeList2[value[2]],
+          is_pass: false
         }
       ]
     })

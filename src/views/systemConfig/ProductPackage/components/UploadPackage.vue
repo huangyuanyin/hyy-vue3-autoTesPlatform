@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="40%" :before-close="closeDialog" v-loading="isLoading">
+  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="40%" :before-close="closeDialog">
     <el-form :model="form" ref="ruleFormRef" :rules="rules">
       <el-form-item label="包名称" label-width="140px" prop="type" v-if="dialogTitle !== '新增'">
         <el-input v-model="form.file_name" :disabled="dialogTitle !== '新增'"></el-input>
@@ -19,7 +19,7 @@
       <el-form-item label="上传方式" label-width="140px" v-if="dialogTitle === '新增'">
         <el-radio-group v-model="form.upload_type">
           <el-radio label="hands">手动上传</el-radio>
-          <el-radio label="url_pull">链接拉取</el-radio>
+          <el-radio label="url_pull" disabled>链接拉取</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="文件上传" label-width="140px" v-if="form.upload_type === 'hands' && dialogTitle === '新增'">

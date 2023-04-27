@@ -13,6 +13,7 @@
 <script lang="ts" setup>
 import FlowGroupSplitLine from './components/FlowGroupSplitLine.vue'
 import FlowGroup from './components/FlowGroup.vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps({
   flows: {
@@ -28,6 +29,22 @@ const handleAddStage = (val: any, index: any) => {
 const handleRemoveFlow = (index: any) => {
   props.flows.splice(index, 1)
 }
+
+watch(
+  () => props.flows,
+  val => {
+    localStorage.setItem('flows', JSON.stringify(props.flows))
+  },
+  { deep: true }
+)
+
+onMounted(() => {
+  localStorage.setItem('flows', JSON.stringify(props.flows))
+})
+
+onUnmounted(() => {
+  localStorage.removeItem('flows')
+})
 </script>
 
 <style lang="scss" scoped>

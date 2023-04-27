@@ -14,7 +14,7 @@ export const disposeList = {
       ifrs: 'y',
       startMidwareType: '',
       sysRest: true,
-      reboot: true,
+      reboot: false,
       serverConfig: {},
       showServerConfig: [
         { label: '设备IP：', value: '' },
