@@ -10,14 +10,14 @@
           <el-tag v-else>是</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="任务状态" align="center" width="200">
+      <!-- <el-table-column prop="status" label="任务状态" align="center" width="200">
         <template #default="item">
           <el-tag v-if="item.row.status === 'not_start'" type="warning">未运行</el-tag>
           <el-tag v-if="item.row.status === 'success'" type="success">运行成功</el-tag>
           <el-tag v-if="item.row.status === 'fail'" type="danger">已失败</el-tag>
           <el-tag v-if="item.row.status === 'in_progress'">运行中</el-tag>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="最近运行状态" align="center" width="200">
         <template #default="item">
           <div class="pipe-status">
@@ -28,11 +28,13 @@
                 </li>
               </el-tooltip>
               <li>-</li>
-              <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[item.row.last_result]}`" placement="top">
+              <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[item.row.status]}`" placement="top">
                 <li>
-                  <el-icon v-if="item.row.last_result === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
-                  <el-icon v-if="item.row.last_result === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
-                  <el-icon v-if="item.row.last_result === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
+                  <el-icon v-if="item.row.status === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
+                  <el-icon v-if="item.row.status === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
+                  <el-icon v-if="item.row.status === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
+                  <el-icon v-if="item.row.status === 'in_progress'" style="color: #409eff"><RefreshRight /></el-icon>
+                  <el-icon v-if="item.row.status === 'channel'" style="color: #909399"><RemoveFilled /></el-icon>
                 </li>
               </el-tooltip>
             </ul>
@@ -74,20 +76,22 @@
             </template>
           </el-popconfirm>
           <el-popconfirm
-            title="确定终止运行这个任务流水线?"
+            title="确定取消运行这个任务流水线?"
             trigger="click"
             :icon="WarningFilled"
             icon-color="#F56C6C"
-            confirm-button-text="确认终止"
+            confirm-button-text="确认取消"
             cancel-button-text="取消"
             @confirm="handleEndTask(item.row.id)"
           >
             <template #reference>
-              <el-button link type="info" size="small" v-if="!item.row.draft && item.row.status === 'in_progress'"> 停止 </el-button>
+              <el-button link type="info" size="small" v-if="!item.row.draft && item.row.status === 'in_progress'"> 取消 </el-button>
             </template>
           </el-popconfirm>
           <el-button link type="primary" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
-          <el-button link type="primary" size="small" @click="toDetail('edit', item.row)"> 编辑 </el-button>
+          <el-button v-if="item.row.status !== 'in_progress'" link type="primary" size="small" @click="toDetail('edit', item.row)">
+            编辑
+          </el-button>
           <el-popconfirm
             title="确定删除这个任务?"
             trigger="click"
@@ -96,7 +100,7 @@
             @confirm="handleDelete(item.row.id)"
           >
             <template #reference>
-              <el-button link type="danger" size="small"> 删除 </el-button>
+              <el-button v-if="item.row.status !== 'in_progress'" link type="danger" size="small"> 删除 </el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -138,12 +142,20 @@
 
 <script lang="ts" setup>
 import { reactive, ref, onMounted, onUnmounted } from 'vue'
-import { CirclePlus, CircleCloseFilled, CircleCheckFilled, InfoFilled, WarningFilled } from '@element-plus/icons-vue'
+import {
+  CirclePlus,
+  CircleCloseFilled,
+  CircleCheckFilled,
+  InfoFilled,
+  WarningFilled,
+  RemoveFilled,
+  RefreshRight
+} from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
 import preview2 from '@/assets/preview2.png'
 import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi } from '@/api/NetDevOps/index'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
 
 interface User {
   id: string
@@ -164,7 +176,8 @@ const statusMap = {
   not_start: '待运行',
   in_progress: '运行中',
   success: '运行成功',
-  fail: '运行失败'
+  fail: '运行失败',
+  channel: '已取消'
 }
 const tableData = [
   {
@@ -352,7 +365,38 @@ socket.onclose = function (event) {
 
 socket.addEventListener('message', event => {
   const message = JSON.parse(event.data)
-  console.log(message)
+  console.log(message.data)
+  if (message.code === 1000) {
+    ElMessage.success('流水线执行结果更新！')
+    getTaskInfo()
+    message.data.map(item => {
+      ElNotification({
+        title: '通知',
+        dangerouslyUseHTMLString: true,
+        message:
+          item.status === 'success'
+            ? `<div>
+              <div>流水线【${item.name}】<span style='color:#67c23a;font-weight:600'>执行成功<span></div>
+                <div>成功时间：${item.last_mod_time}</div>
+              </div>`
+            : item.status === 'fail'
+            ? `<div>
+                <div>流水线【${item.name}】<span style='color:#f56c6c;font-weight:600'>执行失败<span></div>
+                <div>最后失败时间：${item.last_mod_time}</div>
+              </div>`
+            : item.status === 'channel'
+            ? `<div>
+                <div>流水线【${item.name}】<span style='color:#909399;font-weight:600'>已取消<span></div>
+                <div>取消时间：${item.last_mod_time}</div>
+              </div>`
+            : `<div>
+                <div>流水线【${item.name}】<span style='color:#e6a23c;font-weight:600'>执行中<span></div>
+                <div>执行时间：${item.last_mod_time}</div>
+              </div>`,
+        duration: 0
+      })
+    })
+  }
 })
 
 function checkWebSocketStatus() {
@@ -377,7 +421,7 @@ function reconnectWebSocket() {
 
 onMounted(() => {
   getTaskInfo()
-  intervalId = setInterval(checkWebSocketStatus, 2000)
+  intervalId = setInterval(checkWebSocketStatus, 10000)
 })
 
 onUnmounted(() => {

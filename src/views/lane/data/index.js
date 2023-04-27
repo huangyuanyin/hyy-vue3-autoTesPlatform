@@ -13,8 +13,8 @@ export const disposeList = {
       ifback: 'n',
       ifrs: 'y',
       startMidwareType: '',
-      sysRest: true,
-      reboot: false,
+      sysRest: false,
+      reboot: true,
       serverConfig: {},
       showServerConfig: [
         { label: '设备IP：', value: '' },
