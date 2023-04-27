@@ -49,7 +49,7 @@ const changeDrawer = (value: any) => {
               plugin: value[2],
               name: name,
               dispose: disposeList2[value[2]],
-              is_pass: false
+              is_pass: ['netSignPrepare', 'netSignArrange'].includes(value[2]) ? false : true
             }
           ]
         }

@@ -137,7 +137,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, onUnmounted } from 'vue'
 import { CirclePlus, CircleCloseFilled, CircleCheckFilled, InfoFilled, WarningFilled } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
@@ -271,6 +271,9 @@ const tableData = [
     ]
   }
 ]
+let intervalId = ref(null)
+const messages = ref([])
+let socket = new WebSocket('ws://10.4.150.27:8021/ws/get_task_result/')
 
 const handleAdd = (type: String, index?: number, row?: User) => {
   taskTemplateDialogVisible.value = false
@@ -291,7 +294,7 @@ const toDetail = (type, item) => {
 const handleRunTask = async id => {
   let res = await runTaskInfoApi({ task_id: id })
   if (res.code === 1000) {
-    ElMessage.success('任务执行成功')
+    ElMessage.success('任务开始执行！')
     taskCurrentPage.value = 1
     getTaskInfo()
   }
@@ -339,8 +342,47 @@ const handleTaskCurrentChange = async (val: number) => {
   await getTaskInfo()
 }
 
+socket.onopen = function (event) {
+  console.log('WebSocket连接已经建立')
+}
+
+socket.onclose = function (event) {
+  console.log('WebSocket连接已经关闭')
+}
+
+socket.addEventListener('message', event => {
+  const message = JSON.parse(event.data)
+  console.log(message)
+})
+
+function checkWebSocketStatus() {
+  if (socket.readyState === WebSocket.CLOSED) {
+    console.log('WebSocket连接已经断开')
+    reconnectWebSocket()
+  } else {
+    console.log('WebSocket连接正常')
+  }
+}
+
+function reconnectWebSocket() {
+  socket = new WebSocket('ws://10.4.150.27:8021/ws/get_task_result/')
+  socket.onopen = function (event) {
+    console.log('WebSocket连接已经重新连接')
+  }
+  socket.onclose = function (event) {
+    console.log('WebSocket连接已经关闭')
+    setTimeout(checkWebSocketStatus, 10000)
+  }
+}
+
 onMounted(() => {
   getTaskInfo()
+  intervalId = setInterval(checkWebSocketStatus, 2000)
+})
+
+onUnmounted(() => {
+  socket.close()
+  clearInterval(intervalId)
 })
 </script>
 
