@@ -53,7 +53,7 @@
               status-icon
             >
               <el-form-item label="可选设备" prop="serverName" :required="true">
-                <el-select
+                <!-- <el-select
                   v-model="item.serverName"
                   placeholder="请选择设备"
                   :key="index"
@@ -66,6 +66,9 @@
                     v-for="(item, index) in selectDeviceList"
                     :key="'selectDeviceList' + index"
                   />
+                </el-select> -->
+                <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="getDeviceInfo(item, index)">
+                  <el-option :label="item.ip" :value="item.ip" v-for="(item, index) in hasDeviceList" :key="'hasDeviceList' + index" />
                 </el-select>
               </el-form-item>
               <el-form-item label="" v-if="item.serverName">
@@ -163,8 +166,8 @@ const props = defineProps({
     default: () => []
   }
 })
-
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
+
 const ishowDrawer = ref(false)
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
@@ -188,6 +191,8 @@ const selectDeviceList = ref([])
 const selectProductList = ref([])
 let currentFlows = ref(JSON.parse(localStorage.getItem('flows')))
 const isPassVerification = ref(false)
+const hasDeviceList = ref([])
+
 watch(
   () => props.taskDetailDrawer,
   () => {
@@ -207,6 +212,16 @@ watch(
   () => {
     // @ts-ignore
     deviceList.value = props.taskDetailInfo
+    hasDeviceList.value = []
+    JSON.parse(localStorage.getItem('flows')).map(item => {
+      item.task_stages.map(it => {
+        it.task_details.map(i => {
+          if (i.plugin === 'netSignPrepare') {
+            hasDeviceList.value.push({ ip: i.dispose[0].serverName })
+          }
+        })
+      })
+    })
   }
 )
 
@@ -215,7 +230,7 @@ const closeDrawer = (value?: any) => {
   emit('closeDrawer', [false, value])
 }
 
-const cancelClick = async (done: () => void) => {
+const cancelClick = async (done?: () => void) => {
   if (!taskDetailFormRef.value) return
   // formEl.resetFields()
   // closeDrawer()
@@ -244,7 +259,7 @@ const cancelClick = async (done: () => void) => {
       // @ts-ignore
       deviceList.value.push(taskDetailForm.name)
       closeDrawer(deviceList.value)
-      done()
+      // done()
     } else {
       console.log('error submit!', fields)
       ElMessage.error('任务名称不能为空！')

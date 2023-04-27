@@ -63,6 +63,7 @@
                   <el-option
                     :label="item.ip"
                     :value="item.ip"
+                    :disabled="item.disabled"
                     v-for="(item, index) in selectDeviceList"
                     :key="'selectDeviceList' + index"
                   />
@@ -141,14 +142,14 @@
                   <el-option label="Tongweb" value="Tongweb" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="是否需要进行系统还原" prop="reboot">
-                <el-radio-group v-model="item.reboot" class="ml-4">
+              <el-form-item label="是否需要进行系统还原" prop="sysRest">
+                <el-radio-group v-model="item.sysRest" class="ml-4">
                   <el-radio :label="true">是</el-radio>
                   <el-radio :label="false">否</el-radio>
                 </el-radio-group>
               </el-form-item>
-              <el-form-item label="是否需要进行设备重启" prop="sysRest">
-                <el-radio-group v-model="item.sysRest" class="ml-4">
+              <el-form-item label="是否需要进行设备重启" prop="reboot">
+                <el-radio-group v-model="item.reboot" class="ml-4">
                   <el-radio :label="true">是</el-radio>
                   <el-radio :label="false">否</el-radio>
                 </el-radio-group>
@@ -257,8 +258,8 @@ const taskDetailFormRules = reactive<FormRules>({
   ifha: [{ required: true, message: '是否安装HA为必填项', trigger: 'change' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }],
   startMidwareType: [{ required: true, message: '请选择开机自启中间件', trigger: 'change' }],
-  reboot: [{ required: true, message: '请选择是否需要进行系统还原', trigger: 'change' }],
-  sysRest: [{ required: true, message: '请选择是否需要进行设备重启', trigger: 'change' }]
+  reboot: [{ required: true, message: '请选择是否需要进行设备重启', trigger: 'change' }],
+  sysRest: [{ required: true, message: '请选择是否需要进行系统还原', trigger: 'change' }]
 })
 const deviceList = ref(JSON.parse(JSON.stringify(disposeList['netSignPrepare'])))
 const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['netSignPrepare'][0])))
@@ -274,6 +275,7 @@ const selectDeviceList = ref([])
 const deployVersionList = ref([])
 const deployVersionFullList = ref([])
 const isPassVerification = ref(true)
+const hasDeviceList = ref([])
 
 watch(
   () => props.taskDetailDrawer,
@@ -294,6 +296,16 @@ watch(
   () => {
     // @ts-ignore
     deviceList.value = props.taskDetailInfo
+    hasDeviceList.value = []
+    JSON.parse(localStorage.getItem('flows')).map(item => {
+      item.task_stages.map(it => {
+        it.task_details.map(i => {
+          if (i.plugin === 'netSignPrepare') {
+            hasDeviceList.value.push(i.dispose[0].serverName)
+          }
+        })
+      })
+    })
   }
 )
 
@@ -302,7 +314,7 @@ const closeDrawer = (value?: any) => {
   emit('closeDrawer', [false, value])
 }
 
-const cancelClick = async (done: () => void) => {
+const cancelClick = async (done?: () => void) => {
   if (!taskDetailFormRef.value) return
   // formEl.resetFields()
   // closeDrawer()
@@ -343,7 +355,7 @@ const cancelClick = async (done: () => void) => {
       deviceList.value.push(taskDetailForm.name)
       console.log(`保存`, deviceList.value)
       closeDrawer(deviceList.value)
-      done()
+      // done()
     } else {
       ElMessage.error('任务名称不能为空！')
     }
@@ -421,6 +433,14 @@ const selectDevice = async val => {
     if (res.code === 1000) {
       // 过滤掉using为true的设备
       selectDeviceList.value = res.data.filter(item => item.using === false)
+      // 遍历hasDeviceList，将已经选择的设备增加字段disabled为true
+      hasDeviceList.value.map(item => {
+        selectDeviceList.value.map(it => {
+          if (item === it.ip) {
+            it.disabled = true
+          }
+        })
+      })
     }
   }
 }
