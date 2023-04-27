@@ -32,17 +32,23 @@
       <el-table-column fixed="right" label="操作" align="center" width="250">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="openLinuxDialog('detail', scope.row.id)"> 详情 </el-button>
-          <el-button link type="primary" size="small" @click="openLinuxDialog('edit', scope.row.id)"> 编辑 </el-button>
-          <el-button link type="primary" size="small" v-if="isShowTermail === false" @click="openConsole(scope.row)"> 在线终端 </el-button>
+          <el-button link type="primary" size="small" v-if="!scope.row.using" @click="openLinuxDialog('edit', scope.row.id)">
+            编辑
+          </el-button>
+          <el-button link type="primary" size="small" v-if="isShowTermail === false" @click="openConsole(scope.row)" disabled>
+            在线终端
+          </el-button>
           <el-button link type="warning" size="small" v-else @click="cloeConsole(scope.row)">关闭终端</el-button>
           <el-popover placement="bottom" :width="1" trigger="click" popper-class="moreGroupPopover">
             <template #reference>
               <el-button link type="info" size="small">更多</el-button>
             </template>
             <div class="moreButton">
-              <el-button v-if="scope.row.device_user === ''" link type="primary" size="small">设备借用 </el-button>
-              <el-button v-else link type="primary" size="small">设备归还 </el-button>
-              <el-button link type="primary" size="small">状态变更 </el-button>
+              <el-button v-if="scope.row.using" link type="warning" size="small" @click="deviceBorrowing(0, scope.row)"
+                >设备归还
+              </el-button>
+              <el-button v-else link type="warning" size="small" @click="deviceBorrowing(1, scope.row)">设备借用 </el-button>
+              <!-- <el-button link type="primary" size="small">状态变更 </el-button> -->
               <el-popconfirm
                 title="确定删除这个测试平台?"
                 trigger="click"
@@ -51,7 +57,7 @@
                 @confirm="deletetDevice(scope.row.id)"
               >
                 <template #reference>
-                  <el-button link type="danger" size="small">删除</el-button>
+                  <el-button v-if="!scope.row.using" link type="danger" size="small">删除</el-button>
                 </template>
               </el-popconfirm>
             </div>
@@ -264,6 +270,7 @@ const addDevice = async () => {
   if (res.code === 1000) {
     ElMessage.success('添加成功')
     resetForm(ruleFormRef.value)
+    systemCurrentPage.value = 1
     getDevice()
   }
 }
@@ -274,6 +281,7 @@ const editDevice = async () => {
   if (res.code === 1000) {
     ElMessage.success('修改成功')
     resetForm(ruleFormRef.value)
+    systemCurrentPage.value = 1
     getDevice()
   }
 }
@@ -283,6 +291,7 @@ const deletetDevice = async row => {
   const res = await deletetDeviceApi(row)
   if (res.code === 1000) {
     ElMessage.success('删除成功')
+    systemCurrentPage.value = 1
     getDevice()
   }
 }
@@ -327,6 +336,23 @@ const closeDialog = () => {
 const cloeConsole = row => {
   row.isShowTermail = false
   isShowTermail.value = false
+}
+
+const deviceBorrowing = async (status, val) => {
+  // fomr中的值等于val中对应的值
+  for (const key in val) {
+    if (form.hasOwnProperty(key)) {
+      form[key] = val[key]
+    }
+  }
+  form['device_manage_id'] = val.id
+  form['using'] = status
+  const res = await editDeviceApi(form)
+  if (res.code === 1000) {
+    status === 1 ? ElMessage.success('设备借用成功！') : ElMessage.success('设备归还成功！')
+    systemCurrentPage.value = 1
+    getDevice()
+  }
 }
 
 const getQueryDevice = async val => {
@@ -391,7 +417,10 @@ onMounted(() => {
     margin-left: 0;
   }
 }
-:deep(.el-popover.el-popper) {
-  min-width: 0px;
+</style>
+
+<style lang="scss">
+.moreGroupPopover {
+  min-width: 60px !important;
 }
 </style>

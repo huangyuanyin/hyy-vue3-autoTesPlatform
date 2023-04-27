@@ -137,3 +137,14 @@ export function getDeployVersionApi(params) {
     params
   })
 }
+
+/* ---------------------------- /devops/task_info/stop/ ---------------------------- */
+
+export function stopTaskApi(params) {
+  return request({
+    url: `/devops/task_info/stop/`,
+    method: 'POST',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}

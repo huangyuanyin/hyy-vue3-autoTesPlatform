@@ -3,14 +3,14 @@
     <el-button type="primary" @click="handleEdit('add')" style="margin-bottom: 20px"> 新增 </el-button>
     <!-- <el-button type="primary" @click="openDownloadDialog = true" style="margin-left: 20px; margin-bottom: 20px"> 拉取包 </el-button> -->
     <el-table :data="state.buildData" border stripe v-loading="isLoading">
-      <el-table-column prop="file_name" label="包名称" align="center" />
+      <el-table-column prop="file_name" label="包名称" align="center" width="500" />
       <el-table-column prop="type" label="包类别" align="center">
         <template #default="scope">
           <el-tag v-if="scope.row.type === 'baseline'" type="success">待测版本</el-tag>
           <el-tag v-else type="warning">release版本</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="title" label="标识" align="center">
+      <el-table-column prop="title" label="标识" align="center" width="150">
         <template #default="scope">
           <el-tag v-if="scope.row.title === 'sar'">信创</el-tag>
           <el-tag v-else type="info">非信创</el-tag>

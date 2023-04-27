@@ -3,7 +3,7 @@
     <el-tab-pane label="设备管理" name="systemManage">
       <SystemManage />
     </el-tab-pane>
-    <el-tab-pane label="脚本管理" name="scriptMmanage">
+    <el-tab-pane label="脚本管理" name="scriptMmanage" disabled>
       <ScriptMmanage />
     </el-tab-pane>
     <el-tab-pane label="产品包" name="productPackage">

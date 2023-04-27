@@ -24,6 +24,7 @@
       </el-form-item>
       <el-form-item label="文件上传" label-width="140px" v-if="form.upload_type === 'hands' && dialogTitle === '新增'">
         <el-upload
+          ref="uploadFile"
           class="uploadFile-demo"
           style="width: 214px"
           drag
@@ -36,6 +37,9 @@
         >
           <el-icon class="el-icon--upload"><upload-filled /></el-icon>
           <div class="el-upload__text">拖拽文件至此处或<em>点击上传</em></div>
+          <template #tip>
+            <div class="el-upload__tip text-red">Tips：一次只能上传一个文件,新文件将会覆盖旧文件</div>
+          </template>
         </el-upload>
       </el-form-item>
       <el-form-item label="拉取地址" label-width="140px" prop="push_path" v-if="form.upload_type === 'url_pull' && dialogTitle === '新增'">
@@ -55,7 +59,8 @@
 import { ref, reactive, watch } from 'vue'
 import { ElMessage, ElLoading } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
-import type { FormInstance, FormRules } from 'element-plus'
+import { genFileId } from 'element-plus'
+import type { FormInstance, FormRules, UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
 import { addProductPackageApi, editProductPackageApi, getProductPackageApi } from '@/api/NetDevOps/index'
 
 const props = defineProps({
@@ -75,6 +80,7 @@ const props = defineProps({
 const emit = defineEmits(['cancel'])
 
 const dialogFormVisible = ref(false)
+const uploadFile = ref<UploadInstance>()
 const form = reactive({
   file_name: '',
   type: '',
@@ -103,15 +109,18 @@ const handleUpload = async (file, fileList) => {
   console.log(`output->uploadFileList.value`, uploadFileList.value)
 }
 
-const handleExceed = (files, fileList) => {
-  ElMessage.error('一次只能上传一个包！')
+const handleExceed: UploadProps['onExceed'] = files => {
+  uploadFile.value!.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  uploadFile.value!.handleStart(file)
 }
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      delete form.file_name
+      const { file_name, ...params } = form
       if (form.upload_type === 'hands' && uploadFileList.value.length <= 0 && props.dialogTitle === '新增') {
         ElMessage.error('至少上传一个包！')
         return
@@ -121,7 +130,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       fd.append('type', form.type)
       fd.append('upload_type', form.upload_type)
       fd.append('title', form.title)
-      props.dialogTitle === '新增' ? addProductPackage(form.upload_type === 'hands' ? fd : form) : editProductPackage(form)
+      props.dialogTitle === '新增' ? addProductPackage(form.upload_type === 'hands' ? fd : params) : editProductPackage(params)
     }
   })
 }
@@ -136,8 +145,7 @@ const addProductPackage = async (data: any) => {
   loading.close()
   if (res.code === 1000) {
     form.push_path = ''
-    ruleFormRef.value.resetFields()
-    emit('cancel', false)
+    cancel(ruleFormRef.value)
     ElMessage.success('新增成功！')
   }
 }
@@ -147,19 +155,21 @@ const editProductPackage = async (data: any) => {
   const res = await editProductPackageApi(data)
   if (res.code === 1000) {
     form.push_path = ''
-    ruleFormRef.value.resetFields()
-    emit('cancel', false)
+    cancel(ruleFormRef.value)
     ElMessage.success('编辑成功！')
   }
 }
 
 const closeDialog = () => {
-  ruleFormRef.value.resetFields()
-  emit('cancel', false)
+  cancel(ruleFormRef.value)
 }
 
 const cancel = (formEl: FormInstance | undefined) => {
   uploadFileList.value = []
+  if (props.dialogTitle === '新增') {
+    uploadFile.value.clearFiles()
+  }
+  ruleFormRef.value.resetFields()
   formEl.resetFields()
   emit('cancel', false)
 }
@@ -192,5 +202,20 @@ watch(
 <style lang="scss" scoped>
 :deep(.el-input) {
   width: 400px;
+}
+.uploadFile-demo {
+  width: auto !important;
+  :deep(.el-upload) {
+    width: 214px;
+  }
+  :deep(.el-upload-list__item-info, .el-upload-list) {
+    width: auto;
+  }
+  :deep(.el-upload-list__item) {
+    width: 110%;
+  }
+  :deep(.el-upload__tip) {
+    color: #f56c6c;
+  }
 }
 </style>

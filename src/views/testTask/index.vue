@@ -70,7 +70,20 @@
             @confirm="handleRunTask(item.row.id)"
           >
             <template #reference>
-              <el-button link type="warning" size="small" v-if="!item.row.draft"> 执行 </el-button>
+              <el-button link type="warning" size="small" v-if="!item.row.draft && item.row.status !== 'in_progress'"> 执行 </el-button>
+            </template>
+          </el-popconfirm>
+          <el-popconfirm
+            title="确定终止运行这个任务流水线?"
+            trigger="click"
+            :icon="WarningFilled"
+            icon-color="#F56C6C"
+            confirm-button-text="确认终止"
+            cancel-button-text="取消"
+            @confirm="handleEndTask(item.row.id)"
+          >
+            <template #reference>
+              <el-button link type="info" size="small" v-if="!item.row.draft && item.row.status === 'in_progress'"> 停止 </el-button>
             </template>
           </el-popconfirm>
           <el-button link type="primary" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
@@ -125,11 +138,11 @@
 
 <script lang="ts" setup>
 import { reactive, ref, onMounted } from 'vue'
-import { CirclePlus, CircleCloseFilled, CircleCheckFilled, InfoFilled } from '@element-plus/icons-vue'
+import { CirclePlus, CircleCloseFilled, CircleCheckFilled, InfoFilled, WarningFilled } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
 import preview2 from '@/assets/preview2.png'
-import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi } from '@/api/NetDevOps/index'
+import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi } from '@/api/NetDevOps/index'
 import { ElMessage } from 'element-plus'
 
 interface User {
@@ -279,6 +292,15 @@ const handleRunTask = async id => {
   let res = await runTaskInfoApi({ task_id: id })
   if (res.code === 1000) {
     ElMessage.success('任务执行成功')
+    taskCurrentPage.value = 1
+    getTaskInfo()
+  }
+}
+
+const handleEndTask = async id => {
+  let res = await stopTaskApi({ task_id: id })
+  if (res.code === 1000) {
+    ElMessage.success('任务终止成功')
     taskCurrentPage.value = 1
     getTaskInfo()
   }
