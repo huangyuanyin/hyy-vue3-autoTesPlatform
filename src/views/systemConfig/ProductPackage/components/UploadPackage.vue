@@ -5,9 +5,9 @@
         <el-input v-model="form.file_name" :disabled="dialogTitle !== '新增'"></el-input>
       </el-form-item>
       <el-form-item label="包类别" label-width="140px" prop="type">
-        <el-select v-model="form.type" placeholder="请选择包类别" :disabled="dialogTitle !== '新增'">
-          <el-option label="待测版本" value="baseline" />
-          <el-option label="release版本" value="project" />
+        <el-select v-model="form.type" placeholder="请选择包类别">
+          <el-option label="待测版本" value="project" />
+          <el-option label="release版本" value="baseline" />
         </el-select>
       </el-form-item>
       <el-form-item label="标识" label-width="140px" prop="title">

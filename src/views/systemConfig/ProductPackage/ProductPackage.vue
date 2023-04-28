@@ -6,7 +6,7 @@
       <el-table-column prop="file_name" label="包名称" align="center" width="500" />
       <el-table-column prop="type" label="包类别" align="center">
         <template #default="scope">
-          <el-tag v-if="scope.row.type === 'baseline'" type="success">待测版本</el-tag>
+          <el-tag v-if="scope.row.type === 'project'" type="success">待测版本</el-tag>
           <el-tag v-else type="warning">release版本</el-tag>
         </template>
       </el-table-column>

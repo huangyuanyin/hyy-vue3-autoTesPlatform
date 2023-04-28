@@ -192,7 +192,7 @@ onMounted(() => {
   if (route.query.tem && route.query.tem !== 'noUse') {
     data.task_swim_lanes = JSON.parse(localStorage.getItem('taskTemplateObj'))
   }
-  route.query?.type === 'detail' ? (isDetail.value = true) : (isDetail.value = false)
+  route.path === '/testTask/detailTestTask' ? (isDetail.value = true) : (isDetail.value = false)
   if (route.query.id) {
     getTaskInfo()
   }

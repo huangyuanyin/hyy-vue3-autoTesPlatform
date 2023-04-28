@@ -74,6 +74,24 @@ const routes = [
             component: () => import('@/views/lane/index.vue')
           },
           {
+            path: '/testTask/editTestTask',
+            name: 'EditTestTask',
+            meta: {
+              title: '编辑任务',
+              keepAlive: false
+            },
+            component: () => import('@/views/lane/index.vue')
+          },
+          {
+            path: '/testTask/detailTestTask',
+            name: 'detailTestTask',
+            meta: {
+              title: '任务详情',
+              keepAlive: false
+            },
+            component: () => import('@/views/lane/index.vue')
+          },
+          {
             path: '/testResult',
             name: 'TestResult',
             meta: {

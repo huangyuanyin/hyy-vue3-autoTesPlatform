@@ -300,8 +300,11 @@ const handleAdd = (type: String, index?: number, row?: User) => {
 }
 
 const toDetail = (type, item) => {
-  type = type === 'detail' ? 'detail' : undefined
-  router.push({ path: '/testTask/addTestTask', query: { id: item.id, type } })
+  if (type === 'detail') {
+    router.push({ path: '/testTask/detailTestTask', query: { id: item.id } })
+  } else {
+    router.push({ path: '/testTask/editTestTask', query: { id: item.id } })
+  }
 }
 
 const handleRunTask = async id => {
