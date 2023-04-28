@@ -71,6 +71,7 @@ service.interceptors.response.use(
     // 对响应数据做点什么
     if (response.data.code != '1000') {
       ElMessage({
+        dangerouslyUseHTMLString: true,
         message: response.data?.msg || '请求失败',
         type: 'error',
         duration: 3500

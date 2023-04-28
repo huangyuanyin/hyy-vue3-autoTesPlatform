@@ -50,7 +50,7 @@
               <el-button v-else link type="warning" size="small" @click="deviceBorrowing(1, scope.row)">设备借用 </el-button>
               <!-- <el-button link type="primary" size="small">状态变更 </el-button> -->
               <el-popconfirm
-                title="确定删除这个测试平台?"
+                title="确定删除该设备?"
                 trigger="click"
                 confirm-button-text="确认删除"
                 cancel-button-text="取消"

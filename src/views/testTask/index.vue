@@ -546,4 +546,7 @@ onUnmounted(() => {
   background: linear-gradient(45deg, #626f6f, #626f6f) !important;
   right: 0 !important;
 }
+.el-message--error {
+  white-space: pre-line;
+}
 </style>
