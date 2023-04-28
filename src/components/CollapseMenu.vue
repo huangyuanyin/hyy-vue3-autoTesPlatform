@@ -56,7 +56,7 @@ export default defineComponent({
     const store = useAppStore()
     const defaultActiveIndex = ref('')
     onMounted(() => {
-      defaultActiveIndex.value = window.location.hash.replace('#', '')
+      defaultActiveIndex.value = '/' + window.location.hash.replace('#', '').split('/')[1]
     })
     return {
       store,
