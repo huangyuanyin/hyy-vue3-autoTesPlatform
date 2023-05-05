@@ -89,7 +89,7 @@ const routes = [
               title: '任务详情',
               keepAlive: false
             },
-            component: () => import('@/views/lane/index.vue')
+            component: () => import('@/views/testDetail/index.vue')
           },
           {
             path: '/testResult',

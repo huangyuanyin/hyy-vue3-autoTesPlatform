@@ -148,3 +148,13 @@ export function stopTaskApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/task_history/ ---------------------------- */
+export function getTaskHistoryApi(params) {
+  return request({
+    url: `/devops/task_history/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}

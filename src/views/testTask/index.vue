@@ -2,7 +2,7 @@
   <div class="testTask-wrap">
     <!-- <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="taskTemplateDialogVisible = true"> 新建任务</el-button> -->
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="handleAdd('noUse')"> 新建任务</el-button>
-    <el-table :data="taskTableData" border style="width: 100%" stripe v-loading="taskLoading" :height="isHeight">
+    <el-table :data="taskTableData" border style="width: 100%" stripe v-loading="taskLoading" max-height="70vh">
       <el-table-column prop="name" label="任务名称" width="250" align="center" />
       <el-table-column prop="draft" label="是否草稿" align="center" width="180">
         <template #default="item">
@@ -33,7 +33,7 @@
                   <el-icon v-if="item.row.status === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
-                  <el-icon v-if="item.row.status === 'in_progress'" style="color: #409eff"><RefreshRight /></el-icon>
+                  <el-icon class="run-icon" v-if="item.row.status === 'in_progress'" style="color: #409eff"><RefreshRight /></el-icon>
                   <el-icon v-if="item.row.status === 'channel'" style="color: #909399"><RemoveFilled /></el-icon>
                 </li>
               </el-tooltip>
@@ -85,28 +85,32 @@
             @confirm="handleEndTask(item.row.id)"
           >
             <template #reference>
-              <el-button link type="info" size="small" v-if="!item.row.draft && item.row.status === 'in_progress'"> 取消 </el-button>
+              <el-button link style="color: #ff99ff" size="small" v-if="!item.row.draft && item.row.status === 'in_progress'">
+                取消
+              </el-button>
             </template>
           </el-popconfirm>
-          <el-button link type="primary" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
+          <el-button link type="success" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
           <el-button v-if="item.row.status !== 'in_progress'" link type="primary" size="small" @click="toDetail('edit', item.row)">
             编辑
           </el-button>
-          <el-popconfirm
-            title="确定删除这个任务?"
-            trigger="click"
-            confirm-button-text="确认删除"
-            cancel-button-text="取消"
-            @confirm="handleDelete(item.row.id)"
-          >
-            <template #reference>
-              <el-button v-if="item.row.status !== 'in_progress'" link type="danger" size="small"> 删除 </el-button>
+          <el-dropdown>
+            <el-button link type="info" size="small"> 更多 </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>
+                  <el-button v-if="item.row.status !== 'in_progress'" link type="danger" size="small" @click="handleDelete(item.row)">
+                    删除
+                  </el-button>
+                </el-dropdown-item>
+              </el-dropdown-menu>
             </template>
-          </el-popconfirm>
+          </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
     <el-pagination
+      v-if="!taskLoading"
       v-model:currentPage="taskCurrentPage"
       v-model:page-size="taskPageSize"
       :page-sizes="[10, 20, 30, 40]"
@@ -155,7 +159,7 @@ import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
 import preview2 from '@/assets/preview2.png'
 import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi } from '@/api/NetDevOps/index'
-import { ElMessage, ElNotification } from 'element-plus'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 
 interface User {
   id: string
@@ -169,7 +173,6 @@ const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
 const taskTotal = ref(0)
 const taskLoading = ref(false)
-const isHeight = ref('70vh')
 const taskTemplateDialogVisible = ref(false)
 const taskTableData = ref([])
 const statusMap = {
@@ -325,13 +328,26 @@ const handleEndTask = async id => {
   }
 }
 
-const handleDelete = async id => {
-  let res = await deleteTaskInfoApi(id)
-  if (res.code === 1000) {
-    ElMessage.success('删除成功')
-    taskCurrentPage.value = 1
-    getTaskInfo()
-  }
+const handleDelete = async val => {
+  ElMessageBox.confirm(`确定删除【${val.name}】此流水线?`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      let res = await deleteTaskInfoApi(val.id)
+      if (res.code === 1000) {
+        ElMessage.success('删除成功')
+        taskCurrentPage.value = 1
+        getTaskInfo()
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消删除'
+      })
+    })
 }
 
 const getTaskInfo = async () => {
@@ -436,6 +452,9 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .testTask-wrap {
   margin: 20px 0 0 20px;
+  .el-dropdown {
+    margin-left: 12px;
+  }
   .el-pagination {
     display: flex;
     justify-content: end;
@@ -444,6 +463,17 @@ onUnmounted(() => {
   .pipe-status {
     display: flex;
     justify-content: flex-start;
+    .run-icon {
+      animation: run 0.8s infinite;
+    }
+    @keyframes run {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
     ul {
       display: flex;
       padding-left: 0px;
@@ -548,5 +578,10 @@ onUnmounted(() => {
 }
 .el-message--error {
   white-space: pre-line;
+}
+.testTask-wrap {
+  .el-button--small {
+    --el-button-size: 2.313131vw;
+  }
 }
 </style>
