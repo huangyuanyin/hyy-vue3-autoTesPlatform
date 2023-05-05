@@ -33,7 +33,7 @@
                   <el-icon v-if="item.row.status === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
-                  <el-icon class="run-icon" v-if="item.row.status === 'in_progress'" style="color: #409eff"><RefreshRight /></el-icon>
+                  <svg-icon v-if="item.row.status === 'in_progress'" class="run-icon" iconName="icon-shuaxin"></svg-icon>
                   <el-icon v-if="item.row.status === 'channel'" style="color: #909399"><RemoveFilled /></el-icon>
                 </li>
               </el-tooltip>

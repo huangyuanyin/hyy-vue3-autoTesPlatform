@@ -1,5 +1,4 @@
 <template>
-  <!-- :indent-with-tab="true" 是否自动获取焦点-->
   <codemirror
     v-model="props.code"
     placeholder="Code gose here..."
@@ -9,7 +8,6 @@
     :extensions="extensions"
   />
 </template>
-<!-- @ready="ready('ready', $event)" @change="Change('change', $event)" @focus="focus('focus', $event)" @blur="blur('blur', $event)" -->
 
 <script lang="ts" setup>
 import { Codemirror } from 'vue-codemirror'

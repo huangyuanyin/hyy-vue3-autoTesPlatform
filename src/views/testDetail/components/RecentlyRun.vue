@@ -22,8 +22,8 @@
           <span class="info-label">持续时间</span>
           <span>16s</span>
           <el-tooltip
-            class="box-item"
-            effect="dark"
+            popper-class="box-item"
+            effect="customized"
             content="流水线从开始运行到运行结束的间隔时长，并非流水线实际的计费耗时，流水线计费耗时规则"
             placement="top"
           >
@@ -44,63 +44,97 @@
     </section>
     <div class="pipeline-instance">
       <div class="pipeline-instance__content">
-        <div class="flow-groups">
+        <div class="flow-groups" v-for="(item, index) in groups" :key="'group' + index">
           <div class="flow-group">
-            <div class="group-head">构建</div>
+            <div class="group-head">{{ item.name }}</div>
             <div class="stages">
-              <div class="stage">
-                <div class="card first-stage">
+              <div class="stage" :class="[index === 0 ? 'first-stage' : '', index === groups.length - 1 ? 'last-stage' : '']">
+                <div class="card" :class="[cardTyp[it.status]]" v-for="(it, index) in item.card" :key="'card' + index">
                   <div class="content-job">
                     <div class="job-card">
-                      <el-icon class="status-icon success"><SuccessFilled /></el-icon>
-                      <div class="card-content">
-                        <div class="card-title">java代码扫描</div>
-                        <div class="card-info">
-                          <span>15s</span>
-                          <div class="operate">
-                            <div class="report">
-                              <el-icon><Document /></el-icon> <span>扫描报告</span>
+                      <el-tooltip popper-class="box-item" effect="customized" :content="contentType[it.status]" placement="top">
+                        <svg-icon
+                          class="status-icon"
+                          :class="[it.status === 'in_progress' ? 'run-icon' : '']"
+                          :iconName="iconType[it.status]"
+                          className="icon"
+                          style="width: 24px"
+                        ></svg-icon>
+                      </el-tooltip>
+                      <div class="card-content" :class="[cardTyp[it.status]]">
+                        <div class="card-title">{{ it.name }}</div>
+                        <div class="success-comp" v-if="it.status === 'success'">
+                          <div class="card-info">
+                            <span>15s</span>
+                            <div class="operate">
+                              <div class="report">
+                                <el-icon><Document /></el-icon> <span>扫描报告</span>
+                              </div>
+                              <div class="log" @click="handleLog(it)">
+                                <el-icon><Document /></el-icon> <span>日志</span>
+                              </div>
                             </div>
-                            <div class="log">
-                              <el-icon><Document /></el-icon> <span>日志</span>
+                          </div>
+                          <div class="card-num">
+                            <div class="stat-info">
+                              <div class="stat-info-item" v-for="(item, index) in statList" :key="'statList' + index">
+                                <div class="stat-info-item-value" :class="[statColor[item.title]]">{{ item.num }}</div>
+                                <div class="stat-info-item-desc">{{ item.title }}</div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                        <div class="card-num">
-                          <div class="stat-info">
-                            <div class="stat-info-item" v-for="(item, index) in statList" :key="'statList' + index">
-                              <div class="stat-info-item-value" :class="[statColor[item.title]]">{{ item.num }}</div>
-                              <div class="stat-info-item-desc">{{ item.title }}</div>
+                        <div class="fail-comp" v-if="it.status === 'fail'">
+                          <div class="card-info">
+                            <span>15s</span>
+                            <div class="operate">
+                              <div class="log" @click="handleLog(it)">
+                                <el-icon><Document /></el-icon><span>日志</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="card first-stage">
-                  <div class="content-job">
-                    <div class="job-card">
-                      <el-icon class="status-icon success"><SuccessFilled /></el-icon>
-                      <div class="card-content">
-                        <div class="card-title">java代码扫描</div>
-                        <div class="card-info">
-                          <span>15s</span>
-                          <div class="operate">
-                            <div class="report">
-                              <el-icon><Document /></el-icon> <span>扫描报告</span>
-                            </div>
-                            <div class="log">
-                              <el-icon><Document /></el-icon> <span>日志</span>
-                            </div>
+                          <div class="message">
+                            <div>运行失败，请查看日志！</div>
+                          </div>
+                          <div class="button" @click="handleRun(it)">
+                            <div>重试</div>
                           </div>
                         </div>
-                        <div class="card-num">
-                          <div class="stat-info">
-                            <div class="stat-info-item" v-for="(item, index) in statList" :key="'statList' + index">
-                              <div class="stat-info-item-value" :class="[statColor[item.title]]">{{ item.num }}</div>
-                              <div class="stat-info-item-desc">{{ item.title }}</div>
+                        <div class="run-comp" v-if="it.status === 'in_progress'">
+                          <div class="card-info">
+                            <span>15s</span>
+                            <div class="operate">
+                              <div class="log" @click="handleLog(it)">
+                                <el-icon><Document /></el-icon> <span>日志</span>
+                              </div>
                             </div>
+                          </div>
+                          <div class="message">
+                            <div>运行中...</div>
+                          </div>
+                          <div class="button" @click="handleChannel(it)">
+                            <div>取消</div>
+                          </div>
+                        </div>
+                        <div class="channel-comp" v-if="it.status === 'channel'">
+                          <div class="card-info">
+                            <span>15s</span>
+                            <div class="operate">
+                              <div class="log" @click="handleLog(it)">
+                                <el-icon><Document /></el-icon> <span>日志</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="message">
+                            <div>用户已取消</div>
+                          </div>
+                          <div class="button" @click="handleRun(it)">
+                            <div>重试</div>
+                          </div>
+                        </div>
+                        <div class="wait-comp" v-if="it.status === 'not_start'">
+                          <div class="time">
+                            <div>0s</div>
                           </div>
                         </div>
                       </div>
@@ -110,101 +144,7 @@
               </div>
             </div>
           </div>
-          <div class="flow-group-splitline">
-            <div
-              style="width: 10px; height: 10px; position: absolute; top: 13.5%; left: 40%; border-radius: 50%; background-color: #dbdbdb"
-            ></div>
-          </div>
-        </div>
-        <div class="flow-groups">
-          <div class="flow-group">
-            <div class="group-head">部署</div>
-            <div class="stages">
-              <div class="stage">
-                <div class="card">
-                  <div class="content-job">
-                    <div class="job-card">
-                      <el-icon class="status-icon success"><SuccessFilled /></el-icon>
-                      <div class="card-content">
-                        <div class="card-title">java代码扫描</div>
-                        <div class="card-info">
-                          <span>15s</span>
-                          <div class="operate">
-                            <div class="report">
-                              <el-icon><Document /></el-icon> <span>扫描报告</span>
-                            </div>
-                            <div class="log">
-                              <el-icon><Document /></el-icon> <span>日志</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="card-num">
-                          <div class="stat-info">
-                            <div class="stat-info-item" v-for="(item, index) in statList" :key="'statList' + index">
-                              <div class="stat-info-item-value" :class="[statColor[item.title]]">{{ item.num }}</div>
-                              <div class="stat-info-item-desc">{{ item.title }}</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="card">
-                  <div class="content-job">
-                    <div class="job-card">
-                      <el-icon class="status-icon fail"><CircleCloseFilled /></el-icon>
-                      <div class="card-content fail-card">
-                        <div class="card-title">环境部署</div>
-                        <div class="card-info">
-                          <span>2分14s</span>
-                          <div class="operate">
-                            <div class="log">
-                              <el-icon><Document /></el-icon> <span>日志</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="message">
-                          <div>运行失败，请查看日志！</div>
-                        </div>
-                        <div class="button">
-                          <div>重试</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="flow-group-splitline">
-            <div
-              style="width: 10px; height: 10px; position: absolute; top: 13.5%; left: 40%; border-radius: 50%; background-color: #dbdbdb"
-            ></div>
-          </div>
-        </div>
-        <div class="flow-groups">
-          <div class="flow-group">
-            <div class="group-head">接口测试</div>
-            <div class="stages">
-              <div class="stage">
-                <div class="card wait-card">
-                  <div class="content-job">
-                    <div class="job-card">
-                      <el-icon class="status-icon waiting"><Eleme /></el-icon>
-                      <div class="card-content">
-                        <div class="card-title">接口测试</div>
-                        <div class="card-info">
-                          <span>0s</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="flow-group-splitline">
+          <div class="flow-group-splitline" v-if="index !== groups.length - 1">
             <div
               style="width: 10px; height: 10px; position: absolute; top: 13.5%; left: 40%; border-radius: 50%; background-color: #dbdbdb"
             ></div>
@@ -212,30 +152,54 @@
         </div>
       </div>
     </div>
+    <el-dialog
+      v-model="logDialog"
+      :title="logTitle"
+      width="50%"
+      :before-close="handleClose"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <CodeMirror :code="log" :codeStyle="{ height: '60vh' }" />
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import {
-  CirclePlusFilled,
-  CaretRight,
-  CaretBottom,
-  RemoveFilled,
-  Plus,
-  CircleCloseFilled,
-  QuestionFilled,
-  SuccessFilled,
-  Document,
-  Eleme
-} from '@element-plus/icons-vue'
+import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import CodeMirror from '@/components/CodeMirror.vue'
 
+const logDialog = ref(false)
+const logTitle = ref('')
+const log = ref('暂无日志...')
+const cardTyp = {
+  success: '',
+  fail: 'fail-card',
+  in_progress: 'run-card',
+  not_start: 'wait-card',
+  channel: 'channel-card'
+}
+const iconType = {
+  success: 'icon-zhengque',
+  fail: 'icon-cuowu',
+  in_progress: 'icon-shuaxin',
+  not_start: 'icon-shijian',
+  channel: 'icon-cuowu'
+}
+const contentType = {
+  success: '运行成功',
+  fail: '运行失败',
+  in_progress: '运行中',
+  not_start: '等待中',
+  channel: '已取消'
+}
 const infoList = ref([
   { title: '代码变更', num: 0 },
   { title: '运行产物', num: 0 },
   { title: '环境变量', num: 7 }
 ])
-
 const statList = ref([
   { title: '总数', num: 2 },
   { title: '阻塞', num: 0 },
@@ -247,6 +211,46 @@ const statColor = {
   阻塞: 'block',
   严重: 'serious',
   一般: 'yiban'
+}
+const groups = ref([
+  {
+    name: '环境准备',
+    card: [
+      { name: '准备一', status: 'success' },
+      { name: '准备二', status: 'channel' }
+    ]
+  },
+  {
+    name: '环境部署',
+    card: [
+      { name: '部署一', status: 'fail' },
+      { name: '部署二', status: 'in_progress' }
+    ]
+  },
+  {
+    name: '接口测试',
+    card: [
+      { name: '接口测试一', status: 'not_start' },
+      { name: '接口测试二', status: 'not_start' }
+    ]
+  }
+])
+
+const handleChannel = (item: any) => {
+  ElMessage.warning('取消')
+}
+
+const handleLog = (item: any) => {
+  logDialog.value = true
+  logTitle.value = item.name
+}
+
+const handleRun = (item: any) => {
+  ElMessage.warning('重试')
+}
+
+const handleClose = (done: () => void) => {
+  done()
 }
 </script>
 
@@ -401,6 +405,7 @@ const statColor = {
                 position: relative;
                 cursor: pointer;
                 &::before {
+                  pointer-events: none;
                   content: '';
                   position: absolute;
                   left: -12%;
@@ -436,17 +441,50 @@ const statColor = {
                     z-index: 9;
                     font-size: 24px;
                   }
-                  .fail {
+                  .run-icon {
+                    animation: run 0.7s infinite;
+                  }
+                  @keyframes run {
+                    0% {
+                      transform: rotate(0deg);
+                    }
+                    100% {
+                      transform: rotate(360deg);
+                    }
+                  }
+                  .fail,
+                  .channel {
                     color: #e62412;
                   }
                   .success {
                     color: #22b066;
                   }
-                  .waiting {
+                  .in_progress {
+                    color: #409eff;
+                  }
+                  .not_start {
                     color: #909399;
                   }
                   .fail-card {
                     border-left-color: #f7aaa3 !important;
+                    .card-title {
+                      flex: 1;
+                    }
+                  }
+                  .wait-card {
+                    border-left-color: #dae0e5 !important;
+                  }
+                  .run-card {
+                    border-left-color: #75c0f2 !important;
+                    .card-title {
+                      flex: 1;
+                    }
+                  }
+                  .channel-card {
+                    border-left-color: #f7aaa3 !important;
+                    .card-title {
+                      flex: 1;
+                    }
                   }
                   .card-content {
                     height: 165px;
@@ -467,11 +505,28 @@ const statColor = {
                       color: #292929;
                       font-size: 14px;
                     }
+                    .wait-comp {
+                      .time {
+                        background-color: #fff;
+                        padding: 10px 20px 16px 23px;
+                        color: #8b8b8b;
+                        font-size: 12px;
+                      }
+                    }
+                    .run-comp {
+                      .message {
+                        color: #1b9aee;
+                      }
+                      .button {
+                        color: #e62412;
+                      }
+                    }
                     .card-info {
                       padding: 10px 20px 16px 23px;
                       display: flex;
                       justify-content: space-between;
                       align-items: center;
+                      flex: 1;
                       background-color: #fff;
                       span {
                         color: #8b8b8b;
@@ -554,8 +609,8 @@ const statColor = {
                 }
               }
               .wait-card {
-                display: flex;
-                align-items: flex-start;
+                display: flex !important;
+                flex-direction: column !important;
                 .card-content {
                   height: 75px !important;
                   border-left-color: #dbdbdb !important;
@@ -564,11 +619,22 @@ const statColor = {
                   margin-top: 5%;
                 }
               }
-              .first-stage {
+            }
+            .first-stage {
+              .card {
                 &::before {
-                  left: 3px;
-                  width: 105%;
+                  left: 3px !important;
+                  width: 105% !important;
                   border-left: none !important;
+                }
+              }
+            }
+            .last-stage {
+              .card {
+                &::before {
+                  right: -3px !important;
+                  width: 105% !important;
+                  border-right: none !important;
                 }
               }
             }
@@ -577,5 +643,18 @@ const statColor = {
       }
     }
   }
+}
+</style>
+
+<style lang="scss">
+.box-item {
+  padding: 6px 12px !important;
+  background: linear-gradient(90deg, rgb(98, 101, 111), rgb(98, 101, 111)) !important;
+  color: #fff;
+}
+
+.box-item .el-popper__arrow::before {
+  background: linear-gradient(45deg, #626f6f, #626f6f) !important;
+  right: 0 !important;
 }
 </style>
