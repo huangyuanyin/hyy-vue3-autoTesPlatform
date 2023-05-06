@@ -74,6 +74,13 @@
     @closeDrawer="closeDrawer"
     @deleteTask="handleRemoveParallel(taskId)"
   />
+  <InterfaceTest
+    :taskDetailName="taskDetailName"
+    :taskDetailInfo="taskDetailInfo"
+    :taskDetailDrawer="interfaceTestDrawer"
+    @closeDrawer="closeDrawer"
+    @deleteTask="handleRemoveParallel(taskId)"
+  />
   <ExecuteCommand
     :taskDetailName="taskDetailName"
     :taskDetailInfo="taskDetailInfo"
@@ -90,6 +97,7 @@ import { ref } from 'vue'
 import TaskDetailDrawer from '@/components/TestTask/TaskDetailDrawer.vue'
 import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 import ExecuteCommand from '@/components/TestTask/ExecuteCommand.vue'
+import InterfaceTest from '@/components/TestTask/InterfaceTest.vue'
 import { ElMessage } from 'element-plus'
 import { RemoveFilled, WarningFilled } from '@element-plus/icons-vue'
 import { disposeList } from '../data'
@@ -113,6 +121,7 @@ const drawer = ref(false)
 const taskDetailDrawer = ref(false)
 const taskDetailInfo = ref([])
 const NetSignProjectDeployDrawer = ref(false)
+const interfaceTestDrawer = ref(false)
 const executeCommandDrawer = ref(false)
 const taskDetailName = ref('')
 const taskId = ref('')
@@ -144,7 +153,11 @@ const handleRemoveParallel = (id: any) => {
 }
 
 const triggerMethod = (value: boolean) => {
-  automatic.value = value
+  if (automatic.value) {
+    ElMessage.warning('暂不支持手动触发！')
+    return
+  }
+  // automatic.value = value
 }
 
 const openTaskDetailDrawer = (item: any, id: any) => {
@@ -155,7 +168,10 @@ const openTaskDetailDrawer = (item: any, id: any) => {
       break
     case 'netSignArrange':
       NetSignProjectDeployDrawer.value = true
-      // 移除item.dispose中的倒数第二个元素
+      taskDetailInfo.value = item.dispose
+      break
+    case 'interfaceTest':
+      interfaceTestDrawer.value = true
       taskDetailInfo.value = item.dispose
       break
     case 'executeCommand':
@@ -174,6 +190,7 @@ const closeDrawer = (value?: any) => {
   }
   taskDetailDrawer.value = value[0]
   NetSignProjectDeployDrawer.value = value[0]
+  interfaceTestDrawer.value = value[0]
   executeCommandDrawer.value = value[0]
 }
 

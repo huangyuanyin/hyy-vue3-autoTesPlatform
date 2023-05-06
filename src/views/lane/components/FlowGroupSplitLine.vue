@@ -39,7 +39,16 @@ const changeDrawer = (value: any) => {
   }
   drawer.value = value[0]
   if (!drawer.value) {
-    const name = value[1]
+    let name = ''
+    if (value[1].indexOf('环境准备') !== -1) {
+      name = '环境准备'
+    }
+    if (value[1].indexOf('项目部署') !== -1) {
+      name = '项目部署'
+    }
+    if (value[1].indexOf('测试') !== -1) {
+      name = '测试'
+    }
     emit('add-stage', {
       name,
       task_stages: [
@@ -47,9 +56,9 @@ const changeDrawer = (value: any) => {
           task_details: [
             {
               plugin: value[2],
-              name: name,
+              name: value[1],
               dispose: disposeList2[value[2]],
-              is_pass: ['netSignPrepare', 'netSignArrange'].includes(value[2]) ? false : true
+              is_pass: ['netSignPrepare', 'netSignArrange', 'interfaceTest'].includes(value[2]) ? false : true
             }
           ]
         }

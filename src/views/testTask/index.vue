@@ -493,7 +493,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     .group-status {
-      min-width: 80px;
+      width: 80px;
       display: flex;
       position: relative;
       text-align: center;
@@ -508,12 +508,13 @@ onUnmounted(() => {
         .title {
           color: #383838;
           margin-bottom: 10px;
+          width: 70px;
           // padding: 0 10px;
           // box-sizing: border-box;
           // max-width: 100px;
-          // overflow: hidden; //超出的文本隐藏
-          // text-overflow: ellipsis; //溢出用省略号显示
-          // white-space: nowrap; //溢出不换行
+          overflow: hidden; //超出的文本隐藏
+          text-overflow: ellipsis; //溢出用省略号显示
+          white-space: nowrap; //溢出不换行
         }
         .point {
           display: block;

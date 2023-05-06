@@ -49,5 +49,18 @@ export const disposeList = {
       packageName: ''
     }
   ],
+  interfaceTest: [
+    {
+      serverName: '',
+      showServerConfig: [
+        { label: '设备IP：', value: '' },
+        { label: '主板类型：', value: '' },
+        { label: '设备型号：', value: '' },
+        { label: '设备编码：', value: '' },
+        { label: 'cavium卡：', value: '' },
+        { label: '国密卡：', value: '' }
+      ]
+    }
+  ],
   executeCommand: [{}]
 }

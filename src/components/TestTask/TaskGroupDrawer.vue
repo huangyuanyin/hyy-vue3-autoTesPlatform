@@ -133,7 +133,7 @@ const data = reactive({
 })
 const testList = ref([
   {
-    plugin: 'apiTest',
+    plugin: 'interfaceTest',
     name: '接口测试',
     desc: '这是一段接口测试'
   },
