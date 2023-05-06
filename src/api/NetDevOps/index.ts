@@ -158,3 +158,13 @@ export function getTaskHistoryApi(params) {
     params
   })
 }
+
+/* ---------------------------- /devops/task_info/release_device/ ---------------------------- */
+export function releaseDeviceApi(params) {
+  return request({
+    url: `/devops/task_info/release_device/`,
+    method: 'POST',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}

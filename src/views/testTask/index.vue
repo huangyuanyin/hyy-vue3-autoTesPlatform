@@ -94,10 +94,15 @@
           <el-button v-if="item.row.status !== 'in_progress'" link type="primary" size="small" @click="toDetail('edit', item.row)">
             编辑
           </el-button>
-          <el-dropdown>
+          <el-dropdown trigger="click">
             <el-button link type="info" size="small"> 更多 </el-button>
             <template #dropdown>
               <el-dropdown-menu>
+                <el-dropdown-item>
+                  <el-button v-if="item.row.status !== 'in_progress'" link type="primary" size="small" @click="handleRelease(item.row)">
+                    释放
+                  </el-button>
+                </el-dropdown-item>
                 <el-dropdown-item>
                   <el-button v-if="item.row.status !== 'in_progress'" link type="danger" size="small" @click="handleDelete(item.row)">
                     删除
@@ -158,7 +163,7 @@ import {
 import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
 import preview2 from '@/assets/preview2.png'
-import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi } from '@/api/NetDevOps/index'
+import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi, releaseDeviceApi } from '@/api/NetDevOps/index'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 
 interface User {
@@ -346,6 +351,28 @@ const handleDelete = async val => {
       ElMessage({
         type: 'info',
         message: '取消删除'
+      })
+    })
+}
+
+const handleRelease = async val => {
+  ElMessageBox.confirm(`【${val.name}】此流水线下的所有设备都会释放`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      let res = await releaseDeviceApi({ task_id: val.id })
+      if (res.code === 1000) {
+        ElMessage.success('设备释放成功!')
+        taskCurrentPage.value = 1
+        getTaskInfo()
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消释放'
       })
     })
 }
