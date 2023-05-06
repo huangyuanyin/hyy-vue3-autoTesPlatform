@@ -63,13 +63,13 @@ export const APVAutoMenuData = [
     icon: 'Suitcase',
     isDisabled: false,
     children: []
-  },
-  {
-    id: '05',
-    title: '测试结果',
-    path: '/testResult',
-    icon: 'Money',
-    isDisabled: false,
-    children: []
   }
+  // {
+  //   id: '05',
+  //   title: '测试结果',
+  //   path: '/testResult',
+  //   icon: 'Money',
+  //   isDisabled: false,
+  //   children: []
+  // }
 ]

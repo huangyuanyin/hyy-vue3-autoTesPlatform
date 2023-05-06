@@ -520,7 +520,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     .group-status {
-      width: 80px;
+      width: 11vh;
       display: flex;
       position: relative;
       text-align: center;
@@ -535,7 +535,7 @@ onUnmounted(() => {
         .title {
           color: #383838;
           margin-bottom: 10px;
-          width: 70px;
+          width: 10vh;
           // padding: 0 10px;
           // box-sizing: border-box;
           // max-width: 100px;
@@ -570,6 +570,11 @@ onUnmounted(() => {
           border: 2px solid #e6a23c !important;
           color: #e6a23c;
           background: #e6a23c;
+        }
+        .channel {
+          border: 2px solid #909399 !important;
+          color: #909399;
+          background: #909399;
         }
       }
       &::after {

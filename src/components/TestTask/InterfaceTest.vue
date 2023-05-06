@@ -76,10 +76,59 @@
                   </ul>
                 </el-card>
               </el-form-item>
+              <el-form-item label="待测版本" prop="packageName" :required="true">
+                <el-select
+                  v-model="item.packageName"
+                  placeholder="请选择待测版本"
+                  :key="index"
+                  @visible-change="selectProduct(item)"
+                  @change="getProductInfo(item, index)"
+                >
+                  <el-option
+                    :label="item.file_name"
+                    :value="item.file_name"
+                    v-for="(item, index) in selectProductList"
+                    :key="'selectProductList' + index"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-collapse class="collapseItem">
+                <el-collapse-item name="1">
+                  <template #title>
+                    <el-button text type="primary"> 高级设置 </el-button>
+                  </template>
+                  <el-form-item prop="log" class="log-item">
+                    <template #label>
+                      <div class="config-item">
+                        <span> 配置文件 </span>
+                        <svg-icon class="quanping" style="color: red" iconName="icon-quanping" @click="handleFullscreen(item)"></svg-icon>
+                      </div>
+                    </template>
+                    <CodeMirror :code="item.log" :codeStyle="{ height: '20vh', width: '100%' }" />
+                  </el-form-item>
+                </el-collapse-item>
+              </el-collapse>
             </el-form>
           </div>
+          <div class="device-space-item">
+            <el-icon class="delete-icon" @click="deleteDevice(index)">
+              <Delete />
+            </el-icon>
+          </div>
         </div>
+        <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button>
       </div>
+      <el-dialog
+        v-model="configFileDialog"
+        :title="configFileDialogTitle"
+        :modal="false"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        custom-class="configFileDialogStyle"
+        width="70%"
+      >
+        <CodeMirror :code="configFileDialogLog" :codeStyle="{ height: '70vh', width: '100%' }" />
+      </el-dialog>
     </template>
   </el-drawer>
 </template>
@@ -90,6 +139,8 @@ import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import { getDeviceApi, getProductPackageApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
+import CodeMirror from '@/components/CodeMirror.vue'
+import { getInterfaceTestConfigurationFile } from '@/data/InterfaceTestConfigurationFile'
 
 const props = defineProps({
   taskDetailDrawer: {
@@ -107,6 +158,9 @@ const props = defineProps({
 })
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
 
+const configFileDialog = ref(false)
+const configFileDialogTitle = ref('')
+const configFileDialogLog = ref('')
 const ishowDrawer = ref(false)
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
@@ -116,7 +170,7 @@ const taskDetailFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
   packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
-  ifback: [{ required: true, message: '是否生产部门为必填项', trigger: 'change' }],
+  log: [{ required: true, message: '是否生产部门为必填项', trigger: 'change' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }]
 })
 const deviceList = ref(JSON.parse(JSON.stringify(disposeList['interfaceTest'])))
@@ -124,7 +178,8 @@ const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['interfaceTest'
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
-  packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }]
+  packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }],
+  log: [{ required: true, message: '是否生产部门为必填项', trigger: 'change' }]
 })
 const selectDeviceList = ref([])
 const selectProductList = ref([])
@@ -152,15 +207,31 @@ watch(
     // @ts-ignore
     deviceList.value = props.taskDetailInfo
     hasDeviceList.value = []
+    let isHasNetSignPrepare = false
     JSON.parse(localStorage.getItem('flows')).map(item => {
       item.task_stages.map(it => {
         it.task_details.map(i => {
           if (i.plugin === 'netSignPrepare') {
+            isHasNetSignPrepare = true
+          }
+          if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
             hasDeviceList.value.push({ ip: i.dispose[0].serverName })
           }
         })
       })
     })
+    if (hasDeviceList.value.length === 0 && !isHasNetSignPrepare) {
+      const params = {
+        page: 1,
+        page_size: 100
+      }
+      getDeviceApi(params).then(res => {
+        if (res.code === 1000) {
+          // 过滤掉using为true的设备
+          hasDeviceList.value = res.data.filter(item => item.using === false)
+        }
+      })
+    }
   }
 )
 
@@ -171,8 +242,6 @@ const closeDrawer = (value?: any) => {
 
 const cancelClick = async (done?: () => void) => {
   if (!taskDetailFormRef.value) return
-  // formEl.resetFields()
-  // closeDrawer()
   await taskDetailFormRef.value.validate(async (valid, fields) => {
     if (valid) {
       const forms = deviceFormRef.value
@@ -190,7 +259,7 @@ const cancelClick = async (done?: () => void) => {
         }
       }
       for (const item of deviceList.value) {
-        // item.deviceConfig.ifback = item.ifback
+        // item.deviceConfig.log = item.log
         // item.deviceConfig.ifrs = item.ifrs
       }
       // @ts-ignore
@@ -288,6 +357,16 @@ const getDeviceInfo = async (val, index) => {
     deviceList.value[index].packageName = ''
     deviceList.value[index].packagePath = ''
     deviceList.value[index].packageID = null
+
+    // 修改配置文件
+    deviceList.value[index].log = getInterfaceTestConfigurationFile(
+      res.data.ip,
+      res.data.port,
+      res.data.username,
+      res.data.password,
+      val.serverName
+    )
+    console.log(`output->deviceList.value[index]`, deviceList.value[index].log)
   }
 }
 
@@ -299,7 +378,8 @@ const selectProduct = async val => {
     }
     let res = await getProductPackageApi(params)
     if (res.code === 1000) {
-      selectProductList.value = res.data
+      // 过滤掉file_name不包含.zip的
+      selectProductList.value = res.data.filter(item => item.file_name.includes('.zip'))
     }
   }
 }
@@ -312,11 +392,42 @@ const getProductInfo = async (val, index) => {
     }
   })
 }
+
+const handleFullscreen = val => {
+  configFileDialog.value = true
+  configFileDialogTitle.value = `【${val.serverName}】的配置文件`
+  configFileDialogLog.value = val.log
+}
 </script>
 
 <style lang="scss">
 .netSignProjectDeploy-drawer {
   width: 35% !important;
+  .configFileDialogStyle {
+    .el-dialog__body {
+      padding: 0px !important;
+    }
+  }
+  .log-item {
+    .el-form-item__label {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    .config-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0px;
+      width: 100%;
+      svg {
+        cursor: pointer;
+        color: #606266 !important;
+        font-size: 20px;
+      }
+    }
+  }
+
   .el-drawer__header {
     font-size: 14px;
     border-bottom: 1px solid #dbdbdb !important;

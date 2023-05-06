@@ -2,21 +2,25 @@
   <div class="LinuxSystem-wrap">
     <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="openLinuxDialog('add')"> 添加</el-button>
     <el-table :data="linuxTableData" border style="width: 100%" stripe v-loading="loadingTable">
-      <el-table-column prop="ip" label="设备IP" align="center" width="250" />
-      <el-table-column prop="machine_type" label="设备类型" width="200" align="center" />
+      <el-table-column prop="ip" label="设备IP" align="center" width="180">
+        <template #default="scope">
+          <span class="item-ip" @click="openLinuxDialog('detail', scope.row.id)">{{ scope.row.ip }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="machine_type" label="设备类型" min-width="200" align="center" />
       <!-- <el-table-column prop="mode_code" label="型号编码" width="150" />
       <el-table-column prop="config_code" label="配置编码" width="150" /> -->
-      <el-table-column prop="main_board_type" label="主板类型" align="center" width="250" />
+      <el-table-column prop="main_board_type" label="主板类型" align="center" width="160" />
       <!-- <el-table-column prop="cavium_card_type" label="cavium卡类型" width="150" align="center" />
       <el-table-column prop="gm_card_type" label="国密卡类型" width="150" align="center" /> -->
-      <el-table-column prop="using" label="使用状态" width="200" align="center">
+      <el-table-column prop="using" label="使用状态" width="160" align="center">
         <template #default="scope">
           <el-tag :type="scope.row.using === true ? 'danger' : ''" disable-transitions>
             {{ scope.row.using === true ? '使用中' : '空闲中' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="device_user" label="使用人" width="200" align="center">
+      <el-table-column prop="device_user" label="使用人" width="160" align="center">
         <template #default="scope">
           <span>{{ scope.row.device_user === null ? '未知' : scope.row.device_user }}</span>
         </template>
@@ -28,10 +32,9 @@
           <el-tag type="info" e-else>暂无备注</el-tag>
         </template>
       </el-table-column> -->
-      <el-table-column prop="last_mod_time" label="更新时间" width="250" align="center" />
-      <el-table-column fixed="right" label="操作" align="center" width="250">
+      <el-table-column prop="last_mod_time" label="更新时间" width="200" align="center" />
+      <el-table-column fixed="right" label="操作" align="center" width="200">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="openLinuxDialog('detail', scope.row.id)"> 详情 </el-button>
           <el-button link type="primary" size="small" v-if="!scope.row.using" @click="openLinuxDialog('edit', scope.row.id)">
             编辑
           </el-button>
@@ -407,6 +410,10 @@ onMounted(() => {
     display: flex;
     justify-content: end;
     margin-top: 25px;
+  }
+  .item-ip {
+    cursor: pointer;
+    color: #409eff;
   }
 }
 .moreButton {

@@ -216,7 +216,7 @@ watch(
     JSON.parse(localStorage.getItem('flows')).map(item => {
       item.task_stages.map(it => {
         it.task_details.map(i => {
-          if (i.plugin === 'netSignPrepare') {
+          if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
             hasDeviceList.value.push({ ip: i.dispose[0].serverName })
           }
         })
