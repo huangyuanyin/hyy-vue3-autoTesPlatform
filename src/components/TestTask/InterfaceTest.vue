@@ -101,7 +101,7 @@
                     <template #label>
                       <div class="config-item">
                         <span> 配置文件 </span>
-                        <svg-icon class="quanping" style="color: red" iconName="icon-quanping" @click="handleFullscreen(item)"></svg-icon>
+                        <svg-icon class="quanping" iconName="icon-quanping1" @click="handleFullscreen(item, index)"></svg-icon>
                       </div>
                     </template>
                     <CodeMirror :code="item.log" :codeStyle="{ height: '20vh', width: '100%' }" />
@@ -127,7 +127,7 @@
         custom-class="configFileDialogStyle"
         width="70%"
       >
-        <CodeMirror :code="configFileDialogLog" :codeStyle="{ height: '70vh', width: '100%' }" />
+        <CodeMirror :code="configFileDialogLog" :codeStyle="{ height: '70vh', width: '100%' }" @onCodeChange="onCodeChange" />
       </el-dialog>
     </template>
   </el-drawer>
@@ -161,6 +161,7 @@ const emit = defineEmits(['closeDrawer', 'deleteTask'])
 const configFileDialog = ref(false)
 const configFileDialogTitle = ref('')
 const configFileDialogLog = ref('')
+const configId = ref(null)
 const ishowDrawer = ref(false)
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
@@ -170,7 +171,6 @@ const taskDetailFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
   packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
-  log: [{ required: true, message: '是否生产部门为必填项', trigger: 'change' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }]
 })
 const deviceList = ref(JSON.parse(JSON.stringify(disposeList['interfaceTest'])))
@@ -179,7 +179,7 @@ const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
   packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }],
-  log: [{ required: true, message: '是否生产部门为必填项', trigger: 'change' }]
+  log: [{ required: true, message: '配置文件不能为空', trigger: 'change' }]
 })
 const selectDeviceList = ref([])
 const selectProductList = ref([])
@@ -393,10 +393,19 @@ const getProductInfo = async (val, index) => {
   })
 }
 
-const handleFullscreen = val => {
+const handleFullscreen = (val, id) => {
   configFileDialog.value = true
   configFileDialogTitle.value = `【${val.serverName}】的配置文件`
   configFileDialogLog.value = val.log
+  configId.value = id
+}
+
+const onCodeChange = val => {
+  deviceList.value.map((item, index) => {
+    if (index === configId.value) {
+      item.log = val
+    }
+  })
 }
 </script>
 

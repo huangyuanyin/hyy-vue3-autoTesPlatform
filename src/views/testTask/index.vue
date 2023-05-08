@@ -99,12 +99,18 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>
-                  <el-button v-if="item.row.status !== 'in_progress'" link type="primary" size="small" @click="handleRelease(item.row)">
+                  <el-button
+                    :disabled="item.row.status === 'in_progress'"
+                    link
+                    type="primary"
+                    size="small"
+                    @click="handleRelease(item.row)"
+                  >
                     释放
                   </el-button>
                 </el-dropdown-item>
                 <el-dropdown-item>
-                  <el-button v-if="item.row.status !== 'in_progress'" link type="danger" size="small" @click="handleDelete(item.row)">
+                  <el-button :disabled="item.row.status === 'in_progress'" link type="danger" size="small" @click="handleDelete(item.row)">
                     删除
                   </el-button>
                 </el-dropdown-item>

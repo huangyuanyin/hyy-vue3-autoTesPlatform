@@ -1,11 +1,12 @@
 <template>
   <codemirror
-    v-model="props.code"
+    v-model="code"
     placeholder="Code gose here..."
     :style="props.codeStyle"
     :autofocus="true"
     :tabSize="2"
     :extensions="extensions"
+    @input="onCodeChange"
   />
 </template>
 
@@ -27,6 +28,20 @@ const props = defineProps({
     default: () => {}
   }
 })
+const emit = defineEmits(['onCodeChange'])
+
+const code = ref('')
+
+watch(
+  () => props.code,
+  () => {
+    console.log(`output->props.code`, props.code)
+    code.value = props.code
+  },
+  {
+    immediate: true
+  }
+)
 
 let myTheme = EditorView.theme(
   {
@@ -55,7 +70,9 @@ let myTheme = EditorView.theme(
 
 const extensions = [myTheme, python()]
 
-const Change = () => {}
+const onCodeChange = () => {
+  emit('onCodeChange', code.value)
+}
 
 onMounted(() => {})
 </script>

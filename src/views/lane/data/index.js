@@ -1,4 +1,3 @@
-import { getInterfaceTestConfigurationFile } from '@/data/InterfaceTestConfigurationFile.js'
 export const disposeList = {
   netSignPrepare: [
     {
@@ -62,7 +61,7 @@ export const disposeList = {
         { label: '国密卡：', value: '' }
       ],
       serverConfig: {},
-      log: getInterfaceTestConfigurationFile()
+      log: ''
     }
   ],
   executeCommand: [{}]

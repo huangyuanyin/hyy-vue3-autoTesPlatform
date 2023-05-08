@@ -1,7 +1,7 @@
 <template>
   <div class="RunHistory-wrap">
     <el-table :data="tableData" stripe style="width: 100%" max-height="70vh">
-      <el-table-column prop="id" label="任务id" width="250" />
+      <el-table-column prop="id" label="运行记录" width="250" />
       <el-table-column prop="result" label="状态" width="180">
         <template #default="scope">
           <div class="pipe-status">
