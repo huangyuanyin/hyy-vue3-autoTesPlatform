@@ -3,28 +3,33 @@
     <section class="recentlyRun-top">
       <div class="recentlyRun-top-left">
         <div class="left-label">
-          <span class="build-num"> # 1</span>
+          <span class="build-num"> # {{ props.runResult.execution_number }}</span>
           <div class="status-label">
-            <el-icon color="#F56C6C"><CircleCloseFilled /></el-icon>
-            <span>运行失败</span>
+            <svg-icon
+              class="status-icon"
+              :class="[props.runResult.status === 'in_progress' ? 'run-icon' : '']"
+              :iconName="iconType[props.runResult.status]"
+              style="font-size: 16px; margin-right: 8px"
+            ></svg-icon>
+            <span>{{ contentType[props.runResult.status] }}</span>
           </div>
         </div>
         <div class="left-info">
           <span class="info-label">触发信息</span>
           <div class="instance-trigger-info">
             <div class="title">huangyuanyin</div>
-            &nbsp;•&nbsp;页面手动触发
+            &nbsp;•&nbsp;手动触发
           </div>
           <div class="info-divider"></div>
           <span class="info-label">开始时间</span>
-          <span>2023-04-28 14:29:26</span>
+          <span>{{ props.runResult.created_time }}</span>
           <div class="info-divider"></div>
           <span class="info-label">持续时间</span>
           <span>16s</span>
           <el-tooltip
             popper-class="box-item"
             effect="customized"
-            content="流水线从开始运行到运行结束的间隔时长，并非流水线实际的计费耗时，流水线计费耗时规则"
+            content="流水线从开始运行到运行结束的间隔时长，并非流水线实际的耗时"
             placement="top"
           >
             <el-icon><QuestionFilled /></el-icon>
@@ -47,94 +52,105 @@
         <div class="flow-groups" v-for="(item, index) in groups" :key="'group' + index">
           <div class="flow-group">
             <div class="group-head">{{ item.name }}</div>
-            <div class="stages">
-              <div class="stage" :class="[index === 0 ? 'first-stage' : '', index === groups.length - 1 ? 'last-stage' : '']">
-                <div class="card" :class="[cardTyp[it.status]]" v-for="(it, index) in item.card" :key="'card' + index">
-                  <div class="content-job">
-                    <div class="job-card">
-                      <el-tooltip popper-class="box-item" effect="customized" :content="contentType[it.status]" placement="top">
-                        <svg-icon
-                          class="status-icon"
-                          :class="[it.status === 'in_progress' ? 'run-icon' : '']"
-                          :iconName="iconType[it.status]"
-                          className="icon"
-                          style="width: 24px"
-                        ></svg-icon>
-                      </el-tooltip>
-                      <div class="card-content" :class="[cardTyp[it.status]]">
-                        <div class="card-title">{{ it.name }}</div>
-                        <div class="success-comp" v-if="it.status === 'success'">
-                          <div class="card-info">
-                            <span>15s</span>
-                            <div class="operate">
-                              <div class="report">
-                                <el-icon><Document /></el-icon> <span>扫描报告</span>
+            <div class="stages" :class="[index === 0 ? 'first-stages' : '', index === groups.length - 1 ? 'last-stages' : '']">
+              <div
+                v-for="(e, index2) in item.task_stages_history"
+                :key="'task_stages_history' + index2"
+                :class="[index2 === 0 ? 'first-card' : '', index2 === groups.length - 1 ? 'last-card' : '']"
+              >
+                <div class="stage">
+                  <div
+                    class="card"
+                    :class="[cardTyp[it.status]]"
+                    v-for="(it, index) in e.task_details_history"
+                    :key="'task_details_history' + index"
+                  >
+                    <div class="content-job">
+                      <div class="job-card">
+                        <el-tooltip popper-class="box-item" effect="customized" :content="contentType[it.status]" placement="top">
+                          <svg-icon
+                            class="status-icon"
+                            :class="[it.status === 'in_progress' ? 'run-icon' : '']"
+                            :iconName="iconType[it.status]"
+                            className="icon"
+                            style="width: 24px"
+                          ></svg-icon>
+                        </el-tooltip>
+                        <div class="card-content" :class="[cardTyp[it.status]]">
+                          <div class="card-title">{{ it.name }}</div>
+                          <div class="success-comp" v-if="it.status === 'success'">
+                            <div class="card-info">
+                              <span>15s</span>
+                              <div class="operate">
+                                <div class="report">
+                                  <!-- <el-icon><Document /></el-icon> <span>扫描报告</span> -->
+                                </div>
+                                <div class="log" @click="handleLog(it)">
+                                  <el-icon><Document /></el-icon> <span>日志</span>
+                                </div>
                               </div>
-                              <div class="log" @click="handleLog(it)">
-                                <el-icon><Document /></el-icon> <span>日志</span>
+                            </div>
+                            <div class="card-num">
+                              <div class="stat-info">
+                                <div class="stat-info-item" v-for="(item, index) in statList" :key="'statList' + index">
+                                  <div class="stat-info-item-value" :class="[statColor[item.title]]">{{ item.num }}</div>
+                                  <div class="stat-info-item-desc">{{ item.title }}</div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                          <div class="card-num">
-                            <div class="stat-info">
-                              <div class="stat-info-item" v-for="(item, index) in statList" :key="'statList' + index">
-                                <div class="stat-info-item-value" :class="[statColor[item.title]]">{{ item.num }}</div>
-                                <div class="stat-info-item-desc">{{ item.title }}</div>
+                          <div class="fail-comp" v-if="it.status === 'fail'">
+                            <div class="card-info">
+                              <span>15s</span>
+                              <div class="operate">
+                                <div class="log" @click="handleLog(it)">
+                                  <el-icon><Document /></el-icon><span>日志</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                        <div class="fail-comp" v-if="it.status === 'fail'">
-                          <div class="card-info">
-                            <span>15s</span>
-                            <div class="operate">
-                              <div class="log" @click="handleLog(it)">
-                                <el-icon><Document /></el-icon><span>日志</span>
-                              </div>
+                            <div class="message">
+                              <div>运行失败，请查看日志！</div>
+                            </div>
+                            <div class="button" @click="handleRun(it)">
+                              <div>重试</div>
                             </div>
                           </div>
-                          <div class="message">
-                            <div>运行失败，请查看日志！</div>
-                          </div>
-                          <div class="button" @click="handleRun(it)">
-                            <div>重试</div>
-                          </div>
-                        </div>
-                        <div class="run-comp" v-if="it.status === 'in_progress'">
-                          <div class="card-info">
-                            <span>15s</span>
-                            <div class="operate">
-                              <div class="log" @click="handleLog(it)">
-                                <el-icon><Document /></el-icon> <span>日志</span>
+                          <div class="run-comp" v-if="it.status === 'in_progress'">
+                            <div class="card-info">
+                              <span>15s</span>
+                              <div class="operate">
+                                <div class="log" @click="handleLog(it)">
+                                  <!-- <el-icon><Document /></el-icon> <span>日志</span> -->
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div class="message">
-                            <div>运行中...</div>
-                          </div>
-                          <div class="button" @click="handleChannel(it)">
-                            <div>取消</div>
-                          </div>
-                        </div>
-                        <div class="channel-comp" v-if="it.status === 'channel'">
-                          <div class="card-info">
-                            <span>15s</span>
-                            <div class="operate">
-                              <div class="log" @click="handleLog(it)">
-                                <el-icon><Document /></el-icon> <span>日志</span>
-                              </div>
+                            <div class="message">
+                              <div>运行中...</div>
+                            </div>
+                            <div class="button" @click="handleChannel(it)">
+                              <div>取消</div>
                             </div>
                           </div>
-                          <div class="message">
-                            <div>用户已取消</div>
+                          <div class="channel-comp" v-if="it.status === 'channel'">
+                            <div class="card-info">
+                              <span>15s</span>
+                              <div class="operate">
+                                <div class="log" @click="handleLog(it)">
+                                  <el-icon><Document /></el-icon> <span>日志</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="message">
+                              <div>用户已取消</div>
+                            </div>
+                            <div class="button" @click="handleRun(it)">
+                              <div>重试</div>
+                            </div>
                           </div>
-                          <div class="button" @click="handleRun(it)">
-                            <div>重试</div>
-                          </div>
-                        </div>
-                        <div class="wait-comp" v-if="it.status === 'not_start'">
-                          <div class="time">
-                            <div>0s</div>
+                          <div class="wait-comp" v-if="it.status === 'not_start'">
+                            <div class="time">
+                              <div>0s</div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -166,10 +182,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CodeMirror from '@/components/CodeMirror.vue'
+import { useRoute } from 'vue-router'
+
+const props = defineProps({
+  runResult: {
+    type: Object,
+    default: () => {}
+  }
+})
 
 const logDialog = ref(false)
 const logTitle = ref('')
@@ -212,29 +236,17 @@ const statColor = {
   严重: 'serious',
   一般: 'yiban'
 }
-const groups = ref([
-  {
-    name: '环境准备',
-    card: [
-      { name: '准备一', status: 'success' },
-      { name: '准备二', status: 'channel' }
-    ]
+const groups = ref([])
+
+watch(
+  () => props.runResult,
+  val => {
+    groups.value = val.task_swim_lanes_history || []
   },
   {
-    name: '环境部署',
-    card: [
-      { name: '部署一', status: 'fail' },
-      { name: '部署二', status: 'in_progress' }
-    ]
-  },
-  {
-    name: '接口测试',
-    card: [
-      { name: '接口测试一', status: 'not_start' },
-      { name: '接口测试二', status: 'not_start' }
-    ]
+    immediate: true
   }
-])
+)
 
 const handleChannel = (item: any) => {
   ElMessage.warning('取消')
@@ -243,6 +255,7 @@ const handleChannel = (item: any) => {
 const handleLog = (item: any) => {
   logDialog.value = true
   logTitle.value = item.name
+  log.value = item.task_execute_record[0].execute_record
 }
 
 const handleRun = (item: any) => {
@@ -395,7 +408,15 @@ const handleClose = (done: () => void) => {
           }
           .stages {
             margin-top: 10px;
+            .first-card {
+              .card {
+                &::before {
+                  border-right: none !important;
+                }
+              }
+            }
             .stage {
+              display: flex;
               .card {
                 position: relative;
                 display: flex;
@@ -417,15 +438,6 @@ const handleClose = (done: () => void) => {
                   height: 100%;
                 }
 
-                &:first-child::before {
-                  border-left: none;
-                  border-right: none;
-                  border-radius: 0 !important;
-                }
-
-                &:nth-last-child(2)::before {
-                  border-radius: 0 0 16px 16px;
-                }
                 .content-job {
                   display: flex;
                   align-items: center;
@@ -440,17 +452,6 @@ const handleClose = (done: () => void) => {
                     left: -9px;
                     z-index: 9;
                     font-size: 24px;
-                  }
-                  .run-icon {
-                    animation: run 0.7s infinite;
-                  }
-                  @keyframes run {
-                    0% {
-                      transform: rotate(0deg);
-                    }
-                    100% {
-                      transform: rotate(360deg);
-                    }
                   }
                   .fail,
                   .channel {
@@ -608,6 +609,7 @@ const handleClose = (done: () => void) => {
                   }
                 }
               }
+
               .wait-card {
                 display: flex !important;
                 flex-direction: column !important;
@@ -620,27 +622,39 @@ const handleClose = (done: () => void) => {
                 }
               }
             }
-            .first-stage {
-              .card {
-                &::before {
-                  left: 3px !important;
-                  width: 105% !important;
-                  border-left: none !important;
-                }
+          }
+          .first-stages {
+            .card {
+              &::before {
+                left: 3px !important;
+                width: 105% !important;
+                border-left: none !important;
               }
             }
-            .last-stage {
-              .card {
-                &::before {
-                  right: -3px !important;
-                  width: 105% !important;
-                  border-right: none !important;
-                }
+          }
+          .last-stages {
+            .card {
+              &::before {
+                right: -3px !important;
+                width: 105% !important;
+                border-left: none !important;
+                border-right: none !important;
               }
             }
           }
         }
       }
+    }
+  }
+  .run-icon {
+    animation: run 0.7s infinite;
+  }
+  @keyframes run {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
     }
   }
 }

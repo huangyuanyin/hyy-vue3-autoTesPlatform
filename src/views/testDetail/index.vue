@@ -5,20 +5,27 @@
         <el-col class="backButton" :span="7">
           <div class="grid-content ep-bg-purple" />
           <el-button @click="router.go(-1)">返回</el-button>
-          <span style="color: #303133; font-weight: 600; margin-right: 5px">{{ taskName }} </span>
+          <span style="color: #303133; font-weight: 600; margin-right: 5px">{{ recentlyRunLog.name }} </span>
           <span>{{ laneTime }}</span>
         </el-col>
         <el-col :span="11">
           <div class="grid-content ep-bg-purple" />
           <el-tabs v-model="tabName" tab-position="top" class="testDetail_tabs" @tab-change="changeTab" @tab-remove="removeTab">
             <el-tab-pane name="recentlyRun" label="最近运行">
-              <RecentlyRun v-show="tabName === 'recentlyRun'" />
+              <RecentlyRun :runResult="recentlyRunLog" />
             </el-tab-pane>
             <el-tab-pane name="operationHistory" label="运行历史">
-              <RunHistory v-show="tabName === 'operationHistory'" @handleClick="handleClick" />
+              <RunHistory @handleClick="handleClick" />
             </el-tab-pane>
             <el-tab-pane :name="item.name" :label="item.label" v-for="(item, index) in tabList" :key="'tabList' + index" closable>
-              <RecentlyRun />
+              <keep-alive>
+                <component
+                  :is="item.component"
+                  v-if="item.component != null && tabName == String(item.name)"
+                  :key="tabName"
+                  :runResult="runDetailLog"
+                ></component>
+              </keep-alive>
             </el-tab-pane>
           </el-tabs>
         </el-col>
@@ -29,19 +36,15 @@
         </el-col>
       </el-row>
     </div>
-    <!-- <div class="testDetail_container">
-      <RecentlyRun v-show="tabName === 'recentlyRun'" />
-      <RunHistory v-show="tabName === 'operationHistory'" @handleClick="handleClick" />
-    </div> -->
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, markRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Action } from 'element-plus'
-import { getTaskInfoApi, runTaskInfoApi } from '@/api/NetDevOps/index'
+import { getTaskHistoryApi, getTaskInfoApi, runTaskInfoApi } from '@/api/NetDevOps/index'
 import bus from '@/utils/bus.js'
 import RecentlyRun from './components/RecentlyRun.vue'
 import RunHistory from './components/RunHistory.vue'
@@ -49,12 +52,20 @@ import RunHistory from './components/RunHistory.vue'
 const router = useRouter()
 const route = useRoute()
 const tabName = ref('recentlyRun')
-const taskName = ref('流水线')
 const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
 const tabList = ref([])
+const recentlyRunLog = ref({})
+const runDetailLog = ref({})
 
 const changeTab = (e: any) => {
   tabName.value = e
+  if (!['recentlyRun', 'operationHistory'].includes(tabName.value)) {
+    tabList.value.map(item => {
+      if (item.name === tabName.value) {
+        getTaskHistoryDetail(item.id)
+      }
+    })
+  }
 }
 
 const handleRunTask = async id => {
@@ -91,18 +102,61 @@ const toEdit = () => {
 }
 
 const handleClick = val => {
-  tabList.value.push({
-    name: val.id,
-    label: String(val.id)
-  })
+  if (tabList.value.length >= 5) {
+    ElMessage({
+      type: 'warning',
+      message: '最多只能查看5个历史运行记录！'
+    })
+    return
+  }
+  tabName.value = val.execution_number
+  let isExist = tabList.value.some(item => item.name === val.execution_number)
+  if (isExist) {
+    return
+  } else {
+    tabList.value.push({
+      id: val.id,
+      name: val.execution_number,
+      label: '#' + String(val.execution_number)
+    })
+    tabList.value.map(item => {
+      item.component = markRaw(RecentlyRun)
+    })
+  }
+  getTaskHistoryDetail(val.id)
 }
 
 const removeTab = (e: any) => {
   console.log(`output->e`, e)
   tabList.value.splice(e.index, 1)
+  tabName.value = 'recentlyRun'
 }
 
-onMounted(() => {})
+const getTaskHistoryDetail = async id => {
+  const params = {
+    task_history_id: id
+  }
+  let res = await getTaskHistoryApi(params)
+  if (res.code === 1000) {
+    runDetailLog.value = res.data
+  }
+}
+
+const getTaskHistory = async () => {
+  const params = {
+    task_id: route.query.id,
+    page: 1,
+    page_size: 10
+  }
+  let res = await getTaskHistoryApi(params)
+  if (res.code === 1000) {
+    recentlyRunLog.value = res.data[0]
+  }
+}
+
+onMounted(() => {
+  getTaskHistory()
+})
 </script>
 
 <style lang="scss" scoped>

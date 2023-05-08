@@ -1,28 +1,32 @@
 <template>
   <div class="RunHistory-wrap">
     <el-table :data="tableData" stripe style="width: 100%" max-height="70vh">
-      <el-table-column prop="id" label="运行记录" width="250" />
-      <el-table-column prop="result" label="状态" width="180">
+      <el-table-column prop="execution_number" label="运行记录" width="100">
+        <template #default="scope">
+          <span>#{{ scope.row.execution_number }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" label="状态" width="180">
         <template #default="scope">
           <div class="pipe-status">
-            <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[scope.row.result]}`" placement="top">
-              <div class="pipe-status-item" v-if="scope.row.result === 'not_start'">
+            <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[scope.row.status]}`" placement="top">
+              <div class="pipe-status-item" v-if="scope.row.status === 'not_start'">
                 <el-icon style="color: #e6a23c"><InfoFilled /></el-icon>
                 待运行
               </div>
-              <div class="pipe-status-item" v-if="scope.row.result === 'success'">
+              <div class="pipe-status-item" v-if="scope.row.status === 'success'">
                 <el-icon style="color: #67c23a"><CircleCheckFilled /></el-icon>
                 运行成功
               </div>
-              <div class="pipe-status-item" v-if="scope.row.result === 'fail'">
+              <div class="pipe-status-item" v-if="scope.row.status === 'fail'">
                 <el-icon style="color: #e62412"><CircleCloseFilled /></el-icon>
                 运行失败
               </div>
-              <div class="pipe-status-item" v-if="scope.row.result === 'in_progress'">
+              <div class="pipe-status-item" v-if="scope.row.status === 'in_progress'">
                 <el-icon class="run-icon" style="color: #409eff"><RefreshRight /></el-icon>
                 运行中
               </div>
-              <div class="pipe-status-item" v-if="scope.row.result === 'channel'">
+              <div class="pipe-status-item" v-if="scope.row.status === 'channel'">
                 <el-icon style="color: #909399"><RemoveFilled /></el-icon>
                 已取消
               </div>
@@ -57,7 +61,7 @@
           <span v-else>自动触发</span>
         </template>
       </el-table-column>
-      <el-table-column prop="address" label="持续时间" align="center" />
+      <el-table-column prop="address" label="持续时间" align="center" width="150" />
       <el-table-column prop="last_mod_time" label="最后运行时间" width="230" align="center" />
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">
