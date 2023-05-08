@@ -10,9 +10,16 @@
         </el-col>
         <el-col :span="11">
           <div class="grid-content ep-bg-purple" />
-          <el-tabs v-model="tabName" tab-position="top" class="testDetail_tabs" @tab-change="changeTab">
-            <el-tab-pane name="recentlyRun" label="最近运行"></el-tab-pane>
-            <el-tab-pane name="operationHistory" label="运行历史"></el-tab-pane>
+          <el-tabs v-model="tabName" tab-position="top" class="testDetail_tabs" @tab-change="changeTab" @tab-remove="removeTab">
+            <el-tab-pane name="recentlyRun" label="最近运行">
+              <RecentlyRun v-show="tabName === 'recentlyRun'" />
+            </el-tab-pane>
+            <el-tab-pane name="operationHistory" label="运行历史">
+              <RunHistory v-show="tabName === 'operationHistory'" @handleClick="handleClick" />
+            </el-tab-pane>
+            <el-tab-pane :name="item.name" :label="item.label" v-for="(item, index) in tabList" :key="'tabList' + index" closable>
+              <RecentlyRun />
+            </el-tab-pane>
           </el-tabs>
         </el-col>
         <el-col class="buttonList" :span="6">
@@ -22,10 +29,10 @@
         </el-col>
       </el-row>
     </div>
-    <div class="testDetail_container">
+    <!-- <div class="testDetail_container">
       <RecentlyRun v-show="tabName === 'recentlyRun'" />
-      <RunHistory v-show="tabName === 'operationHistory'" />
-    </div>
+      <RunHistory v-show="tabName === 'operationHistory'" @handleClick="handleClick" />
+    </div> -->
   </div>
 </template>
 
@@ -44,6 +51,7 @@ const route = useRoute()
 const tabName = ref('recentlyRun')
 const taskName = ref('流水线')
 const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
+const tabList = ref([])
 
 const changeTab = (e: any) => {
   tabName.value = e
@@ -82,6 +90,18 @@ const toEdit = () => {
   })
 }
 
+const handleClick = val => {
+  tabList.value.push({
+    name: val.id,
+    label: String(val.id)
+  })
+}
+
+const removeTab = (e: any) => {
+  console.log(`output->e`, e)
+  tabList.value.splice(e.index, 1)
+}
+
 onMounted(() => {})
 </script>
 
@@ -94,6 +114,7 @@ onMounted(() => {})
     .el-col {
       height: 55px;
     }
+
     .backButton {
       display: flex;
       align-items: center;
@@ -132,6 +153,11 @@ onMounted(() => {})
       }
       :deep(.el-tabs__nav-wrap::after) {
         display: none !important;
+      }
+      :deep(.el-tabs__content) {
+        width: 88vw;
+        position: absolute;
+        left: 12px;
       }
     }
   }

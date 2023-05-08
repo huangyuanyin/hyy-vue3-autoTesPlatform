@@ -101,7 +101,7 @@
                     <template #label>
                       <div class="config-item">
                         <span> 配置文件 </span>
-                        <svg-icon class="quanping" iconName="icon-quanping1" @click="handleFullscreen(item, index)"></svg-icon>
+                        <el-icon class="screen-icon" @click="handleFullscreen(item, index)"><FullScreen /></el-icon>
                       </div>
                     </template>
                     <CodeMirror :code="item.log" :codeStyle="{ height: '20vh', width: '100%' }" />
@@ -136,7 +136,7 @@
 <script lang="ts" setup>
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
-import { Delete } from '@element-plus/icons-vue'
+import { Delete, FullScreen } from '@element-plus/icons-vue'
 import { getDeviceApi, getProductPackageApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
@@ -429,10 +429,13 @@ const onCodeChange = val => {
       align-items: center;
       margin-bottom: 0px;
       width: 100%;
-      svg {
-        cursor: pointer;
+      .screen-icon {
         color: #606266 !important;
         font-size: 20px;
+        cursor: pointer;
+      }
+      .screen-icon:hover {
+        color: #409eff !important;
       }
     }
   }
@@ -601,6 +604,7 @@ const onCodeChange = val => {
       .el-collapse .el-collapse-item {
         background-color: #f5f5f5 !important;
         // border: none;
+        width: 112%;
       }
 
       .el-collapse .el-collapse-item__header {

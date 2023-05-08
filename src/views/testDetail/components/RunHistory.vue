@@ -60,8 +60,8 @@
       <el-table-column prop="address" label="持续时间" align="center" />
       <el-table-column prop="last_mod_time" label="最后运行时间" width="230" align="center" />
       <el-table-column fixed="right" label="操作" width="120">
-        <template #default>
-          <el-button link type="primary" size="small" @click="handleClick">查看</el-button>
+        <template #default="scope">
+          <el-button link type="primary" size="small" @click="handleClick(scope.row)">查看</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -91,6 +91,8 @@ import {
   RefreshRight
 } from '@element-plus/icons-vue'
 
+const emit = defineEmits(['handleClick'])
+
 const route = useRoute()
 const tableData = ref([])
 const statusMap = {
@@ -114,8 +116,8 @@ const handleRunHistoryCurrentChange = async (val: number) => {
   await getTaskHistory()
 }
 
-const handleClick = () => {
-  console.log('查看')
+const handleClick = val => {
+  emit('handleClick', val)
 }
 
 const getTaskHistory = async () => {

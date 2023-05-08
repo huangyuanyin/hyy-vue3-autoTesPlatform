@@ -76,3 +76,28 @@ const onCodeChange = () => {
 
 onMounted(() => {})
 </script>
+
+<style lang="scss">
+.cm-editor {
+  ::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: hsla(0, 0%, 100%, 0.6);
+  }
+
+  ::-webkit-scrollbar-track {
+    border-radius: 0;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 0;
+    background-color: rgba(95, 95, 95, 0.4);
+    transition: all 0.2s;
+    border-radius: 0.5rem;
+
+    &:hover {
+      background-color: rgba(95, 95, 95, 0.7);
+    }
+  }
+}
+</style>
