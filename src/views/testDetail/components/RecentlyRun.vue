@@ -633,7 +633,15 @@ const handleClose = (done: () => void) => {
             }
           }
           .last-stages {
-            .card {
+            .first-card {
+              .card {
+                &::before {
+                  width: 105% !important;
+                  border-left: none !important;
+                }
+              }
+            }
+            .last-card {
               &::before {
                 right: -3px !important;
                 width: 105% !important;
