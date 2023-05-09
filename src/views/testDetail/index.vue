@@ -31,8 +31,8 @@
         </el-col>
         <el-col class="buttonList" :span="6">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="default" @click="toEdit()">编辑</el-button>
-          <el-button type="primary" @click="toRun()">执行</el-button>
+          <el-button type="default" @click="toEdit()" :disabled="recentlyRunLog.status === 'in_progress'">编辑</el-button>
+          <el-button type="primary" @click="toRun()" :disabled="recentlyRunLog.status === 'in_progress'">执行</el-button>
         </el-col>
       </el-row>
     </div>
@@ -127,9 +127,10 @@ const handleClick = val => {
 }
 
 const removeTab = (e: any) => {
-  console.log(`output->e`, e)
-  tabList.value.splice(e.index, 1)
-  tabName.value = 'recentlyRun'
+  tabList.value = tabList.value.filter(item => item.name !== e)
+  if (tabName.value === e) {
+    tabName.value = 'recentlyRun'
+  }
 }
 
 const getTaskHistoryDetail = async id => {

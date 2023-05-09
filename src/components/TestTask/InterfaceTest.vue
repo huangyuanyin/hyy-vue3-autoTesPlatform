@@ -54,7 +54,13 @@
             >
               <el-form-item label="可选设备" prop="serverName" :required="true">
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="getDeviceInfo(item, index)">
-                  <el-option :label="item.ip" :value="item.ip" v-for="(item, index) in hasDeviceList" :key="'hasDeviceList' + index" />
+                  <el-option
+                    :label="item.ip"
+                    :value="item.ip"
+                    v-for="(item, index) in hasDeviceList"
+                    :key="'hasDeviceList' + index"
+                    :disabled="item.disabled"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item label="" v-if="item.serverName">
@@ -76,9 +82,9 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="待测版本" prop="packageName" :required="true">
-                <el-select
-                  v-model="item.packageName"
+              <el-form-item label="待测版本" prop="tag" :required="true">
+                <!-- <el-select
+                  v-model="item.tag"
                   placeholder="请选择待测版本"
                   :key="index"
                   @visible-change="selectProduct(item)"
@@ -90,9 +96,15 @@
                     v-for="(item, index) in selectProductList"
                     :key="'selectProductList' + index"
                   />
+                </el-select> -->
+                <el-input v-model="item.tag" placeholder="请输入待测版本..."></el-input>
+              </el-form-item>
+              <el-form-item label="代码分支" prop="branch" :required="true">
+                <el-select v-model="item.branch" placeholder="请选择代码分支" :key="index" @change="getProductInfo(item, index)">
+                  <el-option :label="item.name" :value="item.name" v-for="(item, index) in branchList" :key="'branchList' + index" />
                 </el-select>
               </el-form-item>
-              <el-collapse class="collapseItem">
+              <!-- <el-collapse class="collapseItem">
                 <el-collapse-item name="1">
                   <template #title>
                     <el-button text type="primary"> 高级设置 </el-button>
@@ -107,7 +119,7 @@
                     <CodeMirror :code="item.log" :codeStyle="{ height: '20vh', width: '100%' }" />
                   </el-form-item>
                 </el-collapse-item>
-              </el-collapse>
+              </el-collapse> -->
             </el-form>
           </div>
           <div class="device-space-item">
@@ -116,7 +128,7 @@
             </el-icon>
           </div>
         </div>
-        <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button>
+        <!-- <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button> -->
       </div>
       <el-dialog
         v-model="configFileDialog"
@@ -169,7 +181,7 @@ const taskDetailForm = reactive({
 })
 const taskDetailFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
-  packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }],
+  tag: [{ required: true, message: '请输入待测版本', trigger: 'blur' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }]
 })
@@ -178,14 +190,29 @@ const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['interfaceTest'
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
-  packageName: [{ required: true, message: '请选择项目包', trigger: 'blur' }],
-  log: [{ required: true, message: '配置文件不能为空', trigger: 'change' }]
+  tag: [{ required: true, message: '待测版本不能为空', trigger: 'blur' }],
+  log: [{ required: true, message: '配置文件不能为空', trigger: 'change' }],
+  branch: [{ required: true, message: '代码分支不能为空', trigger: 'change' }]
 })
 const selectDeviceList = ref([])
 const selectProductList = ref([])
 let currentFlows = ref(JSON.parse(localStorage.getItem('flows')))
 const isPassVerification = ref(false)
 const hasDeviceList = ref([])
+const branchList = ref([
+  {
+    name: 'master',
+    value: 'master'
+  },
+  {
+    name: 'develop',
+    value: 'develop'
+  },
+  {
+    name: 'release',
+    value: 'release'
+  }
+])
 
 watch(
   () => props.taskDetailDrawer,
@@ -203,7 +230,19 @@ watch(
 
 watch(
   () => props.taskDetailInfo,
-  () => {
+  async () => {
+    let currentDevice = []
+    // 遍历currentFlows，找到plugin为interfaceTest的dispose，将其serverName赋值给currentDevice
+    currentFlows.value.map(item => {
+      item.task_stages.map(it => {
+        it.task_details.map(i => {
+          if (i.plugin === 'interfaceTest') {
+            currentDevice.push(i.dispose[0].serverName)
+          }
+        })
+      })
+    })
+
     // @ts-ignore
     deviceList.value = props.taskDetailInfo
     hasDeviceList.value = []
@@ -225,11 +264,31 @@ watch(
         page: 1,
         page_size: 100
       }
-      getDeviceApi(params).then(res => {
-        if (res.code === 1000) {
-          // 过滤掉using为true的设备
-          hasDeviceList.value = res.data.filter(item => item.using === false)
-        }
+      let res = await getDeviceApi(params)
+      if (res.code === 1000) {
+        // 过滤掉using为true的设备
+        hasDeviceList.value = res.data.filter(item => item.using === false)
+        console.log(`output->currentDevice`, currentDevice, hasDeviceList.value)
+        // 遍历currentDevice和hasDeviceList，如果currentDevice中的设备在hasDeviceList中，则将其置为不可选
+        currentDevice.map(item => {
+          hasDeviceList.value.map(it => {
+            if (item === it.ip) {
+              hasDeviceList.value.map(i => {
+                if (i.ip === item) {
+                  i.disabled = true
+                }
+              })
+            }
+          })
+        })
+      }
+    } else {
+      hasDeviceList.value.map(item => {
+        currentDevice.map(it => {
+          if (item.ip === it) {
+            item.disabled = true
+          }
+        })
       })
     }
   }
@@ -354,7 +413,7 @@ const getDeviceInfo = async (val, index) => {
     deviceList.value[index].serverConfig.modelCode = res.data.mode_code
     deviceList.value[index].serverConfig.configCode = res.data.config_code
 
-    deviceList.value[index].packageName = ''
+    deviceList.value[index].tag = ''
     deviceList.value[index].packagePath = ''
     deviceList.value[index].packageID = null
 
@@ -386,7 +445,7 @@ const selectProduct = async val => {
 
 const getProductInfo = async (val, index) => {
   selectProductList.value.map(it => {
-    if (it.file_name === val.packageName) {
+    if (it.file_name === val.tag) {
       deviceList.value[index].packagePath = it.file_path
       deviceList.value[index].packageID = it.id
     }

@@ -56,7 +56,11 @@
               <div
                 v-for="(e, index2) in item.task_stages_history"
                 :key="'task_stages_history' + index2"
-                :class="[index2 === 0 ? 'first-card' : '', index2 === groups.length - 1 ? 'last-card' : '']"
+                :class="[
+                  index2 === 0 ? 'first-card' : '',
+                  index2 === groups.length - 1 ? 'last-card' : '',
+                  item.task_stages_history.length == 1 ? 'only-card' : ''
+                ]"
               >
                 <div class="stage">
                   <div
@@ -629,6 +633,13 @@ const handleClose = (done: () => void) => {
                 left: 3px !important;
                 width: 105% !important;
                 border-left: none !important;
+              }
+            }
+          }
+          .only-card {
+            .card {
+              &::before {
+                border-bottom: none !important;
               }
             }
           }

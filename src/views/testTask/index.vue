@@ -90,7 +90,9 @@
               </el-button>
             </template>
           </el-popconfirm>
-          <el-button link type="success" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
+          <el-button link type="success" v-if="item.row.run_count != 0" size="small" @click="toDetail('detail', item.row)">
+            详情
+          </el-button>
           <el-button v-if="item.row.status !== 'in_progress'" link type="primary" size="small" @click="toDetail('edit', item.row)">
             编辑
           </el-button>
