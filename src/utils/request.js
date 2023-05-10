@@ -84,7 +84,7 @@ service.interceptors.response.use(
   function (error) {
     // 对响应错误做点什么
     ElMessage({
-      message: error.data?.msg || '请求失败',
+      message: error.response.data?.msg || '请求失败',
       type: 'error',
       duration: 3500
     })

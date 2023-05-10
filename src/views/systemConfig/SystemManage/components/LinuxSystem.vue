@@ -33,15 +33,11 @@
         </template>
       </el-table-column> -->
       <el-table-column prop="last_mod_time" label="更新时间" width="200" align="center" />
-      <el-table-column fixed="right" label="操作" align="center" width="200">
+      <el-table-column fixed="right" label="操作" align="center" width="180">
         <template #default="scope">
-          <el-button link type="primary" size="small" v-if="!scope.row.using" @click="openLinuxDialog('edit', scope.row.id)">
+          <el-button link type="primary" size="small" :disabled="scope.row.using" @click="openLinuxDialog('edit', scope.row.id)">
             编辑
           </el-button>
-          <el-button link type="primary" size="small" v-if="isShowTermail === false" @click="openConsole(scope.row)" disabled>
-            在线终端
-          </el-button>
-          <el-button link type="warning" size="small" v-else @click="cloeConsole(scope.row)">关闭终端</el-button>
           <el-popover placement="bottom" :width="1" trigger="click" popper-class="moreGroupPopover">
             <template #reference>
               <el-button link type="info" size="small">更多</el-button>
@@ -51,6 +47,10 @@
                 >设备归还
               </el-button>
               <el-button v-else link type="warning" size="small" @click="deviceBorrowing(1, scope.row)">设备借用 </el-button>
+              <el-button link type="primary" size="small" v-if="isShowTermail === false" @click="openConsole(scope.row)" disabled>
+                在线终端
+              </el-button>
+              <el-button link type="warning" size="small" v-else @click="cloeConsole(scope.row)">关闭终端</el-button>
               <!-- <el-button link type="primary" size="small">状态变更 </el-button> -->
               <el-popconfirm
                 title="确定删除该设备?"

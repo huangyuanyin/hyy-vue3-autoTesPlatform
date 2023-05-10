@@ -61,7 +61,10 @@ export const disposeList = {
         { label: '国密卡：', value: '' }
       ],
       serverConfig: {},
-      log: ''
+      // log: ''
+      pendingVersion: '',
+      branch: '',
+      netsignVersion: ''
     }
   ],
   executeCommand: [{}]

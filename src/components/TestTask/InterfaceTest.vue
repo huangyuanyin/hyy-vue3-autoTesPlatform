@@ -82,9 +82,9 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="待测版本" prop="tag" :required="true">
+              <el-form-item label="待测版本" prop="pendingVersion" :required="true">
                 <!-- <el-select
-                  v-model="item.tag"
+                  v-model="item.pendingVersion"
                   placeholder="请选择待测版本"
                   :key="index"
                   @visible-change="selectProduct(item)"
@@ -97,11 +97,21 @@
                     :key="'selectProductList' + index"
                   />
                 </el-select> -->
-                <el-input v-model="item.tag" placeholder="请输入待测版本..."></el-input>
+                <el-input v-model="item.pendingVersion" placeholder="请输入待测版本..."></el-input>
               </el-form-item>
               <el-form-item label="代码分支" prop="branch" :required="true">
                 <el-select v-model="item.branch" placeholder="请选择代码分支" :key="index" @change="getProductInfo(item, index)">
                   <el-option :label="item.name" :value="item.name" v-for="(item, index) in branchList" :key="'branchList' + index" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="适用版本" prop="netsignVersion" :required="true">
+                <el-select v-model="item.netsignVersion" placeholder="请选择适用版本" :key="index" @change="getProductInfo(item, index)">
+                  <el-option
+                    :label="item.name"
+                    :value="item.name"
+                    v-for="(item, index) in netsignVersionList"
+                    :key="'netsignVersionList' + index"
+                  />
                 </el-select>
               </el-form-item>
               <!-- <el-collapse class="collapseItem">
@@ -181,7 +191,7 @@ const taskDetailForm = reactive({
 })
 const taskDetailFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
-  tag: [{ required: true, message: '请输入待测版本', trigger: 'blur' }],
+  pendingVersion: [{ required: true, message: '请输入待测版本', trigger: 'blur' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }]
 })
@@ -190,9 +200,10 @@ const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['interfaceTest'
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
-  tag: [{ required: true, message: '待测版本不能为空', trigger: 'blur' }],
+  pendingVersion: [{ required: true, message: '待测版本不能为空', trigger: 'blur' }],
   log: [{ required: true, message: '配置文件不能为空', trigger: 'change' }],
-  branch: [{ required: true, message: '代码分支不能为空', trigger: 'change' }]
+  branch: [{ required: true, message: '代码分支不能为空', trigger: 'change' }],
+  netsignVersion: [{ required: true, message: '适用版本不能为空', trigger: 'change' }]
 })
 const selectDeviceList = ref([])
 const selectProductList = ref([])
@@ -211,6 +222,16 @@ const branchList = ref([
   {
     name: 'release',
     value: 'release'
+  }
+])
+const netsignVersionList = ref([
+  {
+    name: '5.5',
+    value: '5.5'
+  },
+  {
+    name: '5.6',
+    value: '5.6'
   }
 ])
 
@@ -413,7 +434,7 @@ const getDeviceInfo = async (val, index) => {
     deviceList.value[index].serverConfig.modelCode = res.data.mode_code
     deviceList.value[index].serverConfig.configCode = res.data.config_code
 
-    deviceList.value[index].tag = ''
+    // deviceList.value[index].pendingVersion = ''
     deviceList.value[index].packagePath = ''
     deviceList.value[index].packageID = null
 
@@ -445,7 +466,7 @@ const selectProduct = async val => {
 
 const getProductInfo = async (val, index) => {
   selectProductList.value.map(it => {
-    if (it.file_name === val.tag) {
+    if (it.file_name === val.pendingVersion) {
       deviceList.value[index].packagePath = it.file_path
       deviceList.value[index].packageID = it.id
     }
