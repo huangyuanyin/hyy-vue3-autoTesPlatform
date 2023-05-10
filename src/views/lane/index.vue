@@ -38,7 +38,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Lane from './lane.vue'
 import basicInformation from './basicInformation/index.vue'
 import TriggerSetting from './triggerSetting/index.vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { addTaskInfoApi, editTaskInfoApi, getTaskInfoApi } from '@/api/NetDevOps/index'
 import bus from '@/utils/bus.js'
 
@@ -48,6 +48,7 @@ const tabName = ref('basicInformation')
 const isDetail = ref(true)
 const taskName = ref('')
 const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
+const oldFlows = ref(localStorage.getItem('flows'))
 
 const data = reactive({
   name: '',
@@ -195,6 +196,31 @@ onMounted(() => {
   route.path === '/testTask/detailTestTask' ? (isDetail.value = true) : (isDetail.value = false)
   if (route.query.id) {
     getTaskInfo()
+  }
+})
+
+// 路由导航守卫，离开页面前，未保存给出提示
+router.beforeEach((to, from, next) => {
+  if (from.name === 'EditTestTask' || from.name === 'AddTestTask') {
+    if (data.task_swim_lanes.length === 0 || JSON.stringify(data.task_swim_lanes) === oldFlows.value) {
+      next()
+    } else {
+      ElMessageBox.confirm('当前有未保存的流水线，是否离开？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          next()
+          data.task_swim_lanes = []
+          oldFlows.value = ''
+        })
+        .catch(() => {
+          next(false)
+        })
+    }
+  } else {
+    next()
   }
 })
 </script>
