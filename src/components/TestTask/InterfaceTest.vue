@@ -112,7 +112,7 @@
               <el-card class="config-card" shadow="never" :key="index">
                 <template #header>
                   <div class="card-header">
-                    <span>拉取配置</span>
+                    <span>NetSign接口自动化代码配置</span>
                   </div>
                 </template>
                 <el-form-item label="代码分支" prop="branch" :required="true">
@@ -229,16 +229,24 @@ const isPassVerification = ref(false)
 const hasDeviceList = ref([])
 const branchList = ref([
   {
-    name: 'master',
-    value: 'master'
+    name: 'GZRCB',
+    value: 'GZRCB'
   },
   {
-    name: 'develop',
-    value: 'develop'
+    name: 'liangye16.1',
+    value: 'liangye16.1'
   },
   {
-    name: 'release',
-    value: 'release'
+    name: 'netsign5.6.1project',
+    value: 'netsign5.6.1project'
+  },
+  {
+    name: 'netsign5.6.1project_new',
+    value: 'netsign5.6.1project_new'
+  },
+  {
+    name: 'netsign5.6.5',
+    value: 'netsign5.6.5'
   }
 ])
 const netsignVersionList = ref([

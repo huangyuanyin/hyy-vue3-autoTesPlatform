@@ -52,14 +52,21 @@
         <div class="flow-groups" v-for="(item, index) in groups" :key="'group' + index">
           <div class="flow-group">
             <div class="group-head">{{ item.name }}</div>
-            <div class="stages" :class="[index === 0 ? 'first-stages' : '', index === groups.length - 1 ? 'last-stages' : '']">
+            <div
+              class="stages"
+              :class="[
+                groups.length === 1 ? 'only-stages' : '',
+                index === 0 && groups.length !== 1 ? 'first-stages' : '',
+                index === groups.length - 1 && groups.length !== 1 ? 'last-stages' : ''
+              ]"
+            >
               <div
                 v-for="(e, index2) in item.task_stages_history"
                 :key="'task_stages_history' + index2"
                 :class="[
-                  index2 === 0 ? 'first-card' : '',
-                  index2 === groups.length - 1 ? 'last-card' : '',
-                  item.task_stages_history.length == 1 ? 'only-card' : ''
+                  item.task_stages_history.length === 1 ? 'only-card' : '',
+                  index2 === 0 && item.task_stages_history.length !== 1 ? 'first-card' : '',
+                  index2 === item.task_stages_history.length - 1 && item.task_stages_history.length !== 1 ? 'last-card' : ''
                 ]"
               >
                 <div class="stage">
@@ -416,6 +423,15 @@ const handleClose = (done: () => void) => {
               .card {
                 &::before {
                   border-right: none !important;
+                  border-left: none !important;
+                }
+              }
+            }
+            .only-card {
+              .card {
+                &::before {
+                  border-right: none !important;
+                  border-left: none !important;
                 }
               }
             }
@@ -627,6 +643,17 @@ const handleClose = (done: () => void) => {
               }
             }
           }
+          .only-stages {
+            .only-card {
+              .card {
+                &::before {
+                  border-left: none !important;
+                  border-right: none !important;
+                  border-bottom: none !important;
+                }
+              }
+            }
+          }
           .first-stages {
             .card {
               &::before {
@@ -636,14 +663,16 @@ const handleClose = (done: () => void) => {
               }
             }
           }
-          .only-card {
-            .card {
-              &::before {
-                border-bottom: none !important;
+          .last-stages {
+            .only-card {
+              .card {
+                &::before {
+                  border-left: none !important;
+                  border-right: none !important;
+                  width: 105% !important;
+                }
               }
             }
-          }
-          .last-stages {
             .first-card {
               .card {
                 &::before {
