@@ -20,15 +20,15 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="device_user" label="使用人" width="160" align="center">
+      <el-table-column prop="operate_user" label="使用人" width="160" align="center">
         <template #default="scope">
-          <span>{{ scope.row.device_user === null ? '未知' : scope.row.device_user }}</span>
+          <span>{{ scope.row.operate_user === null ? '' : scope.row.operate_user }}</span>
         </template>
       </el-table-column>
       <!-- <el-table-column prop="device_group" label="设备组" width="150" align="center" />
       <el-table-column prop="remark" label="备注" width="150">
         <template #default="scope">
-          <span v-if="scope.row.remark !== null">{{ scope.row.device_user }}</span>
+          <span v-if="scope.row.remark !== null">{{ scope.row.operate_user }}</span>
           <el-tag type="info" e-else>暂无备注</el-tag>
         </template>
       </el-table-column> -->
