@@ -62,6 +62,7 @@ export const disposeList = {
       ],
       serverConfig: {},
       // log: ''
+      pendingVersionOrigin: 'auto',
       pendingVersion: '',
       branch: '',
       netsignVersion: ''

@@ -83,7 +83,18 @@
                 </el-card>
               </el-form-item>
               <el-form-item label="待测版本" prop="pendingVersion" :required="true">
-                <!-- <el-select
+                <el-radio-group v-model="item.pendingVersionOrigin" class="ml-4" @change="changePendingVersionOrigin(item, index)">
+                  <el-radio label="auto" size="large">版本列表</el-radio>
+                  <el-radio label="manual" size="large">Tag</el-radio>
+                </el-radio-group>
+                <el-input
+                  class="input-width"
+                  v-show="item.pendingVersionOrigin === 'manual'"
+                  v-model="item.pendingVersion"
+                  placeholder="请输入待测版本..."
+                ></el-input>
+                <el-select
+                  v-show="item.pendingVersionOrigin === 'auto'"
                   v-model="item.pendingVersion"
                   placeholder="请选择待测版本"
                   :key="index"
@@ -96,24 +107,30 @@
                     v-for="(item, index) in selectProductList"
                     :key="'selectProductList' + index"
                   />
-                </el-select> -->
-                <el-input v-model="item.pendingVersion" placeholder="请输入待测版本..."></el-input>
-              </el-form-item>
-              <el-form-item label="代码分支" prop="branch" :required="true">
-                <el-select v-model="item.branch" placeholder="请选择代码分支" :key="index" @change="getProductInfo(item, index)">
-                  <el-option :label="item.name" :value="item.name" v-for="(item, index) in branchList" :key="'branchList' + index" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="适用版本" prop="netsignVersion" :required="true">
-                <el-select v-model="item.netsignVersion" placeholder="请选择适用版本" :key="index" @change="getProductInfo(item, index)">
-                  <el-option
-                    :label="item.name"
-                    :value="item.name"
-                    v-for="(item, index) in netsignVersionList"
-                    :key="'netsignVersionList' + index"
-                  />
-                </el-select>
-              </el-form-item>
+              <el-card class="config-card" shadow="never" :key="index">
+                <template #header>
+                  <div class="card-header">
+                    <span>拉取配置</span>
+                  </div>
+                </template>
+                <el-form-item label="代码分支" prop="branch" :required="true">
+                  <el-select v-model="item.branch" placeholder="请选择代码分支" :key="index" @change="getProductInfo(item, index)">
+                    <el-option :label="item.name" :value="item.name" v-for="(item, index) in branchList" :key="'branchList' + index" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="适用版本" prop="netsignVersion" :required="true">
+                  <el-select v-model="item.netsignVersion" placeholder="请选择适用版本" :key="index" @change="getProductInfo(item, index)">
+                    <el-option
+                      :label="item.name"
+                      :value="item.name"
+                      v-for="(item, index) in netsignVersionList"
+                      :key="'netsignVersionList' + index"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-card>
               <!-- <el-collapse class="collapseItem">
                 <el-collapse-item name="1">
                   <template #title>
@@ -253,7 +270,6 @@ watch(
   () => props.taskDetailInfo,
   async () => {
     let currentDevice = []
-    // 遍历currentFlows，找到plugin为interfaceTest的dispose，将其serverName赋值给currentDevice
     currentFlows.value.map(item => {
       item.task_stages.map(it => {
         it.task_details.map(i => {
@@ -287,9 +303,7 @@ watch(
       }
       let res = await getDeviceApi(params)
       if (res.code === 1000) {
-        // 过滤掉using为true的设备
         hasDeviceList.value = res.data.filter(item => item.using === false)
-        console.log(`output->currentDevice`, currentDevice, hasDeviceList.value)
         // 遍历currentDevice和hasDeviceList，如果currentDevice中的设备在hasDeviceList中，则将其置为不可选
         currentDevice.map(item => {
           hasDeviceList.value.map(it => {
@@ -439,29 +453,51 @@ const getDeviceInfo = async (val, index) => {
     deviceList.value[index].packageID = null
 
     // 修改配置文件
-    deviceList.value[index].log = getInterfaceTestConfigurationFile(
-      res.data.ip,
-      res.data.port,
-      res.data.username,
-      res.data.password,
-      val.serverName
-    )
+    // deviceList.value[index].log = getInterfaceTestConfigurationFile(
+    //   res.data.ip,
+    //   res.data.port,
+    //   res.data.username,
+    //   res.data.password,
+    //   val.serverName
+    // )
     console.log(`output->deviceList.value[index]`, deviceList.value[index].log)
   }
 }
 
 const selectProduct = async val => {
   selectProductList.value = []
-  if (val.showServerConfig[1].value) {
-    const params = {
-      main_board_type: val.showServerConfig[1].value === 'x86' ? 'x86' : 'other'
-    }
-    let res = await getProductPackageApi(params)
-    if (res.code === 1000) {
-      // 过滤掉file_name不包含.zip的
-      selectProductList.value = res.data.filter(item => item.file_name.includes('.zip'))
+  currentFlows.value.map(item => {
+    item.task_stages.map(it => {
+      it.task_details.map(i => {
+        if (i.plugin === 'netSignArrange') {
+          selectProductList.value.push({ file_name: i.dispose[0].packageName, id: i.dispose[0].packageID })
+        }
+      })
+    })
+  })
+
+  selectProductList.value = removeDuplicateObj(selectProductList.value)
+  if (selectProductList.value.length === 0) {
+    if (val.showServerConfig[1].value) {
+      const params = {
+        main_board_type: val.showServerConfig[1].value === 'x86' ? 'x86' : 'other'
+      }
+      let res = await getProductPackageApi(params)
+      if (res.code === 1000) {
+        // 过滤掉file_name不包含.zip的
+        selectProductList.value = res.data.filter(item => item.file_name.includes('.zip'))
+      }
     }
   }
+}
+
+const removeDuplicateObj = arr => {
+  let obj = {}
+  arr = arr.reduce((newArr, next) => {
+    obj[next.file_name] ? '' : (obj[next.file_name] = true && newArr.push(next))
+    return newArr
+  }, [])
+  return arr
 }
 
 const getProductInfo = async (val, index) => {
@@ -478,6 +514,10 @@ const handleFullscreen = (val, id) => {
   configFileDialogTitle.value = `【${val.serverName}】的配置文件`
   configFileDialogLog.value = val.log
   configId.value = id
+}
+
+const changePendingVersionOrigin = (val, index) => {
+  deviceList.value[index].pendingVersion = ''
 }
 
 const onCodeChange = val => {
@@ -629,7 +669,7 @@ const onCodeChange = val => {
     .device-space {
       justify-content: space-between;
       display: flex;
-      padding: 20px 20px 0;
+      padding: 20px;
       margin-left: 20px;
       margin-bottom: 20px;
       position: relative;
@@ -637,6 +677,9 @@ const onCodeChange = val => {
 
       .device-ruleForm {
         .el-select {
+          width: 400px;
+        }
+        .input-width {
           width: 400px;
         }
       }
@@ -654,6 +697,33 @@ const onCodeChange = val => {
 
         .el-card__body {
           padding: 0px 15px;
+
+          ul {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+
+            li {
+              width: 45%;
+
+              span {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                width: 130px;
+                overflow: hidden;
+                color: #67c23a;
+              }
+            }
+          }
+        }
+      }
+      .config-card {
+        width: 520px !important;
+        .el-card__header {
+          padding: 9px 14px;
+        }
+        .el-card__body {
+          padding: 8px 15px 10px 15px;
 
           ul {
             display: flex;
