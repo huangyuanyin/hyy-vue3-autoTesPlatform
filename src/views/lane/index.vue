@@ -4,7 +4,7 @@
       <el-row :gutter="20">
         <el-col class="backButton" :span="7">
           <div class="grid-content ep-bg-purple" />
-          <el-button @click="router.go(-1)">返回</el-button>
+          <el-button @click="goBack">返回</el-button>
           <span style="color: #303133; font-weight: 600; margin-right: 5px">{{ taskName === '' ? '流水线' : taskName }} </span>
           <span>{{ laneTime }}</span>
         </el-col>
@@ -41,6 +41,7 @@ import TriggerSetting from './triggerSetting/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { addTaskInfoApi, editTaskInfoApi, getTaskInfoApi } from '@/api/NetDevOps/index'
 import bus from '@/utils/bus.js'
+// import { jsPlumb, jsPlumbInstance } from 'jsplumb'
 
 const router = useRouter()
 const route = useRoute()
@@ -48,7 +49,7 @@ const tabName = ref('basicInformation')
 const isDetail = ref(true)
 const taskName = ref('')
 const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
-const oldFlows = ref(localStorage.getItem('flows'))
+const oldFlows = ref('')
 
 const data = reactive({
   name: '',
@@ -69,6 +70,12 @@ const data = reactive({
 
 const changeTab = (e: any) => {
   tabName.value = e
+}
+
+const goBack = () => {
+  judegeSave(() => {
+    router.go(-1)
+  })
 }
 
 const sumbitTask = type => {
@@ -127,7 +134,12 @@ const addTaskInfo = async () => {
   const res = await addTaskInfoApi(params)
   if (res.code === 1000) {
     ElMessage.success('任务创建成功')
-    router.go(-1)
+    data.task_swim_lanes.length = 0
+    if (data.task_swim_lanes.length === 0) {
+      judegeSave(() => {
+        router.go(-1)
+      })
+    }
   }
 }
 
@@ -160,7 +172,12 @@ const editTaskInfo = async () => {
   const res = await editTaskInfoApi(params)
   if (res.code === 1000) {
     ElMessage.success('任务编辑成功')
-    router.go(-1)
+    data.task_swim_lanes.length = 0
+    if (data.task_swim_lanes.length === 0) {
+      judegeSave(() => {
+        router.go(-1)
+      })
+    }
   }
 }
 
@@ -189,36 +206,95 @@ const getTaskInfo = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // jsPlumb.on(document, 'jsPlumbInstance', () => {
+  //   const instance = jsPlumb.getInstance()
+  //   // 连接 card1 和 card3
+  //   instance.connect({
+  //     source: 'card1',
+  //     target: 'card3',
+  //     // 设置连接样式
+  //     paintStyle: { stroke: '#666', strokeWidth: 2 },
+  //     // 设置连接的中间点
+  //     anchors: ['Right', 'Left'],
+  //     // 设置连接的类型
+  //     connector: ['Flowchart', { cornerRadius: 5 }],
+  //     // 设置连接的标签
+  //     overlays: [
+  //       [
+  //         'Label',
+  //         {
+  //           label: 'label1',
+  //           location: 0.5,
+  //           cssClass: 'label',
+  //           visible: true
+  //         }
+  //       ]
+  //     ]
+  //   })
+
+  //   // 连接 card2 和 card3
+  //   instance.connect({
+  //     source: 'card2',
+  //     target: 'card3',
+  //     // 设置连接样式
+  //     paintStyle: { stroke: '#666', strokeWidth: 2 },
+  //     // 设置连接的中间点
+  //     anchors: ['Right', 'Left'],
+  //     // 设置连接的类型
+  //     connector: ['Flowchart', { cornerRadius: 5 }],
+  //     // 设置连接的标签
+  //     overlays: [
+  //       [
+  //         'Label',
+  //         {
+  //           label: 'label2',
+  //           location: 0.5,
+  //           cssClass: 'label',
+  //           visible: true
+  //         }
+  //       ]
+  //     ]
+  //   })
+  // })
   if (route.query.tem && route.query.tem !== 'noUse') {
     data.task_swim_lanes = JSON.parse(localStorage.getItem('taskTemplateObj'))
   }
   route.path === '/testTask/detailTestTask' ? (isDetail.value = true) : (isDetail.value = false)
   if (route.query.id) {
-    getTaskInfo()
+    await getTaskInfo()
+    oldFlows.value = JSON.stringify(data.task_swim_lanes)
   }
 })
+
+// 判断是否有未保存的流水线
+const judegeSave = callback => {
+  console.log(`output->`, JSON.stringify(data.task_swim_lanes), oldFlows.value)
+  if (data.task_swim_lanes.length === 0 || JSON.stringify(data.task_swim_lanes) === oldFlows.value) {
+    callback()
+  } else {
+    ElMessageBox.confirm('当前有未保存的流水线，是否离开？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+      .then(() => {
+        callback()
+        data.task_swim_lanes = []
+        oldFlows.value = ''
+      })
+      .catch(() => {
+        // callback()
+      })
+  }
+}
 
 // 路由导航守卫，离开页面前，未保存给出提示
 router.beforeEach((to, from, next) => {
   if (from.name === 'EditTestTask' || from.name === 'AddTestTask') {
-    if (data.task_swim_lanes.length === 0 || JSON.stringify(data.task_swim_lanes) === oldFlows.value) {
+    judegeSave(() => {
       next()
-    } else {
-      ElMessageBox.confirm('当前有未保存的流水线，是否离开？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          next()
-          data.task_swim_lanes = []
-          oldFlows.value = ''
-        })
-        .catch(() => {
-          next(false)
-        })
-    }
+    })
   } else {
     next()
   }
@@ -275,5 +351,44 @@ router.beforeEach((to, from, next) => {
       }
     }
   }
+}
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  margin-right: 50px;
+}
+
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 50px;
+  margin: 10px;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+}
+
+.right .card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 50px;
+  margin: 10px;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
 }
 </style>
