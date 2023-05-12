@@ -255,8 +255,12 @@ const netsignVersionList = ref([
     value: '5.5'
   },
   {
-    name: '5.6',
-    value: '5.6'
+    name: '5.6.4',
+    value: '5.6.4'
+  },
+  {
+    name: '5.6.5',
+    value: '5.6.5'
   }
 ])
 
