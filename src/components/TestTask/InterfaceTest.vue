@@ -109,7 +109,7 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-card class="config-card" shadow="never" :key="index">
+              <!-- <el-card class="config-card" shadow="never" :key="index">
                 <template #header>
                   <div class="card-header">
                     <span>NetSign接口自动化代码配置</span>
@@ -130,7 +130,7 @@
                     />
                   </el-select>
                 </el-form-item>
-              </el-card>
+              </el-card> -->
               <!-- <el-collapse class="collapseItem">
                 <el-collapse-item name="1">
                   <template #title>
@@ -149,11 +149,47 @@
               </el-collapse> -->
             </el-form>
           </div>
-          <div class="device-space-item">
+          <!-- <div class="device-space-item">
             <el-icon class="delete-icon" @click="deleteDevice(index)">
               <Delete />
             </el-icon>
+          </div> -->
+        </div>
+        <span class="title">NetSign接口自动化代码配置</span>
+        <div class="device-space" v-for="(item, index) in deviceList" :key="'deviceList' + index">
+          <div class="device-space-item">
+            <el-form
+              ref="deviceFormRef"
+              :model="item"
+              :rules="deviceFormRules"
+              label-width="220px"
+              class="device-ruleForm"
+              size="default"
+              label-position="top"
+              status-icon
+            >
+              <el-form-item label="代码分支" prop="branch" :required="true">
+                <el-select v-model="item.branch" placeholder="请选择代码分支" :key="index" @change="getProductInfo(item, index)">
+                  <el-option :label="item.name" :value="item.name" v-for="(item, index) in branchList" :key="'branchList' + index" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="适用版本" prop="netsignVersion" :required="true">
+                <el-select v-model="item.netsignVersion" placeholder="请选择适用版本" :key="index" @change="getProductInfo(item, index)">
+                  <el-option
+                    :label="item.name"
+                    :value="item.name"
+                    v-for="(item, index) in netsignVersionList"
+                    :key="'netsignVersionList' + index"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-form>
           </div>
+          <!-- <div class="device-space-item">
+            <el-icon class="delete-icon" @click="deleteDevice(index)">
+              <Delete />
+            </el-icon>
+          </div> -->
         </div>
         <!-- <el-button type="primary" @click="addDeviceForm">+ 添加设备</el-button> -->
       </div>
