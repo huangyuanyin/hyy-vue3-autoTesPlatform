@@ -87,7 +87,7 @@
                             style="width: 24px"
                           ></svg-icon>
                         </el-tooltip>
-                        <div class="card-content" :class="[it.plugin !== 'interfaceTest' ? cardTyp[it.status] : '']">
+                        <div class="card-content" :class="[cardTyp[it.status]]">
                           <div class="card-title">{{ it.name }}</div>
                           <div class="success-comp" v-if="it.status === 'success'">
                             <div class="card-info">
@@ -104,9 +104,39 @@
                             <div class="card-num" v-if="it.plugin === 'interfaceTest'">
                               <div class="stat-info">
                                 <div class="stat-info-item" v-for="(item, index) in it.total_statistics" :key="'total_statistics' + index">
-                                  <div class="stat-info-item-value" :class="[statColor[item.name]]" @click="getClassName(item, it.id)">
-                                    {{ item.value }}
-                                  </div>
+                                  <el-popover placement="top" :width="500" trigger="click" @show="getClassName(item, it.id)">
+                                    <template #reference>
+                                      <div class="stat-info-item-value" :class="[statColor[item.name]]">
+                                        {{ item.value }}
+                                      </div>
+                                    </template>
+                                    <el-table
+                                      :data="tableData"
+                                      v-loading="tableDataLoading"
+                                      max-height="30vh"
+                                      :span-method="objectSpanMethod"
+                                    >
+                                      <el-table-column width="150" property="project_name" label="项目名称" />
+                                      <el-table-column width="250" property="class_name" label="class_name" />
+                                      <el-table-column label="操作">
+                                        <template #default="scope">
+                                          <el-button size="small" type="primary" @click="getMethods(scope.row, item.name, it)"
+                                            >查看</el-button
+                                          >
+                                        </template>
+                                      </el-table-column>
+                                    </el-table>
+                                    <el-pagination
+                                      class="tableDataPage"
+                                      v-model:current-page="tableDataCurrentPage"
+                                      :page-size="tableDataPageSize"
+                                      small="small"
+                                      layout="total, prev, pager, next"
+                                      :total="tableDataTotal"
+                                      @size-change="handleTableDataSizeChange"
+                                      @current-change="handleTableDataCurrentChange"
+                                    />
+                                  </el-popover>
                                   <div class="stat-info-item-desc">{{ statList[item.name] }}</div>
                                 </div>
                               </div>
@@ -184,6 +214,7 @@
     <el-dialog
       v-model="logDialog"
       :title="logTitle"
+      custom-class="logDialog"
       width="50%"
       :before-close="handleClose"
       :close-on-click-modal="false"
@@ -191,16 +222,55 @@
     >
       <CodeMirror :code="log" :codeStyle="{ height: '60vh' }" />
     </el-dialog>
+    <el-dialog
+      v-model="methodsDialog"
+      custom-class="methodsDialog"
+      width="50%"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <template #header="{ close, titleId, titleClass }">
+        <div class="my-header">
+          <div class="left">
+            <h4 :id="titleId" :class="titleClass">{{ methodsTitle }}</h4>
+            <span :class="[statColor[classNameTitle]]"
+              >【 <span>{{ statList[classNameTitle] }}用例</span> 】</span
+            >
+          </div>
+          <el-button type="danger" @click="close">
+            <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
+            关闭
+          </el-button>
+        </div>
+      </template>
+      <el-table :data="methodsData" border style="width: 100%; margin-top: 20px" v-loading="methodsDataLoading" max-height="50vh">
+        <el-table-column prop="method_name" label="方法名称" />
+        <el-table-column prop="case_param" label="参数" />
+        <el-table-column prop="exception_details" label="错误说明" />
+        <el-table-column prop="case_description" label="描述" />
+      </el-table>
+      <el-pagination
+        class="methodsDataPage"
+        v-model:current-page="methodsDataCurrentPage"
+        :page-size="methodsDataPageSize"
+        small="small"
+        layout="total, prev, pager, next"
+        :total="methodsDataTotal"
+        @current-change="handleMethodsDataCurrentChange"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+// @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
 import { useRoute } from 'vue-router'
-import { getClassNameApi } from '@/api/NetDevOps'
+import { getClassNameApi, getMethodsApi } from '@/api/NetDevOps'
 
 const props = defineProps({
   runResult: {
@@ -209,8 +279,21 @@ const props = defineProps({
   }
 })
 
+const tableData = ref([])
+const tableDataLoading = ref(false)
 const logDialog = ref(false)
 const logTitle = ref('')
+const methodsDialog = ref(false)
+const methodsTitle = ref('')
+const classNameTitle = ref('')
+const tableDataCurrentPage = ref(1)
+const tableDataPageSize = ref(5)
+const tableDataTotal = ref(0)
+const methodsData = ref([])
+const methodsDataCurrentPage = ref(1)
+const methodsDataPageSize = ref(20)
+const methodsDataTotal = ref(0)
+const methodsDataLoading = ref(false)
 const log = ref('暂无日志...')
 const cardTyp = {
   success: 'success-card',
@@ -256,6 +339,11 @@ const statName = {
   skipped_count: 'SKIPPED'
 }
 const groups = ref([])
+const currentItem = ref(null)
+const currentId = ref(null)
+const currentMethodsItem = ref(null)
+const currentMethodsId = ref(null)
+const currentMethodsType = ref(null)
 
 watch(
   () => props.runResult,
@@ -300,10 +388,91 @@ const handleLog = (item: any) => {
   log.value = item.task_execute_record[0].execute_record
 }
 
+const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {
+  if (columnIndex === 0) {
+    const _row = getRowCount(tableData.value).one[rowIndex]
+    const _col = _row > 0 ? 1 : 0
+    return {
+      rowspan: _row,
+      colspan: _col
+    }
+  }
+}
+
+const getRowCount = arr => {
+  let spanOneArr = []
+  let concatOne = 0
+  arr.forEach((item, index) => {
+    if (index === 0) {
+      spanOneArr.push(1)
+    } else {
+      if (item.project_name === arr[index - 1].project_name) {
+        spanOneArr[concatOne] += 1
+        spanOneArr.push(0)
+      } else {
+        spanOneArr.push(1)
+        concatOne = index
+      }
+    }
+  })
+  return {
+    one: spanOneArr
+  }
+}
+
 const getClassName = async (item: any, id) => {
   if (item.name === 'count') return
-  let res = await getClassNameApi({ task_details_history_id: id, status: statName[item.name] })
-  if (res.code === 200) {
+  currentItem.value = item
+  currentId.value = id
+  handleClassNameApi(currentItem.value, currentId.value)
+}
+
+const handleClassNameApi = async (item, id) => {
+  tableDataLoading.value = true
+  let res = await getClassNameApi({
+    task_details_history_id: id,
+    status: statName[item.name],
+    page: tableDataCurrentPage.value,
+    page_size: tableDataPageSize.value
+  })
+  tableDataLoading.value = false
+  if (res.code === 1000) {
+    classNameTitle.value = item.name
+    // @ts-ignore
+    tableDataTotal.value = res.total
+    tableData.value = res.data.flatMap(({ project_name, class_name }) =>
+      class_name.map(classItem => ({
+        project_name: project_name,
+        class_name: classItem
+      }))
+    )
+  }
+}
+
+const getMethods = async (item: any, type, val) => {
+  currentMethodsItem.value = item
+  currentMethodsId.value = val
+  currentMethodsType.value = type
+  handleMethods(currentMethodsItem.value, currentMethodsType.value, currentMethodsId.value)
+}
+
+const handleMethods = async (item: any, type, val) => {
+  methodsDataLoading.value = true
+  let res = await getMethodsApi({
+    project_name: item.project_name,
+    class_name: item.class_name,
+    status: statName[type],
+    task_details_history_id: val.id,
+    page: methodsDataCurrentPage.value,
+    page_size: methodsDataPageSize.value
+  })
+  methodsDataLoading.value = false
+  if (res.code === 1000) {
+    methodsDialog.value = true
+    methodsData.value = res.data
+    // @ts-ignore
+    methodsDataTotal.value = res.total
+    methodsTitle.value = `${val.name} - ${item.project_name} - ${item.class_name}`
   }
 }
 
@@ -313,6 +482,16 @@ const handleRun = (item: any) => {
 
 const handleClose = (done: () => void) => {
   done()
+}
+
+const handleTableDataSizeChange = (val: number) => {}
+const handleTableDataCurrentChange = (val: number) => {
+  tableDataCurrentPage.value = val
+  getClassName(currentItem.value, currentId.value)
+}
+const handleMethodsDataCurrentChange = (val: number) => {
+  methodsDataCurrentPage.value = val
+  handleMethods(currentMethodsItem.value, currentMethodsType.value, currentMethodsId.value)
 }
 </script>
 
@@ -638,11 +817,12 @@ const handleClose = (done: () => void) => {
                         justify-content: space-around;
                         width: 100%;
                         .stat-info-item {
-                          min-width: 20%;
+                          min-width: 25%;
                           height: 58px;
                           padding: 4px 0;
                           .stat-info-item-value {
-                            font-size: 20px;
+                            font-size: 18px;
+                            margin-bottom: 5px;
                             font-family: DINPro;
                           }
                           .total {
@@ -794,9 +974,54 @@ const handleClose = (done: () => void) => {
     }
   }
 }
+
+.my-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .left {
+    display: flex;
+    align-items: center;
+    .success {
+      margin-left: 5px;
+      color: #22b066;
+    }
+    .serious {
+      margin-left: 5px;
+      color: #e62412;
+    }
+    .yiban {
+      margin-left: 5px;
+      color: #8b8b8b;
+    }
+  }
+}
 </style>
 
 <style lang="scss">
+.methodsDataPage,
+.tableDataPage {
+  display: flex !important;
+  justify-content: flex-end !important;
+  margin-top: 5px;
+}
+
+.methodsDialog {
+  .el-dialog__header {
+    padding: 0 16px !important;
+  }
+  .el-dialog__body {
+    padding: 0 16px 16px !important;
+  }
+}
+.logDialog {
+  .el-dialog__header {
+    padding-bottom: 0 !important;
+  }
+  .el-dialog__body {
+    padding-top: 16px !important;
+  }
+}
 .box-item {
   padding: 6px 12px !important;
   background: linear-gradient(90deg, rgb(98, 101, 111), rgb(98, 101, 111)) !important;

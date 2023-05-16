@@ -187,3 +187,12 @@ export function getClassNameApi(params) {
     params
   })
 }
+
+export function getMethodsApi(params) {
+  return request({
+    url: `/devops/interface/method_detail`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
