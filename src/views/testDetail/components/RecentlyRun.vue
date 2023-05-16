@@ -17,7 +17,7 @@
         <div class="left-info">
           <span class="info-label">触发信息</span>
           <div class="instance-trigger-info">
-            <div class="title">huangyuanyin</div>
+            <div class="title">{{ props.runResult.create_user }}</div>
             &nbsp;•&nbsp;手动触发
           </div>
           <div class="info-divider"></div>
@@ -72,7 +72,7 @@
                 <div class="stage">
                   <div
                     class="card"
-                    :class="[cardTyp[it.status]]"
+                    :class="[it.plugin !== 'interfaceTest' && it.status !== 'success' ? cardTyp[it.status] : 'interfaceTest_card']"
                     v-for="(it, index) in e.task_details_history"
                     :key="'task_details_history' + index"
                   >
@@ -87,7 +87,7 @@
                             style="width: 24px"
                           ></svg-icon>
                         </el-tooltip>
-                        <div class="card-content" :class="[cardTyp[it.status]]">
+                        <div class="card-content" :class="[it.plugin !== 'interfaceTest' ? cardTyp[it.status] : '']">
                           <div class="card-title">{{ it.name }}</div>
                           <div class="success-comp" v-if="it.status === 'success'">
                             <div class="card-info">
@@ -101,11 +101,13 @@
                                 </div>
                               </div>
                             </div>
-                            <div class="card-num">
+                            <div class="card-num" v-if="it.plugin === 'interfaceTest'">
                               <div class="stat-info">
-                                <div class="stat-info-item" v-for="(item, index) in statList" :key="'statList' + index">
-                                  <div class="stat-info-item-value" :class="[statColor[item.title]]">{{ item.num }}</div>
-                                  <div class="stat-info-item-desc">{{ item.title }}</div>
+                                <div class="stat-info-item" v-for="(item, index) in it.total_statistics" :key="'total_statistics' + index">
+                                  <div class="stat-info-item-value" :class="[statColor[item.name]]" @click="getClassName(item, it.id)">
+                                    {{ item.value }}
+                                  </div>
+                                  <div class="stat-info-item-desc">{{ statList[item.name] }}</div>
                                 </div>
                               </div>
                             </div>
@@ -122,7 +124,7 @@
                             <div class="message">
                               <div>运行失败，请查看日志！</div>
                             </div>
-                            <div class="button" @click="handleRun(it)">
+                            <div class="button" v-if="it.status === 'fail' && it.plugin === 'interfaceTest'" @click="handleRun(it)">
                               <div>重试</div>
                             </div>
                           </div>
@@ -138,9 +140,9 @@
                             <div class="message">
                               <div>运行中...</div>
                             </div>
-                            <div class="button" @click="handleChannel(it)">
+                            <!-- <div class="button" @click="handleChannel(it)">
                               <div>取消</div>
-                            </div>
+                            </div> -->
                           </div>
                           <div class="channel-comp" v-if="it.status === 'channel'">
                             <div class="card-info">
@@ -155,7 +157,7 @@
                               <div>用户已取消</div>
                             </div>
                             <div class="button" @click="handleRun(it)">
-                              <div>重试</div>
+                              <!-- <div>重试</div> -->
                             </div>
                           </div>
                           <div class="wait-comp" v-if="it.status === 'not_start'">
@@ -198,6 +200,7 @@ import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document } from '@ele
 import { ElMessage } from 'element-plus'
 import CodeMirror from '@/components/CodeMirror.vue'
 import { useRoute } from 'vue-router'
+import { getClassNameApi } from '@/api/NetDevOps'
 
 const props = defineProps({
   runResult: {
@@ -210,7 +213,7 @@ const logDialog = ref(false)
 const logTitle = ref('')
 const log = ref('暂无日志...')
 const cardTyp = {
-  success: '',
+  success: 'success-card',
   fail: 'fail-card',
   in_progress: 'run-card',
   not_start: 'wait-card',
@@ -235,17 +238,22 @@ const infoList = ref([
   { title: '运行产物', num: 0 },
   { title: '环境变量', num: 7 }
 ])
-const statList = ref([
-  { title: '总数', num: 2 },
-  { title: '阻塞', num: 0 },
-  { title: '严重', num: 0 },
-  { title: '一般', num: 2 }
-])
+const statList = ref({
+  count: '总数',
+  success_count: '成功',
+  failed_count: '失败',
+  skipped_count: '跳过'
+})
 const statColor = {
-  总数: 'total',
-  阻塞: 'block',
-  严重: 'serious',
-  一般: 'yiban'
+  count: 'total',
+  success_count: 'success',
+  failed_count: 'serious',
+  skipped_count: 'yiban'
+}
+const statName = {
+  success_count: 'SUCCESS',
+  failed_count: 'FAILED',
+  skipped_count: 'SKIPPED'
 }
 const groups = ref([])
 
@@ -253,6 +261,29 @@ watch(
   () => props.runResult,
   val => {
     groups.value = val.task_swim_lanes_history || []
+  },
+  {
+    immediate: true
+  }
+)
+
+watch(
+  () => props.runResult.task_swim_lanes_history,
+  val => {
+    if (props.runResult.task_swim_lanes_history) {
+      props.runResult.task_swim_lanes_history.map((item: any) => {
+        item.task_stages_history.map((it: any) => {
+          it.task_details_history.map((i: any) => {
+            if (i.status === 'success' && i.plugin === 'interfaceTest') {
+              i.total_statistics = Object.entries(i.total_statistics).map(([key, value]) => ({
+                name: key,
+                value: String(value)
+              }))
+            }
+          })
+        })
+      })
+    }
   },
   {
     immediate: true
@@ -267,6 +298,13 @@ const handleLog = (item: any) => {
   logDialog.value = true
   logTitle.value = item.name
   log.value = item.task_execute_record[0].execute_record
+}
+
+const getClassName = async (item: any, id) => {
+  if (item.name === 'count') return
+  let res = await getClassNameApi({ task_details_history_id: id, status: statName[item.name] })
+  if (res.code === 200) {
+  }
 }
 
 const handleRun = (item: any) => {
@@ -608,13 +646,13 @@ const handleClose = (done: () => void) => {
                             font-family: DINPro;
                           }
                           .total {
-                            color: #e62412;
+                            color: #fa8c15;
                           }
-                          .block {
-                            color: #f56c6c;
+                          .success {
+                            color: #22b066;
                           }
                           .serious {
-                            color: #fa8c15;
+                            color: #e62412;
                           }
                           .yiban {
                             color: #8b8b8b;
@@ -636,6 +674,40 @@ const handleClose = (done: () => void) => {
                 .card-content {
                   height: 75px !important;
                   border-left-color: #dbdbdb !important;
+                }
+                .content-job {
+                  margin-top: 5%;
+                }
+              }
+              .fail-card {
+                display: flex !important;
+                flex-direction: column !important;
+                border-left-color: #f7aaa3 !important;
+                .card-content {
+                  height: 120px !important;
+                }
+                .content-job {
+                  margin-top: 5%;
+                }
+              }
+              .run-card {
+                display: flex !important;
+                flex-direction: column !important;
+                border-left-color: #75c0f2 !important;
+                .card-content {
+                  height: 120px !important;
+                }
+                .content-job {
+                  margin-top: 5%;
+                }
+              }
+              .success-card {
+                display: flex !important;
+                flex-direction: column !important;
+                border-left-color: #90deb5 !important;
+                height: 75px !important;
+                .card-content {
+                  height: 75px !important;
                 }
                 .content-job {
                   margin-top: 5%;
@@ -682,16 +754,32 @@ const handleClose = (done: () => void) => {
               }
             }
             .last-card {
-              &::before {
-                right: -3px !important;
-                width: 105% !important;
-                border-left: none !important;
-                border-right: none !important;
+              .card {
+                &::before {
+                  right: -3px !important;
+                  width: 105% !important;
+                  border-right: none !important;
+                }
               }
             }
           }
         }
       }
+    }
+  }
+  .interfaceTest_card {
+    display: flex !important;
+    flex-direction: column !important;
+    .success-card {
+      height: 165px !important;
+      border-left-color: #90deb5 !important;
+    }
+    .card-content {
+      height: 165px !important;
+      border-left-color: #90deb5 !important;
+    }
+    .content-job {
+      margin-top: 5%;
     }
   }
   .run-icon {

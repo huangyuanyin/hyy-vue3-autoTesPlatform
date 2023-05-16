@@ -62,6 +62,7 @@
           </div>
         </template>
       </el-table-column>
+      <el-table-column prop="create_user" label="创建人" width="150" align="center" />
       <el-table-column fixed="right" label="操作" align="center" width="180">
         <template #default="item">
           <el-popconfirm
@@ -90,9 +91,6 @@
               </el-button>
             </template>
           </el-popconfirm>
-          <el-button link type="success" v-if="item.row.run_count != 0" size="small" @click="toDetail('detail', item.row)">
-            详情
-          </el-button>
           <el-button v-if="item.row.status !== 'in_progress'" link type="primary" size="small" @click="toDetail('edit', item.row)">
             编辑
           </el-button>
@@ -100,6 +98,9 @@
             <el-button link type="info" size="small"> 更多 </el-button>
             <template #dropdown>
               <el-dropdown-menu>
+                <el-dropdown-item v-if="item.row.run_count != 0">
+                  <el-button link type="success" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
+                </el-dropdown-item>
                 <el-dropdown-item>
                   <el-button
                     :disabled="item.row.status === 'in_progress'"

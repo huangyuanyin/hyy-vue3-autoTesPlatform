@@ -134,13 +134,13 @@ const data = reactive({
 const testList = ref([
   {
     plugin: 'interfaceTest',
-    name: '接口测试',
-    desc: '这是一段接口测试'
+    name: 'Netsign接口测试',
+    desc: '这是一段Netsign接口测试'
   },
   {
-    plugin: 'uiTest',
-    name: 'UI测试',
-    desc: '这是一段UI测试'
+    plugin: 'netsignUITest',
+    name: 'Netsign UI测试',
+    desc: '这是一段Netsign UI测试'
   }
 ])
 const deployList = ref([

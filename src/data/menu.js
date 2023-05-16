@@ -58,7 +58,7 @@ export const APVAutoMenuData = [
   },
   {
     id: '04',
-    title: '测试任务',
+    title: '流水线',
     path: '/testTask',
     icon: 'Suitcase',
     isDisabled: false,

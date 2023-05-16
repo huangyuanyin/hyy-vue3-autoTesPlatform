@@ -16,6 +16,7 @@
           <el-tag v-else type="info">非信创</el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="create_user" label="创建人" align="center" width="150" />
       <el-table-column prop="last_mod_time" label="更新时间" align="center" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">

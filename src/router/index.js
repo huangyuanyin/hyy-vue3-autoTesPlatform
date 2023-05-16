@@ -59,7 +59,7 @@ const routes = [
             path: '/testTask',
             name: 'TestTask',
             meta: {
-              title: '测试任务',
+              title: '流水线',
               keepAlive: false
             },
             component: () => import('@/views/testTask/index.vue')

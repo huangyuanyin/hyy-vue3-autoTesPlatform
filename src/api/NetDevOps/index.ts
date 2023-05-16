@@ -168,3 +168,22 @@ export function releaseDeviceApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/interface/ ---------------------------- */
+export function getStatisticsTotalApi(params) {
+  return request({
+    url: `/devops/interface/statistics/total`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+export function getClassNameApi(params) {
+  return request({
+    url: `/devops/interface/class_name`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}

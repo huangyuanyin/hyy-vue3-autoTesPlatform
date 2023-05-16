@@ -7,12 +7,6 @@
           <span class="item-ip" @click="openLinuxDialog('detail', scope.row.id)">{{ scope.row.ip }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="machine_type" label="设备类型" min-width="200" align="center" />
-      <!-- <el-table-column prop="mode_code" label="型号编码" width="150" />
-      <el-table-column prop="config_code" label="配置编码" width="150" /> -->
-      <el-table-column prop="main_board_type" label="主板类型" align="center" width="160" />
-      <!-- <el-table-column prop="cavium_card_type" label="cavium卡类型" width="150" align="center" />
-      <el-table-column prop="gm_card_type" label="国密卡类型" width="150" align="center" /> -->
       <el-table-column prop="using" label="使用状态" width="160" align="center">
         <template #default="scope">
           <el-tag :type="scope.row.using === true ? 'danger' : ''" disable-transitions>
@@ -20,6 +14,12 @@
           </el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="machine_type" label="设备类型" min-width="200" align="center" />
+      <!-- <el-table-column prop="mode_code" label="型号编码" width="150" />
+      <el-table-column prop="config_code" label="配置编码" width="150" /> -->
+      <el-table-column prop="main_board_type" label="CPU类型" align="center" width="160" />
+      <el-table-column prop="cavium_card_type" label="cavium卡类型" width="150" align="center" />
+      <el-table-column prop="gm_card_type" label="国密卡类型" width="150" align="center" />
       <el-table-column prop="operate_user" label="使用人" width="160" align="center">
         <template #default="scope">
           <span>{{ scope.row.operate_user === null ? '' : scope.row.operate_user }}</span>
@@ -117,8 +117,8 @@
             <el-form-item label="产品ID" :label-width="formLabelWidth" prop="product_id">
               <el-input v-model="form.product_id" autocomplete="off" :disabled="disabled" maxlength="6" show-word-limit />
             </el-form-item>
-            <el-form-item label="主板类型" :label-width="formLabelWidth" prop="main_board_type">
-              <el-select v-model="form.main_board_type" placeholder="请选择主板类型" :disabled="disabled">
+            <el-form-item label="CPU类型" :label-width="formLabelWidth" prop="main_board_type">
+              <el-select v-model="form.main_board_type" placeholder="请选择CPU类型" :disabled="disabled">
                 <el-option label="X86" value="x86" />
                 <el-option label="兆芯C4600-server" value="兆芯C4600-server" />
                 <el-option label="兆芯C4600-desktop" value="兆芯C4600-desktop" />
@@ -143,6 +143,7 @@
                 <el-option label="渔翁-1.1" value="渔翁-1.1" />
                 <el-option label="渔翁-4.1" value="渔翁-4.1" />
                 <el-option label="渔翁-5.0" value="渔翁-5.0" />
+                <el-option label="国芯-1.0" value="国芯-1.0" />
                 <el-option label="无" value="无" />
               </el-select>
             </el-form-item>
@@ -247,7 +248,7 @@ const rules = reactive<FormRules>({
   product_id: [{ required: true, message: '请输入产品ID', trigger: 'blur' }],
   mode_code: [{ required: true, message: '请输入型号编码', trigger: 'blur' }],
   config_code: [{ required: true, message: '请输入配置编码', trigger: 'blur' }],
-  main_board_type: [{ required: true, message: '请输入主板类型', trigger: 'blur' }],
+  main_board_type: [{ required: true, message: '请输入CPU类型', trigger: 'blur' }],
   cavium_card_type: [{ required: true, message: '请输入cavium卡类型', trigger: 'blur' }],
   gm_card_type: [{ required: true, message: '请输入国密卡类型', trigger: 'blur' }],
   machine_type: [{ required: true, message: '请选择设备类型', trigger: 'blur' }],
