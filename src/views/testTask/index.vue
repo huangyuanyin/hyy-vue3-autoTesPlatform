@@ -1,7 +1,19 @@
 <template>
   <div class="testTask-wrap">
-    <!-- <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="taskTemplateDialogVisible = true"> 新建任务</el-button> -->
-    <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="handleAdd('noUse')"> 新建任务</el-button>
+    <div style="display: flex; justify-content: space-between">
+      <!-- <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="taskTemplateDialogVisible = true"> 新建任务</el-button> -->
+      <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="handleAdd('noUse')"> 新建任务</el-button>
+      <div class="search-wrap">
+        <el-input
+          v-model="keywords"
+          class="w-50 m-2"
+          placeholder="输入流水线名称进行搜索..."
+          :prefix-icon="Search"
+          @change="searchLane"
+          clearable
+        />
+      </div>
+    </div>
     <el-table :data="taskTableData" border style="width: 100%" stripe v-loading="taskLoading" max-height="70vh">
       <el-table-column prop="name" label="任务名称" width="250" align="center" />
       <el-table-column prop="draft" label="是否草稿" align="center" width="180">
@@ -167,7 +179,8 @@ import {
   InfoFilled,
   WarningFilled,
   RemoveFilled,
-  RefreshRight
+  RefreshRight,
+  Search
 } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
@@ -188,6 +201,7 @@ const taskPageSize = ref(10)
 const taskTotal = ref(0)
 const taskLoading = ref(false)
 const taskTemplateDialogVisible = ref(false)
+const keywords = ref('')
 const taskTableData = ref([])
 const statusMap = {
   not_start: '待运行',
@@ -305,6 +319,11 @@ let intervalId = ref(null)
 const messages = ref([])
 let socket = new WebSocket('ws://10.4.150.27:8021/ws/get_task_result/')
 
+const searchLane = () => {
+  taskCurrentPage.value = 1
+  getTaskInfo()
+}
+
 const handleAdd = (type: String, index?: number, row?: User) => {
   taskTemplateDialogVisible.value = false
   if (type === 'noUse') {
@@ -389,7 +408,8 @@ const handleRelease = async val => {
 const getTaskInfo = async () => {
   const params = {
     page: taskCurrentPage.value,
-    page_size: taskPageSize.value
+    page_size: taskPageSize.value,
+    keywords: keywords.value
   }
   taskLoading.value = true
   let res = await getTaskInfoApi(params)

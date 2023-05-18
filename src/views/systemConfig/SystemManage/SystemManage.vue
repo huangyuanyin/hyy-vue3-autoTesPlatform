@@ -4,7 +4,7 @@
       <el-tab-pane label="Linux设备">
         <LinuxSystem />
       </el-tab-pane>
-      <el-tab-pane label="Windows设备">
+      <el-tab-pane label="Windows设备" disabled>
         <WindowsStystem />
       </el-tab-pane>
     </el-tabs>

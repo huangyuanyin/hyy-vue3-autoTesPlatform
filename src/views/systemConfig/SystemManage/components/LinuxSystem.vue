@@ -1,6 +1,44 @@
 <template>
   <div class="LinuxSystem-wrap">
-    <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="openLinuxDialog('add')"> 添加</el-button>
+    <div class="search-add">
+      <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="openLinuxDialog('add')"> 添加</el-button>
+      <div class="search-wrap">
+        <el-input
+          v-model="keywords_ip"
+          class="w-50 m-2"
+          placeholder="输入设备IP进行搜索..."
+          :prefix-icon="Search"
+          @change="searchLinux('gm_card_type')"
+          clearable
+        />
+        <el-select
+          v-model="gm_card_type"
+          placeholder="选择国密卡类型进行搜索..."
+          class="w-50 m-2"
+          @change="searchLinux('gm_card_type')"
+          clearable
+        >
+          <el-option label="渔翁-1.1" value="渔翁-1.1" />
+          <el-option label="渔翁-4.1" value="渔翁-4.1" />
+          <el-option label="渔翁-5.0" value="渔翁-5.0" />
+          <el-option label="国芯-1.0" value="国芯-1.0" />
+        </el-select>
+        <el-select
+          v-model="cavium_card_type"
+          placeholder="选择cavium卡类型进行搜索..."
+          class="w-50 m-2"
+          @change="searchLinux('cavium_card_type')"
+          clearable
+        >
+          <el-option label="5560-550" value="5560-550" />
+          <el-option label="5560-550-c25" value="5560-550-c25" />
+          <el-option label="5560-750-c35" value="5560-750-c35" />
+          <el-option label="1620" value="1620" />
+          <el-option label="3510" value="3510" />
+          <el-option label="3530" value="3530" />
+        </el-select>
+      </div>
+    </div>
     <el-table :data="linuxTableData" border style="width: 100%" stripe v-loading="loadingTable">
       <el-table-column prop="ip" label="设备IP" align="center" width="180">
         <template #default="scope">
@@ -184,7 +222,7 @@
 import { reactive, ref, onMounted } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { CirclePlus } from '@element-plus/icons-vue'
+import { CirclePlus, Search } from '@element-plus/icons-vue'
 import Termmail from '@/components/Termail.vue'
 import { getDeviceApi, addDeviceApi, editDeviceApi, deletetDeviceApi } from '@/api/NetDevOps/index'
 import { utc2beijing } from '@/utils/util.js'
@@ -218,6 +256,9 @@ const form = reactive({
   remark: ''
 })
 const ruleFormRef = ref<FormInstance>()
+const keywords_ip = ref('')
+const cavium_card_type = ref('')
+const gm_card_type = ref('')
 
 var iplist =
   /^((25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))|\*)((\/([012]\d|3[012]|\d))?)(,((25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))|\*)((\/([012]\d|3[012]|\d))?))*$/
@@ -306,6 +347,11 @@ const resetForm = (formEl: FormInstance | undefined) => {
   formEl.resetFields()
 }
 
+const searchLinux = type => {
+  systemCurrentPage.value = 1
+  getDevice()
+}
+
 const openLinuxDialog = (...args) => {
   args[0] === 'detail' ? (disabled.value = true) : (disabled.value = false)
   switch (args[0]) {
@@ -376,7 +422,10 @@ const getDevice = async () => {
   loadingTable.value = true
   const params = {
     page: systemCurrentPage.value,
-    page_size: systemPageSize.value
+    page_size: systemPageSize.value,
+    keywords_ip: keywords_ip.value,
+    keywords_cavium_card_type: cavium_card_type.value,
+    keywords_gm_card_type: gm_card_type.value
   }
   const res = await getDeviceApi(params)
   loadingTable.value = false
@@ -401,6 +450,18 @@ onMounted(() => {
 <style lang="scss" scoped>
 .LinuxSystem-wrap {
   margin: 15px 0 0 20px;
+  .search-add {
+    display: flex;
+    justify-content: space-between;
+    .search-wrap {
+      .el-input {
+        margin-right: 0px;
+      }
+      .el-select {
+        margin-left: 20px;
+      }
+    }
+  }
   .el-select {
     width: 300px;
   }
