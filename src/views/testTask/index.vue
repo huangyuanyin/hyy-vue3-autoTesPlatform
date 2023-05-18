@@ -15,7 +15,11 @@
       </div>
     </div>
     <el-table :data="taskTableData" border style="width: 100%" stripe v-loading="taskLoading" max-height="70vh">
-      <el-table-column prop="name" label="任务名称" width="250" align="center" />
+      <el-table-column prop="name" label="任务名称" width="250" align="center">
+        <template #default="scope">
+          <span class="item-ip" @click="toDetail('detail', scope.row)">{{ scope.row.name }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="draft" label="是否草稿" align="center" width="180">
         <template #default="item">
           <el-tag v-if="item.row.draft === false" type="info">否</el-tag>
@@ -508,6 +512,10 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .testTask-wrap {
   margin: 20px 0 0 20px;
+  .item-ip {
+    cursor: pointer;
+    color: #409eff;
+  }
   .el-dropdown {
     margin-left: 12px;
   }
