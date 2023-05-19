@@ -8,6 +8,7 @@
     "build:stage": "vite build --mode staging",
     "prod": "vite serve --mode production",
     "build:prod": "vite build --mode production",
+    "build:53":"vite build --mode 53",
     "preview": "vite preview",
     "format": "prettier --write src/* src/*/* src/*/*/* src/*/*/*/*"
   },
