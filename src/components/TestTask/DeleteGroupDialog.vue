@@ -41,10 +41,6 @@ const closeDeleteDialog = () => {
 }
 const submitDelete = () => {
   emit('submitDelete')
-  ElMessage({
-    message: '删除成功',
-    type: 'success'
-  })
 }
 </script>
 <style scoped>
