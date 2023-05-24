@@ -8,21 +8,69 @@
       text-color="rgb(51, 51, 51)"
       router
     >
-      <template v-for="(item, index) in menuList" :key="index + 'menu'">
+      <template v-for="(item, index) in props.menuList" :key="index + 'menu'">
         <!-- 一级菜单(无子级) -->
-        <el-menu-item v-if="!item.children.length" :index="item.path" :disabled="item.isDisabled">
-          <el-icon v-if="item.icon">
-            <component :is="item.icon" />
-          </el-icon>
-          <template #title>{{ item.title }}</template>
+        <el-menu-item
+          v-if="!item.children.length && !['已分组', '暂无分组'].includes(item.title)"
+          :index="item.path"
+          :disabled="item.isDisabled"
+          :class="[item.icon === null ? 'trendsMenu-item' : 'menu-item', item.title === '暂无分组' ? 'noGroup-item' : '']"
+        >
+          <template #title>
+            <div @click="ggg">
+              <el-icon>
+                <component :is="getIconComponent(item.icon)" />
+              </el-icon>
+              {{ item.title }}
+            </div>
+            <div v-if="item.icon === null" class="trendsMenu-item-left">
+              <el-dropdown trigger="hover">
+                <el-icon><MoreFilled /></el-icon>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="editGroup" @click.stop="handleAddGroup('edit', item)">编辑分组</el-dropdown-item>
+                    <el-dropdown-item command="deleteGroup" @click.stop="handleAddGroup('delete', item)">
+                      <span style="color: #f56c6c">删除分组</span>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+              <el-icon><StarFilled /></el-icon>
+            </div>
+          </template>
+        </el-menu-item>
+        <el-menu-item
+          v-if="(!item.children.length && item.title === '已分组') || item.title === '暂无分组'"
+          :index="item.path"
+          :disabled="true"
+          class="grouped-item"
+        >
+          <template #title>
+            <div v-if="item.title === '已分组'">
+              <el-icon>
+                <component :is="getIconComponent(item.icon)" />
+              </el-icon>
+              {{ item.title }}
+            </div>
+            <div style="color: #b1b8bf" v-else>
+              <el-icon>
+                <component :is="getIconComponent(item.icon)" />
+              </el-icon>
+              {{ item.title }}，
+              <span @click.stop="handleAddGroup('add')" style="color: #409eff; cursor: pointer">新建分组</span>
+            </div>
+            <div class="grouped-item-left" v-if="item.title === '已分组'">
+              <el-icon @click.stop="handleAddGroup('add')"><CirclePlus /></el-icon>
+            </div>
+          </template>
         </el-menu-item>
         <!-- 一级菜单(有子级) -->
         <el-sub-menu v-if="item.children && item.children.length" :index="item.id">
           <!-- 一级菜单模板区域 -->
           <template #title>
-            <el-icon>
+            <!-- <el-icon>
               <location />
-            </el-icon>
+            </el-icon> -->
             <span>{{ item.title }}</span>
           </template>
           <el-menu-item-group>
@@ -38,38 +86,178 @@
       </template>
     </el-menu>
   </el-aside>
+  <el-dialog v-model="addGroupDialog" :title="addGroupDialogTitle" width="40%" :before-close="handleClose">
+    <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="120px" class="demo-ruleForm" status-icon>
+      <el-form-item label="分组名称" prop="name">
+        <el-input v-model="form.name" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="resetForm(ruleFormRef)">取消</el-button>
+        <el-button type="primary" @click="submitForm(ruleFormRef)"> 确定 </el-button>
+      </span>
+    </template>
+  </el-dialog>
+  <el-dialog v-model="deleteGroupDialog" title="删除分组" width="35%" :before-close="handleClose">
+    <div class="deleteGroupName">{{ `确定删除【${deleteGroupName}】这个分组吗？` }}</div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="deleteGroupDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleDeleteGroup"> 确定 </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
-import { Document, Menu as IconMenu, Location, School, DataLine, House, Suitcase, Money } from '@element-plus/icons-vue'
+<script lang="ts" setup>
+import { onMounted, ref, reactive, watch } from 'vue'
+import { CirclePlus, MoreFilled, StarFilled } from '@element-plus/icons-vue'
+import { ElMessage, FormInstance, FormRules, ElIcon } from 'element-plus'
 import { useAppStore } from '../store/modules/app/index'
-export default defineComponent({
-  components: { Document, IconMenu, Location, School, House, DataLine, Suitcase, Money },
-  props: {
-    menuList: {
-      type: Array as any,
-      default: () => []
-    }
-  },
-  setup() {
-    const store = useAppStore()
-    const defaultActiveIndex = ref('')
-    onMounted(() => {
-      defaultActiveIndex.value = '/' + window.location.hash.replace('#', '').split('/')[1]
-    })
-    return {
-      store,
-      defaultActiveIndex
-    }
+import { addPipelineGroupApi, editPipelineGroupApi, deletePipelineGroupApi } from '@/api/NetDevOps/index'
+import { getIconComponent } from '@/data/iconComponent'
+import { useRoute, useRouter } from 'vue-router'
+
+const props = defineProps({
+  menuList: {
+    type: Array as any,
+    default: () => []
   }
+})
+const emit = defineEmits(['updateMenuList'])
+const store = useAppStore()
+const route = useRoute()
+const router = useRouter()
+const defaultActiveIndex = ref('')
+const addGroupDialogTitle = ref('')
+const deleteGroupName = ref('')
+const deleteGroupId = ref(null)
+const deleteGroupDialog = ref(false)
+const addGroupDialog = ref(false)
+const ruleFormRef = ref<FormInstance>()
+const form = reactive({
+  pipeline_group_id: undefined,
+  name: ''
+})
+const rules = reactive<FormRules>({
+  name: [{ required: true, message: '请输入分组名称', trigger: 'blur' }]
+})
+
+const handleAddGroup = (type, val?) => {
+  console.log(`output->val`, val)
+  switch (type) {
+    case 'add':
+      addGroupDialog.value = true
+      addGroupDialogTitle.value = '新建分组'
+      break
+    case 'edit':
+      addGroupDialog.value = true
+      form.name = val.title
+      form.pipeline_group_id = val.id
+      addGroupDialogTitle.value = '编辑分组'
+      break
+    case 'delete':
+      deleteGroupDialog.value = true
+      deleteGroupName.value = val.title
+      deleteGroupId.value = val.id
+  }
+}
+
+const submitForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      addGroupDialogTitle.value === '新建分组'
+        ? addPipelineGroup()
+        : addGroupDialogTitle.value === '编辑分组'
+        ? editPipelineGroup()
+        : deletePipelineGroup(deleteGroupId.value)
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
+const handleDeleteGroup = () => {
+  deletePipelineGroup(deleteGroupId.value)
+}
+
+const addPipelineGroup = async () => {
+  let res = await addPipelineGroupApi(form)
+  if (res.code === 1000) {
+    ElMessage.success('新建分组成功！')
+    resetForm(ruleFormRef.value)
+    addGroupDialog.value = false
+    emit('updateMenuList')
+  }
+}
+
+const editPipelineGroup = async () => {
+  let res = await editPipelineGroupApi(form)
+  if (res.code === 1000) {
+    ElMessage.success('编辑分组成功！')
+    resetForm(ruleFormRef.value)
+    addGroupDialog.value = false
+    emit('updateMenuList')
+  }
+}
+
+const deletePipelineGroup = async id => {
+  let res = await deletePipelineGroupApi(id)
+  if (res.code === 1000) {
+    ElMessage.success('删除分组成功！')
+    deleteGroupDialog.value = false
+    emit('updateMenuList')
+  }
+}
+
+const resetForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  addGroupDialog.value = false
+  formEl.resetFields()
+}
+
+const handleClose = (done: () => void) => {
+  resetForm(ruleFormRef.value)
+  done()
+}
+
+const ggg = () => {
+  // 刷新页面
+  // router.go(0)
+}
+
+onMounted(() => {
+  defaultActiveIndex.value = '/' + window.location.hash.replace('#', '').split('/')[1]
 })
 </script>
 
 <style lang="scss" scoped>
+.deleteGroupName {
+  color: #f56c6c;
+  font-size: 16px;
+  text-align: center;
+}
 .el-menu {
   height: 100%;
-  .el-menu-item {
+  .grouped-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .grouped-item-left {
+      display: flex;
+      align-items: center;
+      .el-icon {
+        margin-right: 0px;
+        cursor: pointer;
+      }
+      .el-icon:hover {
+        color: #409eff;
+      }
+    }
+  }
+  .menu-item {
     &.is-disabled {
       display: flex;
       justify-content: center;
@@ -78,6 +266,31 @@ export default defineComponent({
       border-bottom: 1px solid #ebebeb;
     }
   }
+  .trendsMenu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .trendsMenu-item-left {
+      display: flex;
+      align-items: center;
+      .el-dropdown:hover {
+        color: #409eff;
+      }
+      .el-icon:nth-child(2) {
+        margin-right: 0px;
+      }
+    }
+  }
+  .noGroup-item {
+    color: #b1b8bf;
+  }
+  .grouped-item {
+    &.is-disabled {
+      opacity: 100%;
+      cursor: default;
+    }
+  }
+
   :deep(.el-menu-item-group__title) {
     padding: 0px;
   }
@@ -87,7 +300,7 @@ export default defineComponent({
 }
 
 .el-menu:not(.el-menu--collapse) {
-  width: 191px;
+  width: 241px;
 }
 
 .el-aside {

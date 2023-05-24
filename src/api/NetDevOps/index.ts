@@ -196,3 +196,39 @@ export function getMethodsApi(params) {
     params
   })
 }
+
+/* ---------------------------- /devops/pipeline_group/ ---------------------------- */
+export function getPipelineGroupApi(params) {
+  return request({
+    url: `/devops/pipeline_group/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+export function addPipelineGroupApi(params) {
+  return request({
+    url: `/devops/pipeline_group/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function editPipelineGroupApi(params) {
+  return request({
+    url: `/devops/pipeline_group/`,
+    method: 'put',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function deletePipelineGroupApi(id) {
+  return request({
+    url: `/devops/pipeline_group/${id}`,
+    method: 'delete',
+    urlType: 'NetDevOps'
+  })
+}

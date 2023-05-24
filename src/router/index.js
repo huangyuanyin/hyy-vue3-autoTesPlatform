@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router
 
 import Layout from '@/views/Layout/index.vue' // 布局组件 不需要懒加载
 
-const routes = [
+const staticRoutes = [
   {
     path: '/login',
     name: 'Login',
@@ -56,13 +56,40 @@ const routes = [
             component: () => import('@/views/systemConfig/index.vue')
           },
           {
+            path: '/myTestTask',
+            name: 'MyTestTask',
+            meta: {
+              title: '我的流水线',
+              keepAlive: false
+            },
+            component: () => import('@/views/testTask/myTest.vue')
+          },
+          {
             path: '/testTask',
             name: 'TestTask',
             meta: {
-              title: '流水线',
+              title: '全部流水线',
               keepAlive: false
             },
-            component: () => import('@/views/testTask/index.vue')
+            component: () => import('@/views/testTask/allTest.vue')
+          },
+          {
+            path: '/compTest/:id',
+            name: 'compTest',
+            meta: {
+              title: '111',
+              keepAlive: false
+            },
+            component: () => import('@/views/testTask/compTest.vue')
+          },
+          {
+            path: '/ungrouped',
+            name: 'Ungrouped',
+            meta: {
+              title: '未分组',
+              keepAlive: false
+            },
+            component: () => import('@/views/testTask/ungrouped.vue')
           },
           {
             path: '/testTask/addTestTask',
@@ -134,7 +161,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHashHistory('/netDevOps/'),
-  routes
+  routes: staticRoutes
 })
 
 export default router

@@ -5,7 +5,7 @@
       <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="handleAdd('noUse')"> 新建任务</el-button>
       <div class="search-wrap">
         <el-input
-          v-model="keywords"
+          v-model="searchKeywords"
           class="w-50 m-2"
           placeholder="输入流水线名称进行搜索..."
           :prefix-icon="Search"
@@ -14,7 +14,7 @@
         />
       </div>
     </div>
-    <el-table :data="taskTableData" border style="width: 100%" stripe v-loading="taskLoading" max-height="70vh">
+    <el-table :data="props.taskTableData" border style="width: 100%" stripe v-loading="props.taskLoading" max-height="70vh">
       <el-table-column prop="name" label="任务名称" width="250" align="center">
         <template #default="scope">
           <span class="item-ip" @click="toDetail('detail', scope.row)">{{ scope.row.name }}</span>
@@ -140,7 +140,7 @@
       </el-table-column>
     </el-table>
     <el-pagination
-      v-if="!taskLoading"
+      v-if="!props.taskLoading"
       v-model:currentPage="taskCurrentPage"
       v-model:page-size="taskPageSize"
       :page-sizes="[10, 20, 30, 40]"
@@ -175,7 +175,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, onMounted, onUnmounted } from 'vue'
+import { reactive, ref, onMounted, onUnmounted, watch } from 'vue'
 import {
   CirclePlus,
   CircleCloseFilled,
@@ -192,6 +192,27 @@ import preview2 from '@/assets/preview2.png'
 import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi, releaseDeviceApi } from '@/api/NetDevOps/index'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 
+const props = defineProps({
+  taskTableData: {
+    type: Array,
+    default: () => []
+  },
+  taskTotal: {
+    type: Number,
+    default: 0
+  },
+  taskLoading: {
+    type: Boolean,
+    default: false
+  },
+  keywords: {
+    type: String,
+    default: ''
+  }
+})
+
+const emit = defineEmits(['update:taskTotal', 'searchLane', 'update:taskTableData'])
+
 interface User {
   id: string
   name: string
@@ -202,11 +223,8 @@ interface User {
 const router = useRouter()
 const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
-const taskTotal = ref(0)
-const taskLoading = ref(false)
 const taskTemplateDialogVisible = ref(false)
-const keywords = ref('')
-const taskTableData = ref([])
+const searchKeywords = ref('')
 const statusMap = {
   not_start: '待运行',
   in_progress: '运行中',
@@ -320,12 +338,20 @@ const tableData = [
   }
 ]
 let intervalId = ref(null)
-const messages = ref([])
 let socket = new WebSocket('ws://10.4.150.27:8021/ws/get_task_result/')
+
+watch(
+  () => props.keywords,
+  (val, oldVal) => {
+    if (val !== oldVal) {
+      searchKeywords.value = val
+    }
+  }
+)
 
 const searchLane = () => {
   taskCurrentPage.value = 1
-  getTaskInfo()
+  emit('searchLane', searchKeywords.value)
 }
 
 const handleAdd = (type: String, index?: number, row?: User) => {
@@ -352,7 +378,7 @@ const handleRunTask = async id => {
   if (res.code === 1000) {
     ElMessage.success('任务开始执行！')
     taskCurrentPage.value = 1
-    getTaskInfo()
+    emit('update:taskTableData', 1)
   }
 }
 
@@ -361,7 +387,7 @@ const handleEndTask = async id => {
   if (res.code === 1000) {
     ElMessage.success('任务终止成功')
     taskCurrentPage.value = 1
-    getTaskInfo()
+    emit('update:taskTableData', 1)
   }
 }
 
@@ -376,7 +402,7 @@ const handleDelete = async val => {
       if (res.code === 1000) {
         ElMessage.success('删除成功')
         taskCurrentPage.value = 1
-        getTaskInfo()
+        emit('update:taskTableData', 1)
       }
     })
     .catch(() => {
@@ -398,7 +424,7 @@ const handleRelease = async val => {
       if (res.code === 1000) {
         ElMessage.success('设备释放成功!')
         taskCurrentPage.value = 1
-        getTaskInfo()
+        emit('update:taskTableData', 1)
       }
     })
     .catch(() => {
@@ -409,29 +435,14 @@ const handleRelease = async val => {
     })
 }
 
-const getTaskInfo = async () => {
-  const params = {
-    page: taskCurrentPage.value,
-    page_size: taskPageSize.value,
-    keywords: keywords.value
-  }
-  taskLoading.value = true
-  let res = await getTaskInfoApi(params)
-  taskLoading.value = false
-  if (res.code === 1000) {
-    taskTableData.value = res.data || []
-    taskTotal.value = res.total
-  }
-}
-
 const handleTaskSizeChange = async (val: number) => {
-  taskPageSize.value = val
-  await getTaskInfo()
+  // taskPageSize.value = val
+  // emit('update:taskTableData', 1)
 }
 
 const handleTaskCurrentChange = async (val: number) => {
   taskCurrentPage.value = val
-  await getTaskInfo()
+  emit('update:taskTableData', taskCurrentPage.value)
 }
 
 socket.onopen = function (event) {
@@ -447,7 +458,7 @@ socket.addEventListener('message', event => {
   console.log(message.data)
   if (message.code === 1000) {
     ElMessage.success('流水线执行结果更新！')
-    getTaskInfo()
+    emit('update:taskTableData', taskCurrentPage.value)
     message.data.map(item => {
       ElNotification({
         title: '通知',
@@ -499,7 +510,6 @@ function reconnectWebSocket() {
 }
 
 onMounted(() => {
-  getTaskInfo()
   intervalId = setInterval(checkWebSocketStatus, 10000)
 })
 
