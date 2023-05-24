@@ -65,7 +65,8 @@ const getPipelineGroup = async () => {
         children: [],
         icon: null,
         path: '/compTest/' + item.name + '/?id=' + item.id,
-        component: '@/views/testTask/compTest.vue'
+        component: '@/views/testTask/compTest.vue',
+        task_count: item.task_count
       }))
     } else {
       newMenuList.push({

@@ -100,12 +100,19 @@
       </span>
     </template>
   </el-dialog>
-  <el-dialog v-model="deleteGroupDialog" title="删除分组" width="35%" :before-close="handleClose">
-    <div class="deleteGroupName">{{ `确定删除【${deleteGroupName}】这个分组吗？` }}</div>
+  <el-dialog v-model="deleteGroupDialog" title="删除分组" width="440px" :before-close="handleClose">
+    <template #header="{ close, titleId, titleClass }">
+      <div class="my-header">
+        <div class="deleteGroupName">
+          <el-icon style="color: #cd3021"><CircleCloseFilled /></el-icon>删除分组
+        </div>
+      </div>
+    </template>
+    {{ `【${deleteGroupName}】目前有${task_count}条流水线，确认删除吗？` }}
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="deleteGroupDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleDeleteGroup"> 确定 </el-button>
+        <el-button type="danger" @click="handleDeleteGroup"> 确定 </el-button>
       </span>
     </template>
   </el-dialog>
@@ -113,7 +120,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, reactive, watch, nextTick, watchEffect } from 'vue'
-import { CirclePlus, MoreFilled, StarFilled } from '@element-plus/icons-vue'
+import { CirclePlus, MoreFilled, StarFilled, CircleCloseFilled } from '@element-plus/icons-vue'
 import { ElMessage, FormInstance, FormRules, ElIcon } from 'element-plus'
 import { useAppStore } from '../store/modules/app/index'
 import { addPipelineGroupApi, editPipelineGroupApi, deletePipelineGroupApi } from '@/api/NetDevOps/index'
@@ -136,6 +143,7 @@ const defaultActiveIndex = ref('')
 const addGroupDialogTitle = ref('')
 const deleteGroupName = ref('')
 const deleteGroupId = ref(null)
+const task_count = ref(null)
 const deleteGroupDialog = ref(false)
 const addGroupDialog = ref(false)
 const ruleFormRef = ref<FormInstance>()
@@ -164,9 +172,11 @@ const handleAddGroup = (type, val?) => {
       addGroupDialogTitle.value = '编辑分组'
       break
     case 'delete':
+      console.log(`output->val`, val)
       deleteGroupDialog.value = true
       deleteGroupName.value = val.title
       deleteGroupId.value = val.id
+      task_count.value = val.task_count
   }
 }
 
@@ -272,9 +282,14 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .deleteGroupName {
-  color: #f56c6c;
+  color: #292929;
   font-size: 16px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  .el-icon {
+    font-size: 20px;
+    margin-right: 5px;
+  }
 }
 .el-menu {
   height: 100%;
