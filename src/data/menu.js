@@ -67,19 +67,19 @@ export const APVAutoMenuData = [
 ]
 
 export const AutoTestMenuData = [
-  {
-    id: '00',
-    title: '信安云效平台',
-    icon: 'null',
-    path: null,
-    isDisabled: true,
-    children: []
-  },
+  // {
+  //   id: '00',
+  //   title: '信安云效平台',
+  //   icon: 'null',
+  //   path: null,
+  //   isDisabled: true,
+  //   children: []
+  // },
   {
     id: '01',
     title: '我的流水线',
     path: '/myTestTask',
-    icon: 'Suitcase',
+    icon: 'House',
     isDisabled: false,
     children: []
   },
@@ -87,7 +87,7 @@ export const AutoTestMenuData = [
     id: '02',
     title: '全部流水线',
     path: '/testTask',
-    icon: 'Suitcase',
+    icon: 'Discount',
     isDisabled: false,
     children: []
   },
@@ -103,7 +103,7 @@ export const AutoTestMenuData = [
     id: '04',
     title: '未分组',
     path: '/ungrouped',
-    icon: 'Suitcase',
+    icon: 'CollectionTag',
     isDisabled: false,
     children: []
   },

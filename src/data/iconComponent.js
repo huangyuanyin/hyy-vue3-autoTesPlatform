@@ -9,6 +9,8 @@ const DataLine = defineAsyncComponent(() => import('@element-plus/icons-vue').th
 const Suitcase = defineAsyncComponent(() => import('@element-plus/icons-vue').then(module => module.Suitcase))
 const Money = defineAsyncComponent(() => import('@element-plus/icons-vue').then(module => module.Money))
 const CirclePlus = defineAsyncComponent(() => import('@element-plus/icons-vue').then(module => module.CirclePlus))
+const CollectionTag = defineAsyncComponent(() => import('@element-plus/icons-vue').then(module => module.CollectionTag))
+const Discount = defineAsyncComponent(() => import('@element-plus/icons-vue').then(module => module.Discount))
 
 export const getIconComponent = iconName => {
   switch (iconName) {
@@ -30,6 +32,10 @@ export const getIconComponent = iconName => {
       return Money
     case 'CirclePlus':
       return CirclePlus
+    case 'CollectionTag':
+      return CollectionTag
+    case 'Discount':
+      return Discount
     default:
       return null
   }

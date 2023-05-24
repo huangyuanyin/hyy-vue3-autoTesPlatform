@@ -7,7 +7,7 @@
             <span>欢迎使用</span>
           </div>
           <div class="desc">
-            <span>信安云测平台</span>
+            <span>信安云效平台</span>
           </div>
         </div>
         <div class="bottom">

@@ -5,7 +5,7 @@
       <el-button v-else :icon="CloseBold" class="open" @click="openDrawer('close')" />
       <Drawer :drawer="drawer" @changeDrawer="changeDrawer" />
       <img :src="logo" />
-      <span>信安云测平台</span>
+      <span>信安云效平台</span>
     </div>
     <span class="line"> | </span>
     <div class="work">

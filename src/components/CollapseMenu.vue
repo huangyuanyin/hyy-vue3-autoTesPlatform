@@ -259,8 +259,7 @@ watch(
   () => {
     console.log(`output->1212`, localStorage.getItem('isLoadMenu'))
     if (
-      (localStorage.getItem('isLoadMenu') === 'false' &&
-        '/' + decodeURIComponent(window.location.hash.replace('#', '')).split('/')[1] === '/compTest') ||
+      '/' + decodeURIComponent(window.location.hash.replace('#', '')).split('/')[1] === '/compTest' ||
       '/' + decodeURIComponent(window.location.hash.replace('#', '')).split('/')[1] === '/myTestTask'
     ) {
       setTimeout(() => {

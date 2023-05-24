@@ -52,7 +52,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
       store
         .Login(formData)
         .then(() => {
-          router.replace('/')
+          router.replace('/myTestTask')
         })
         .finally(() => {
           loading.value = false

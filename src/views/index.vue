@@ -52,10 +52,9 @@ const getPipelineGroup = async () => {
     page_size: 10
   }
   menuList.value = Array.from(AutoTestMenuData)
-  localStorage.setItem('isLoadMenu', 'true')
   let res = await getPipelineGroupApi(params)
   if (res.code === 1000) {
-    localStorage.setItem('isLoadMenu', 'false')
+    localStorage.setItem('isLoadMenu', String(new Date().valueOf()))
     let newMenuList = []
     if (res.data.length !== 0) {
       newMenuList = res.data.map(item => ({
