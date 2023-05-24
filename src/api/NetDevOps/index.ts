@@ -232,3 +232,13 @@ export function deletePipelineGroupApi(id) {
     urlType: 'NetDevOps'
   })
 }
+
+/* ---------------------------- /devops/task_info/update_group_tag/ ---------------------------- */
+export function updateGroupTagApi(params) {
+  return request({
+    url: `/devops/task_info/update_group_tag/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}

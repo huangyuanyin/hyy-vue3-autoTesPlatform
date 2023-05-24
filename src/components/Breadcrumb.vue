@@ -50,7 +50,7 @@ export default defineComponent({
       (newPath, oldPath) => {
         matchedList.value = route.matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
         if (matchedList.value[1].name === 'compTest') {
-          matchedList.value[1].meta.title = route.path.split('/')[2]
+          matchedList.value[1].meta.title = decodeURIComponent(route.path).split('/')[2]
         }
       },
       { immediate: true }

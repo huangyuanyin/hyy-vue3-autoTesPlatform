@@ -113,7 +113,43 @@
           <el-dropdown trigger="click">
             <el-button link type="info" size="small"> 更多 </el-button>
             <template #dropdown>
-              <el-dropdown-menu>
+              <el-dropdown-menu :hide-on-click="false">
+                <el-dropdown-item>
+                  <el-popover placement="left" :width="300" trigger="click" popper-class="moveGroupDialog" :visible="groupVisible">
+                    <template #reference>
+                      <el-button link type="info" size="small" @click="handleMoveGroup(item.row)"> 移动分组 </el-button>
+                    </template>
+                    <div class="moveGroupDialog-top">
+                      <span>
+                        移动【<span style="color: #409eff">{{ item.row.name }}</span
+                        >】流水线至
+                      </span>
+                      <el-icon style="cursor: pointer" @click="resetMoveGroupForm(groupFormRef)"><CloseBold /></el-icon>
+                    </div>
+                    <el-form
+                      ref="groupFormRef"
+                      :model="groupForm"
+                      :rules="groupRules"
+                      label-width="120px"
+                      class="demo-groupForm"
+                      size="default"
+                      status-icon
+                      label-position="top"
+                    >
+                      <el-form-item label="目标分组名称" prop="region">
+                        <el-select v-model="groupForm.name" placeholder="请选择目标分组">
+                          <el-option :label="item.name" :value="item.name" v-for="(item, index) in groupList" :key="'groupList' + index" />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item class="moveGroupDialog-bottom">
+                        <div>
+                          <el-button @click="resetMoveGroupForm(groupFormRef)">取消</el-button>
+                          <el-button type="primary" @click="submitMoveGroupForm(groupFormRef)"> 确定 </el-button>
+                        </div>
+                      </el-form-item>
+                    </el-form>
+                  </el-popover>
+                </el-dropdown-item>
                 <el-dropdown-item v-if="item.row.run_count != 0">
                   <el-button link type="success" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
                 </el-dropdown-item>
@@ -184,13 +220,23 @@ import {
   WarningFilled,
   RemoveFilled,
   RefreshRight,
-  Search
+  Search,
+  CloseBold
 } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
 import preview2 from '@/assets/preview2.png'
-import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi, releaseDeviceApi } from '@/api/NetDevOps/index'
+import {
+  getTaskInfoApi,
+  deleteTaskInfoApi,
+  runTaskInfoApi,
+  stopTaskApi,
+  releaseDeviceApi,
+  getPipelineGroupApi,
+  updateGroupTagApi
+} from '@/api/NetDevOps/index'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 
 const props = defineProps({
   taskTableData: {
@@ -225,6 +271,27 @@ const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
 const taskTemplateDialogVisible = ref(false)
 const searchKeywords = ref('')
+const currentLaneId = ref(null)
+const groupVisible = ref(false)
+const groupList = ref([
+  {
+    name: '未分组',
+    id: -1
+  }
+])
+const groupFormRef = ref<FormInstance>()
+const groupForm = reactive({
+  name: ''
+})
+const groupRules = reactive<FormRules>({
+  name: [
+    {
+      required: true,
+      message: '请至少选择一个分组',
+      trigger: 'change'
+    }
+  ]
+})
 const statusMap = {
   not_start: '待运行',
   in_progress: '运行中',
@@ -413,6 +480,72 @@ const handleDelete = async val => {
     })
 }
 
+const submitMoveGroupForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      updateGroupTag()
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
+const updateGroupTag = async () => {
+  const params = {
+    task_id: currentLaneId.value,
+    group_id: null
+  }
+  groupList.value.forEach(item => {
+    if (item.name === groupForm.name) {
+      params.group_id = item.id
+    }
+  })
+  let res = await updateGroupTagApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('移动成功')
+    groupVisible.value = false
+    taskCurrentPage.value = 1
+    emit('update:taskTableData', 1)
+  }
+}
+
+const handleMoveGroup = val => {
+  currentLaneId.value = val.id
+  groupVisible.value = true
+  getPipelineGroup()
+  if (val.group === null) {
+    groupForm.name = '未分组'
+  } else {
+    groupForm.name = val.group.name
+  }
+}
+
+const getPipelineGroup = async () => {
+  groupList.value = [
+    {
+      name: '未分组',
+      id: -1
+    }
+  ]
+  const params = {
+    page: 1,
+    page_size: 10
+  }
+  let res = await getPipelineGroupApi(params)
+  if (res.code === 1000) {
+    if (res.data.length !== 0) {
+      groupList.value.splice(0, 0, ...res.data)
+    }
+  }
+}
+
+const resetMoveGroupForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  groupVisible.value = false
+}
+
 const handleRelease = async val => {
   ElMessageBox.confirm(`【${val.name}】此流水线下的所有设备都会释放`, '提示', {
     confirmButtonText: '确定',
@@ -522,6 +655,7 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .testTask-wrap {
   margin: 20px 0 0 20px;
+
   .item-ip {
     cursor: pointer;
     color: #409eff;
@@ -646,6 +780,32 @@ onUnmounted(() => {
 </style>
 
 <style lang="scss">
+.moveGroupDialog {
+  padding: 0px !important;
+  .el-select {
+    width: 100%;
+  }
+  .moveGroupDialog-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dae0e5;
+    font-size: 16px;
+    color: #575757;
+    padding: 15px 20px;
+  }
+  .demo-groupForm {
+    padding: 15px 20px;
+  }
+  .moveGroupDialog-bottom {
+    text-align: end;
+    width: 100%;
+    margin-bottom: 0px;
+    div {
+      width: 100%;
+    }
+  }
+}
 .box-item {
   padding: 6px 12px !important;
   background: linear-gradient(90deg, rgb(98, 101, 111), rgb(98, 101, 111)) !important;

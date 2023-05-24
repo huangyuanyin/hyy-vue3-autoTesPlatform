@@ -7,6 +7,7 @@
       active-text-color="rgb(85, 85, 85)"
       text-color="rgb(51, 51, 51)"
       router
+      v-loading="isLoading"
     >
       <template v-for="(item, index) in props.menuList" :key="index + 'menu'">
         <!-- 一级菜单(无子级) -->
@@ -17,7 +18,7 @@
           :class="[item.icon === null ? 'trendsMenu-item' : 'menu-item', item.title === '暂无分组' ? 'noGroup-item' : '']"
         >
           <template #title>
-            <div @click="ggg">
+            <div>
               <el-icon>
                 <component :is="getIconComponent(item.icon)" />
               </el-icon>
@@ -35,7 +36,7 @@
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-              <el-icon><StarFilled /></el-icon>
+              <el-icon @click.stop="handleFavoriteGroup(item)"><StarFilled /></el-icon>
             </div>
           </template>
         </el-menu-item>
@@ -89,7 +90,7 @@
   <el-dialog v-model="addGroupDialog" :title="addGroupDialogTitle" width="40%" :before-close="handleClose">
     <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="120px" class="demo-ruleForm" status-icon>
       <el-form-item label="分组名称" prop="name">
-        <el-input v-model="form.name" />
+        <el-input v-model="form.name" maxlength="10" show-word-limit />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -111,13 +112,14 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, reactive, watch } from 'vue'
+import { onMounted, ref, reactive, watch, nextTick, watchEffect } from 'vue'
 import { CirclePlus, MoreFilled, StarFilled } from '@element-plus/icons-vue'
 import { ElMessage, FormInstance, FormRules, ElIcon } from 'element-plus'
 import { useAppStore } from '../store/modules/app/index'
 import { addPipelineGroupApi, editPipelineGroupApi, deletePipelineGroupApi } from '@/api/NetDevOps/index'
 import { getIconComponent } from '@/data/iconComponent'
 import { useRoute, useRouter } from 'vue-router'
+import { setInterval } from 'timers/promises'
 
 const props = defineProps({
   menuList: {
@@ -129,6 +131,7 @@ const emit = defineEmits(['updateMenuList'])
 const store = useAppStore()
 const route = useRoute()
 const router = useRouter()
+const isLoading = ref(false)
 const defaultActiveIndex = ref('')
 const addGroupDialogTitle = ref('')
 const deleteGroupName = ref('')
@@ -144,8 +147,11 @@ const rules = reactive<FormRules>({
   name: [{ required: true, message: '请输入分组名称', trigger: 'blur' }]
 })
 
+const handleFavoriteGroup = val => {
+  ElMessage.warning('收藏功能开发中...')
+}
+
 const handleAddGroup = (type, val?) => {
-  console.log(`output->val`, val)
   switch (type) {
     case 'add':
       addGroupDialog.value = true
@@ -194,20 +200,35 @@ const addPipelineGroup = async () => {
 }
 
 const editPipelineGroup = async () => {
+  isLoading.value = true
   let res = await editPipelineGroupApi(form)
+  isLoading.value = false
   if (res.code === 1000) {
-    ElMessage.success('编辑分组成功！')
-    resetForm(ruleFormRef.value)
-    addGroupDialog.value = false
+    if (Number(route.query.id) === form.pipeline_group_id) {
+      router.push({
+        path: '/compTest/' + form.name,
+        query: {
+          id: form.pipeline_group_id
+        }
+      })
+    }
     emit('updateMenuList')
+    ElMessage.success('编辑分组成功！')
+    addGroupDialog.value = false
+    resetForm(ruleFormRef.value)
   }
 }
 
 const deletePipelineGroup = async id => {
+  isLoading.value = true
   let res = await deletePipelineGroupApi(id)
+  isLoading.value = false
+  deleteGroupDialog.value = false
   if (res.code === 1000) {
+    if (Number(route.query.id) === id) {
+      router.push({ path: '/myTestTask' })
+    }
     ElMessage.success('删除分组成功！')
-    deleteGroupDialog.value = false
     emit('updateMenuList')
   }
 }
@@ -223,13 +244,29 @@ const handleClose = (done: () => void) => {
   done()
 }
 
-const ggg = () => {
-  // 刷新页面
-  // router.go(0)
-}
+watch(
+  () => localStorage.getItem('isLoadMenu'),
+  () => {
+    console.log(`output->1212`, localStorage.getItem('isLoadMenu'))
+    if (
+      (localStorage.getItem('isLoadMenu') === 'false' &&
+        '/' + decodeURIComponent(window.location.hash.replace('#', '')).split('/')[1] === '/compTest') ||
+      '/' + decodeURIComponent(window.location.hash.replace('#', '')).split('/')[1] === '/myTestTask'
+    ) {
+      setTimeout(() => {
+        defaultActiveIndex.value = decodeURIComponent(window.location.hash.replace('#', ''))
+      }, 500)
+    }
+  },
+  {
+    immediate: true
+  }
+)
 
 onMounted(() => {
-  defaultActiveIndex.value = '/' + window.location.hash.replace('#', '').split('/')[1]
+  if ('/' + window.location.hash.replace('#', '').split('/')[1] !== '/compTest') {
+    defaultActiveIndex.value = '/' + window.location.hash.replace('#', '').split('/')[1]
+  }
 })
 </script>
 
@@ -276,8 +313,15 @@ onMounted(() => {
       .el-dropdown:hover {
         color: #409eff;
       }
+      .el-icon {
+        font-size: 20px;
+      }
       .el-icon:nth-child(2) {
+        color: #909399;
         margin-right: 0px;
+      }
+      .el-icon:nth-child(2):hover {
+        color: #e6a23c;
       }
     }
   }

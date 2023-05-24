@@ -42,7 +42,7 @@ const getTaskInfo = async () => {
     page: taskCurrentPage.value,
     page_size: taskPageSize.value,
     keywords: keywords.value,
-    my_pipelines: 0
+    group_id: route.query.id
   }
   taskLoading.value = true
   let res = await getTaskInfoApi(params)

@@ -52,8 +52,10 @@ const getPipelineGroup = async () => {
     page_size: 10
   }
   menuList.value = Array.from(AutoTestMenuData)
+  localStorage.setItem('isLoadMenu', 'true')
   let res = await getPipelineGroupApi(params)
   if (res.code === 1000) {
+    localStorage.setItem('isLoadMenu', 'false')
     let newMenuList = []
     if (res.data.length !== 0) {
       newMenuList = res.data.map(item => ({
@@ -62,7 +64,7 @@ const getPipelineGroup = async () => {
         title: item.name,
         children: [],
         icon: null,
-        path: '/compTest/' + item.name,
+        path: '/compTest/' + item.name + '/?id=' + item.id,
         component: '@/views/testTask/compTest.vue'
       }))
     } else {
