@@ -210,7 +210,7 @@ onMounted(() => {
         display: none !important;
       }
       :deep(.el-tabs__content) {
-        width: 88vw;
+        width: 85vw;
         position: absolute;
         left: 12px;
       }

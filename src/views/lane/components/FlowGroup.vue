@@ -84,26 +84,7 @@ const closeDeleteDialog = (val: any) => {
 
 const submitDelete = () => {
   isShowDeleteGroupDialog.value = false
-  let isHasCount = 0
-  JSON.parse(localStorage.getItem('flows')).map(item => {
-    item.task_stages.map(it => {
-      it.task_details.map(i => {
-        if (i.plugin === 'netSignArrange') {
-          isHasCount++
-        }
-      })
-    })
-  })
-  if (isHasCount !== 0) {
-    ElMessage.error('监测到项目准备任务后有项目部署任务，请先删除环境部署任务！')
-    return
-  } else {
-    ElMessage({
-      message: '删除成功',
-      type: 'success'
-    })
-    emit('removeFlow')
-  }
+  emit('removeFlow')
 }
 </script>
 

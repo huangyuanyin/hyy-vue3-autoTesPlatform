@@ -3,7 +3,7 @@
     <div class="flow-groups">
       <template v-for="(flow, index) in flows">
         <FlowGroupSplitLine @add-stage="(val:any) => handleAddStage(val, index)" />
-        <FlowGroup :flow="flow" @removeFlow="() => handleRemoveFlow(index)" />
+        <FlowGroup :flow="flow" @removeFlow="() => handleRemoveFlow(flow, index)" />
       </template>
       <FlowGroupSplitLine @add-stage="(val:any) => handleAddStage(val, flows.length)" />
     </div>
@@ -14,6 +14,7 @@
 import FlowGroupSplitLine from './components/FlowGroupSplitLine.vue'
 import FlowGroup from './components/FlowGroup.vue'
 import { onMounted, onUnmounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({
   flows: {
@@ -26,8 +27,30 @@ const handleAddStage = (val: any, index: any) => {
   props.flows.splice(index, 0, val)
 }
 
-const handleRemoveFlow = (index: any) => {
-  props.flows.splice(index, 1)
+const handleRemoveFlow = (val: any, id: any) => {
+  let isHasCount = 0
+  if (val.name === '环境准备') {
+    JSON.parse(localStorage.getItem('flows')).map((item, index) => {
+      item.task_stages.map(it => {
+        it.task_details.map(i => {
+          if (i.plugin === 'netSignArrange') {
+            isHasCount++
+          }
+        })
+      })
+    })
+  }
+
+  if (isHasCount !== 0) {
+    ElMessage.error('监测到项目准备任务后有项目部署任务，请先删除环境部署任务！')
+    return
+  } else {
+    ElMessage({
+      message: '删除成功',
+      type: 'success'
+    })
+    props.flows.splice(id, 1)
+  }
 }
 
 watch(

@@ -23,7 +23,9 @@
             />
           </el-form-item>
           <el-form-item>
-            <el-button type="danger" v-if="!isDisabled" @click="dialogVisible = true">删除任务</el-button>
+            <el-button type="danger" v-if="!isDisabled && route.path !== '/testTask/addTestTask'" @click="dialogVisible = true"
+              >删除任务</el-button
+            >
           </el-form-item>
         </el-form>
       </div>
