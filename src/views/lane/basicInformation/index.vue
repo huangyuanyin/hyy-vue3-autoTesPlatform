@@ -23,7 +23,10 @@
             />
           </el-form-item>
           <el-form-item>
-            <el-button type="danger" v-if="!isDisabled && route.path !== '/testTask/addTestTask'" @click="dialogVisible = true"
+            <el-button
+              type="danger"
+              v-if="!isDisabled && route.path !== '/testTask/addTestTask' && route.path !== '/testTask/lookTestTaskConfig'"
+              @click="dialogVisible = true"
               >删除任务</el-button
             >
           </el-form-item>

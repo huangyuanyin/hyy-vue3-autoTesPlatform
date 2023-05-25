@@ -17,7 +17,7 @@
             <el-tab-pane name="variableCache" label="变量和缓存"></el-tab-pane>
           </el-tabs>
         </el-col>
-        <el-col class="saveButton" :span="6">
+        <el-col class="saveButton" :span="6" v-if="route.path !== '/testTask/lookTestTaskConfig'">
           <div class="grid-content ep-bg-purple" />
           <el-button v-if="!isDetail" type="default" @click="sumbitTask(true)">保存为草稿</el-button>
           <el-button v-if="!isDetail" type="primary" @click="sumbitTask(false)">保存并创建任务</el-button>

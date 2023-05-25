@@ -110,6 +110,15 @@ const staticRoutes = [
             component: () => import('@/views/lane/index.vue')
           },
           {
+            path: '/testTask/lookTestTaskConfig',
+            name: 'LookTestTaskConfig',
+            meta: {
+              title: '任务配置（仅查看）',
+              keepAlive: false
+            },
+            component: () => import('@/views/lane/index.vue')
+          },
+          {
             path: '/testTask/detailTestTask',
             name: 'detailTestTask',
             meta: {

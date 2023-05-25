@@ -76,7 +76,7 @@
                     v-for="(it, index) in e.task_details_history"
                     :key="'task_details_history' + index"
                   >
-                    <div class="content-job">
+                    <div class="content-job" @click="toLookTestTaskConfig">
                       <div class="job-card">
                         <el-tooltip popper-class="box-item" effect="customized" :content="contentType[it.status]" placement="top">
                           <svg-icon
@@ -96,7 +96,7 @@
                                 <div class="report">
                                   <!-- <el-icon><Document /></el-icon> <span>扫描报告</span> -->
                                 </div>
-                                <div class="log" @click="handleLog(it)">
+                                <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon> <span>日志</span>
                                 </div>
                               </div>
@@ -120,7 +120,7 @@
                                       <el-table-column width="250" property="class_name" label="class_name" />
                                       <el-table-column label="操作">
                                         <template #default="scope">
-                                          <el-button size="small" type="primary" @click="getMethods(scope.row, item.name, it)"
+                                          <el-button size="small" type="primary" @click.stop="getMethods(scope.row, item.name, it)"
                                             >查看</el-button
                                           >
                                         </template>
@@ -146,7 +146,7 @@
                             <div class="card-info">
                               <span>15s</span>
                               <div class="operate">
-                                <div class="log" @click="handleLog(it)">
+                                <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon><span>日志</span>
                                 </div>
                               </div>
@@ -154,7 +154,7 @@
                             <div class="message">
                               <div>运行失败，请查看日志！</div>
                             </div>
-                            <div class="button" v-if="it.status === 'fail' && it.plugin === 'interfaceTest'" @click="handleRun(it)">
+                            <div class="button" v-if="it.status === 'fail' && it.plugin === 'interfaceTest'" @click.stop="handleRun(it)">
                               <div>重试</div>
                             </div>
                           </div>
@@ -162,7 +162,7 @@
                             <div class="card-info">
                               <span>15s</span>
                               <div class="operate">
-                                <div class="log" @click="handleLog(it)">
+                                <div class="log" @click.stop="handleLog(it)">
                                   <!-- <el-icon><Document /></el-icon> <span>日志</span> -->
                                 </div>
                               </div>
@@ -178,7 +178,7 @@
                             <div class="card-info">
                               <span>15s</span>
                               <div class="operate">
-                                <div class="log" @click="handleLog(it)">
+                                <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon> <span>日志</span>
                                 </div>
                               </div>
@@ -186,7 +186,7 @@
                             <div class="message">
                               <div>用户已取消</div>
                             </div>
-                            <div class="button" @click="handleRun(it)">
+                            <div class="button" @click.stop="handleRun(it)">
                               <!-- <div>重试</div> -->
                             </div>
                           </div>
@@ -269,7 +269,7 @@ import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document } from '@ele
 import { ElMessage } from 'element-plus'
 // @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getClassNameApi, getMethodsApi } from '@/api/NetDevOps'
 
 const props = defineProps({
@@ -279,6 +279,8 @@ const props = defineProps({
   }
 })
 
+const route = useRoute()
+const router = useRouter()
 const tableData = ref([])
 const tableDataLoading = ref(false)
 const logDialog = ref(false)
@@ -418,6 +420,15 @@ const getRowCount = arr => {
   return {
     one: spanOneArr
   }
+}
+
+const toLookTestTaskConfig = () => {
+  router.push({
+    name: 'LookTestTaskConfig',
+    query: {
+      id: route.query.id
+    }
+  })
 }
 
 const getClassName = async (item: any, id) => {
