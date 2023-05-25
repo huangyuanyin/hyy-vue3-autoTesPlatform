@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, watchEffect } from 'vue'
 import bus from '@/utils/bus'
 
 const emit = defineEmits(['formLabelAlign'])
@@ -125,15 +125,22 @@ function selectTime2(val) {
   formLabelAlign.value.trigger_time = [startTime.value, endTime.value]
 }
 
-watch(
-  () => formLabelAlign.value,
-  () => {
-    formLabelAlign.value.trigger_time =
-      formLabelAlign.value.trigger_ways === 'period' ? [startTime.value, endTime.value] : [startTime.value]
-    emit('formLabelAlign', formLabelAlign.value)
-  },
-  { deep: true }
-)
+// Uncaught (in promise) RangeError: Maximum call stack size exceeded
+// watch(
+//   () => formLabelAlign.value,
+//   () => {
+//     formLabelAlign.value.trigger_time =
+//       formLabelAlign.value.trigger_ways === 'period' ? [startTime.value, endTime.value] : [startTime.value]
+//     emit('formLabelAlign', formLabelAlign.value)
+//   },
+//   { deep: true }
+// )
+
+// 解决Uncaught (in promise) RangeError: Maximum call stack size exceeded
+watchEffect(() => {
+  formLabelAlign.value.trigger_time = formLabelAlign.value.trigger_ways === 'period' ? [startTime.value, endTime.value] : [startTime.value]
+  emit('formLabelAlign', formLabelAlign.value)
+})
 
 // 获取缓存触发设置数据
 const getTriggerSettingData = val => {
