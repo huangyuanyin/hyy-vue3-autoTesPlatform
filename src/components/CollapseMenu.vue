@@ -322,6 +322,7 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     .trendsMenu-item-left {
+      margin-left: 20px;
       display: flex;
       align-items: center;
       .el-dropdown:hover {
@@ -358,7 +359,7 @@ onMounted(() => {
 }
 
 .el-menu:not(.el-menu--collapse) {
-  width: 241px;
+  min-width: 13vw;
 }
 
 .el-aside {
