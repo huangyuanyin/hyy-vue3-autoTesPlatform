@@ -424,6 +424,7 @@ const searchLane = () => {
 const handleAdd = (type: String, index?: number, row?: User) => {
   taskTemplateDialogVisible.value = false
   if (type === 'noUse') {
+    ElMessage.warning('目前新建流水线默认不分组，新建完之后如有需要请手动移动至分组。等待后续需求确定~~~~')
     router.push({ path: '/testTask/addTestTask', query: { tem: 'noUse' } })
   } else {
     localStorage.setItem('taskTemplateObj', JSON.stringify(row.obj))
