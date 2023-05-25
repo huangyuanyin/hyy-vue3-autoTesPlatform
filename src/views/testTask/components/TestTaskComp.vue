@@ -434,7 +434,11 @@ const handleAdd = (type: String, index?: number, row?: User) => {
 
 const toDetail = (type, item) => {
   if (type === 'detail') {
-    router.push({ path: '/testTask/detailTestTask', query: { id: item.id } })
+    if (item.run_count === 0) {
+      ElMessage.warning('该任务还未执行过，无法查看详情！')
+    } else {
+      router.push({ path: '/testTask/detailTestTask', query: { id: item.id } })
+    }
   } else {
     router.push({ path: '/testTask/editTestTask', query: { id: item.id } })
   }
