@@ -130,6 +130,8 @@ const addTaskInfo = async () => {
       })
     }
   })
+  // @ts-ignore
+  params.group_id = route.query.groupId ? Number(route.query.groupId) : undefined
   const res = await addTaskInfoApi(params)
   if (res.code === 1000) {
     ElMessage.success('任务创建成功')
@@ -165,6 +167,8 @@ const editTaskInfo = async () => {
       })
     }
   })
+  // @ts-ignore
+  params.group_id = route.query.groupId ? Number(route.query.groupId) : undefined
   console.log(`output->修改流水线data`, data)
   console.log(`output->修改流水线params`, params)
 

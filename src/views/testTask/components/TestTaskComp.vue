@@ -223,7 +223,7 @@ import {
   Search,
   CloseBold
 } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
 import preview2 from '@/assets/preview2.png'
 import {
@@ -266,6 +266,7 @@ interface User {
   obj: string
 }
 
+const route = useRoute()
 const router = useRouter()
 const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
@@ -422,10 +423,16 @@ const searchLane = () => {
 }
 
 const handleAdd = (type: String, index?: number, row?: User) => {
+  const routePath = route.path.split('/')[1] === 'compTest'
   taskTemplateDialogVisible.value = false
   if (type === 'noUse') {
-    ElMessage.warning('目前新建流水线默认不分组，新建完之后如有需要请手动移动至分组。等待后续需求确定~~~~')
-    router.push({ path: '/testTask/addTestTask', query: { tem: 'noUse' } })
+    router.push({
+      path: '/testTask/addTestTask',
+      query: {
+        tem: 'noUse',
+        groupId: routePath ? route.query.id : undefined
+      }
+    })
   } else {
     localStorage.setItem('taskTemplateObj', JSON.stringify(row.obj))
     console.log(index, row)
