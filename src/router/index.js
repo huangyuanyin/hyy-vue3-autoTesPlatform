@@ -21,7 +21,7 @@ const staticRoutes = [
   },
   {
     path: '/',
-    redirect: '/overview',
+    redirect: '/myTestTask',
     component: Layout
   },
   {

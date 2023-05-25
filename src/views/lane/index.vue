@@ -41,7 +41,6 @@ import TriggerSetting from './triggerSetting/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { addTaskInfoApi, editTaskInfoApi, getTaskInfoApi } from '@/api/NetDevOps/index'
 import bus from '@/utils/bus.js'
-// import { jsPlumb, jsPlumbInstance } from 'jsplumb'
 
 const router = useRouter()
 const route = useRoute()
