@@ -30,6 +30,7 @@
           @change="searchLinux('cavium_card_type')"
           clearable
         >
+          <el-option label="5530" value="5530" />
           <el-option label="5560-550" value="5560-550" />
           <el-option label="5560-550-c25" value="5560-550-c25" />
           <el-option label="5560-750-c35" value="5560-750-c35" />
@@ -167,6 +168,7 @@
             </el-form-item>
             <el-form-item label="cavium类型" :label-width="formLabelWidth" prop="cavium_card_type">
               <el-select v-model="form.cavium_card_type" placeholder="请选择cavium类型" :disabled="disabled">
+                <el-option label="5530" value="5530" />
                 <el-option label="5560-550" value="5560-550" />
                 <el-option label="5560-550-c25" value="5560-550-c25" />
                 <el-option label="5560-750-c35" value="5560-750-c35" />

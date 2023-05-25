@@ -145,11 +145,11 @@ const handleAddParallel = (position: any, index: any) => {
 const handleRemoveParallel = (id: any) => {
   if (props.stage.length > 1) {
     props.stage.splice(id, 1)
+    ElMessage.success('删除成功！')
   } else {
     emit('removeStage')
   }
   closeDrawer([false])
-  ElMessage.success('删除成功！')
 }
 
 const triggerMethod = (value: boolean) => {
