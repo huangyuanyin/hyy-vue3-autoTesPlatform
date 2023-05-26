@@ -44,7 +44,7 @@ import bus from '@/utils/bus.js'
 
 const router = useRouter()
 const route = useRoute()
-const tabName = ref('basicInformation')
+const tabName = ref('processConfig')
 const isDetail = ref(true)
 const taskName = ref('')
 const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
