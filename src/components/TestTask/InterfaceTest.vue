@@ -159,7 +159,7 @@
         <div class="device-space" v-for="(item, index) in deviceList" :key="'deviceList' + index">
           <div class="device-space-item">
             <el-form
-              ref="deviceFormRef"
+              ref="deviceFormRef2"
               :model="item"
               :rules="deviceFormRules"
               label-width="220px"
@@ -251,6 +251,7 @@ const taskDetailFormRules = reactive<FormRules>({
 const deviceList = ref(JSON.parse(JSON.stringify(disposeList['interfaceTest'])))
 const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['interfaceTest'][0])))
 const deviceFormRef = ref([])
+const deviceFormRef2 = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
   pendingVersion: [{ required: true, message: '待测版本不能为空', trigger: 'blur' }],
@@ -387,19 +388,22 @@ const cancelClick = async (done?: () => void) => {
   await taskDetailFormRef.value.validate(async (valid, fields) => {
     if (valid) {
       const forms = deviceFormRef.value
-      if (forms) {
-        for (const item of forms) {
+      const forms2 = deviceFormRef2.value
+      const forms3 = forms.concat(forms2)
+      let isAllFormsValid = true
+      if (forms && forms2) {
+        for (const item of forms3) {
           try {
             const result = await item.validate()
             if (!result) {
-              return
+              isAllFormsValid = false
             }
-            isPassVerification.value = true
           } catch (error) {
-            isPassVerification.value = false
+            isAllFormsValid = false
           }
         }
       }
+      isPassVerification.value = isAllFormsValid
       for (const item of deviceList.value) {
         // item.deviceConfig.log = item.log
         // item.deviceConfig.ifrs = item.ifrs
