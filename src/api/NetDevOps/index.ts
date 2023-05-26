@@ -242,3 +242,40 @@ export function updateGroupTagApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/main_product_package/ ---------------------------- */
+
+export function getMainProductPackageApi(params) {
+  return request({
+    url: `/devops/main_product_package/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+export function addMainProductPackageApi(params) {
+  return request({
+    url: `/devops/main_product_package/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function editMainProductPackageApi(params) {
+  return request({
+    url: `/devops/main_product_package/`,
+    method: 'put',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function deleteMainProductPackageApi(id: number) {
+  return request({
+    url: `/devops/main_product_package/${id}`,
+    method: 'DELETE',
+    urlType: 'NetDevOps'
+  })
+}

@@ -168,11 +168,6 @@
               label-position="top"
               status-icon
             >
-              <el-form-item label="代码分支" prop="branch" :required="true">
-                <el-select v-model="item.branch" placeholder="请选择代码分支" :key="index" @change="getProductInfo(item, index)">
-                  <el-option :label="item.name" :value="item.name" v-for="(item, index) in branchList" :key="'branchList' + index" />
-                </el-select>
-              </el-form-item>
               <el-form-item label="适用版本" prop="netsignVersion" :required="true">
                 <el-select v-model="item.netsignVersion" placeholder="请选择适用版本" :key="index" @change="getProductInfo(item, index)">
                   <el-option
@@ -181,6 +176,11 @@
                     v-for="(item, index) in netsignVersionList"
                     :key="'netsignVersionList' + index"
                   />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="代码分支" prop="branch" :required="true">
+                <el-select v-model="item.branch" placeholder="请选择代码分支" :key="index" @change="getProductInfo(item, index)">
+                  <el-option :label="item.name" :value="item.name" v-for="(item, index) in branchList" :key="'branchList' + index" />
                 </el-select>
               </el-form-item>
             </el-form>

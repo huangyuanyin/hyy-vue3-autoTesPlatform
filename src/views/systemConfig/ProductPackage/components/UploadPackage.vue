@@ -1,8 +1,8 @@
 <template>
   <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="40%" :before-close="closeDialog">
     <el-form :model="form" ref="ruleFormRef" :rules="rules">
-      <el-form-item label="包名称" label-width="140px" prop="type" v-if="dialogTitle !== '新增'">
-        <el-input v-model="form.file_name" :disabled="dialogTitle !== '新增'"></el-input>
+      <el-form-item label="包名称" label-width="140px" prop="type" v-if="!dialogTitle.includes('新增')">
+        <el-input v-model="form.file_name" :disabled="!dialogTitle.includes('新增')"></el-input>
       </el-form-item>
       <el-form-item label="包类别" label-width="140px" prop="type">
         <el-select v-model="form.type" placeholder="请选择包类别">
@@ -10,19 +10,19 @@
           <el-option label="release版本" value="baseline" />
         </el-select>
       </el-form-item>
-      <el-form-item label="标识" label-width="140px" prop="title">
+      <el-form-item label="标识" label-width="140px" prop="title" v-if="dialogTitle.includes('项目版本')">
         <el-select v-model="form.title" placeholder="请选择标识">
           <el-option label="信创" value="sar" />
           <el-option label="非信创" value="main" />
         </el-select>
       </el-form-item>
-      <el-form-item label="上传方式" label-width="140px" v-if="dialogTitle === '新增'">
+      <el-form-item label="上传方式" label-width="140px" v-if="dialogTitle.includes('新增')">
         <el-radio-group v-model="form.upload_type">
           <el-radio label="hands">手动上传</el-radio>
           <el-radio label="url_pull" disabled>链接拉取</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="文件上传" label-width="140px" v-if="form.upload_type === 'hands' && dialogTitle === '新增'">
+      <el-form-item label="文件上传" label-width="140px" v-if="form.upload_type === 'hands' && dialogTitle.includes('新增')">
         <el-upload
           ref="uploadFile"
           class="uploadFile-demo"
@@ -42,7 +42,12 @@
           </template>
         </el-upload>
       </el-form-item>
-      <el-form-item label="拉取地址" label-width="140px" prop="push_path" v-if="form.upload_type === 'url_pull' && dialogTitle === '新增'">
+      <el-form-item
+        label="拉取地址"
+        label-width="140px"
+        prop="push_path"
+        v-if="form.upload_type === 'url_pull' && dialogTitle.includes('新增')"
+      >
         <el-input v-model="form.push_path" autocomplete="off" placeholder="请输入包的拉取地址" />
       </el-form-item>
     </el-form>
@@ -61,7 +66,14 @@ import { ElMessage, ElLoading } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { genFileId } from 'element-plus'
 import type { FormInstance, FormRules, UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
-import { addProductPackageApi, editProductPackageApi, getProductPackageApi } from '@/api/NetDevOps/index'
+import {
+  addProductPackageApi,
+  editProductPackageApi,
+  getProductPackageApi,
+  addMainProductPackageApi,
+  editMainProductPackageApi,
+  getMainProductPackageApi
+} from '@/api/NetDevOps/index'
 
 const props = defineProps({
   dialog: {
@@ -129,8 +141,14 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       fd.append('upload_file', uploadFileList.value instanceof Array ? uploadFileList.value[0] : uploadFileList.value)
       fd.append('type', form.type)
       fd.append('upload_type', form.upload_type)
-      fd.append('title', form.title)
-      props.dialogTitle === '新增' ? addProductPackage(form.upload_type === 'hands' ? fd : params) : editProductPackage(params)
+      props.dialogTitle.includes('主线版本') ? '' : fd.append('title', form.title)
+      if (props.dialogTitle.includes('新增')) {
+        props.dialogTitle === '新增主线版本'
+          ? addMainProductPackage(form.upload_type === 'hands' ? fd : params)
+          : addProductPackage(form.upload_type === 'hands' ? fd : params)
+      } else {
+        props.dialogTitle === '编辑主线版本' ? delete params.title && editMainProductPackage(params) : editProductPackage(params)
+      }
     }
   })
 }
@@ -160,11 +178,37 @@ const editProductPackage = async (data: any) => {
   }
 }
 
+const addMainProductPackage = async (data: any) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '文件上传中，请稍后...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
+  const res = await addMainProductPackageApi(data)
+  loading.close()
+  if (res.code === 1000) {
+    form.push_path = ''
+    cancel(ruleFormRef.value)
+    ElMessage.success('新增成功！')
+  }
+}
+
+const editMainProductPackage = async (data: any) => {
+  data.main_product_package_id = props.dialogId
+  const res = await editMainProductPackageApi(data)
+  if (res.code === 1000) {
+    form.push_path = ''
+    cancel(ruleFormRef.value)
+    ElMessage.success('编辑成功！')
+  }
+}
+
 const closeDialog = () => {
   cancel(ruleFormRef.value)
 }
 
 const cancel = (formEl: FormInstance | undefined) => {
+  uploadFile.value.clearFiles()
   uploadFileList.value = []
   if (props.dialogTitle === '新增') {
     uploadFile.value.clearFiles()
@@ -180,7 +224,20 @@ const getProductPackage = async () => {
   }
   const res = await getProductPackageApi(params)
   if (res.code === 1000) {
-    // 循环res.data，将数据赋值给form
+    for (const key in res.data) {
+      if (form.hasOwnProperty(key)) {
+        form[key] = res.data[key]
+      }
+    }
+  }
+}
+
+const getMainPackage = async () => {
+  const params = {
+    main_product_package_id: props.dialogId
+  }
+  const res = await getMainProductPackageApi(params)
+  if (res.code === 1000) {
     for (const key in res.data) {
       if (form.hasOwnProperty(key)) {
         form[key] = res.data[key]
@@ -193,7 +250,7 @@ watch(
   () => props.dialogId,
   () => {
     if (props.dialogId) {
-      getProductPackage()
+      props.dialogTitle === '编辑项目版本' ? getProductPackage() : getMainPackage()
     }
   }
 )

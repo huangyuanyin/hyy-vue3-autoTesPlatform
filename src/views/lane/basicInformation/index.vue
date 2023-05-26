@@ -13,6 +13,7 @@
           class="basicInformation-ruleForm"
           size="default"
           status-icon
+          label-position="top"
         >
           <el-form-item label="任务名称" prop="name">
             <el-input
@@ -21,6 +22,18 @@
               placeholder="请输入任务名称..."
               @change="submitForm(basicInformationFormRef)"
             />
+          </el-form-item>
+          <el-form-item label="标签" prop="region">
+            <el-select v-model="basicInformationForm.group_id" placeholder="待联调" :disabled="true">
+              <el-option label="Zone one" value="shanghai" />
+              <el-option label="Zone two" value="beijing" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="分组" prop="region">
+            <el-select v-model="basicInformationForm.group_id" placeholder="待联调" :disabled="true">
+              <el-option label="Zone one" value="shanghai" />
+              <el-option label="Zone two" value="beijing" />
+            </el-select>
           </el-form-item>
           <el-form-item>
             <el-button
@@ -141,7 +154,7 @@ const deleteTaskInfo = async id => {
     }
   }
   .content {
-    padding: 30px 40px 0 0px;
+    padding: 30px 40px 0 20px;
   }
 }
 </style>

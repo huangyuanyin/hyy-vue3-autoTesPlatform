@@ -1,10 +1,9 @@
 <template>
   <el-tabs type="border-card" v-model="tabValue">
-    <el-tab-pane label="主线版本" name="主线版本" disabled>
+    <el-tab-pane label="主线版本" name="主线版本">
       <div class="build-card">
-        <el-button type="primary" :icon="CirclePlus" @click="handleEdit('add')" style="margin-bottom: 20px"> 新增 </el-button>
-        <!-- <el-button type="primary" @click="openDownloadDialog = true" style="margin-left: 20px; margin-bottom: 20px"> 拉取包 </el-button> -->
-        <el-table :data="state.buildData" border stripe v-loading="isLoading">
+        <el-button type="primary" :icon="CirclePlus" @click="handleEdit('addMain')" style="margin-bottom: 20px"> 新增 </el-button>
+        <el-table :data="state.mainProductPackageData" border stripe v-loading="isLoading">
           <el-table-column prop="file_name" label="包名称" align="center" width="500" />
           <el-table-column prop="type" label="包类别" align="center">
             <template #default="scope">
@@ -16,13 +15,13 @@
           <el-table-column prop="last_mod_time" label="更新时间" align="center" />
           <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="handleEdit('edit', scope.row.id)">编辑</el-button>
+              <el-button link type="primary" size="small" @click="handleEdit('editMain', scope.row.id)">编辑</el-button>
               <el-popconfirm
                 title="确定删除这个文件?"
                 trigger="click"
                 confirm-button-text="确认删除"
                 cancel-button-text="取消"
-                @confirm="handleDelete(scope.row.id)"
+                @confirm="handleDelete('deleteMain', scope.row.id)"
               >
                 <template #reference>
                   <el-button link type="danger" size="small">删除</el-button>
@@ -32,19 +31,19 @@
           </el-table-column>
         </el-table>
         <el-pagination
-          v-model:currentPage="buildCurrentPage"
-          v-model:page-size="buildPageSize"
+          v-model:currentPage="mainCurrentPage"
+          v-model:page-size="mainPageSize"
           :page-sizes="[10, 20, 30, 40]"
           layout="total, prev, pager, next, jumper"
-          :total="buildTotal"
-          @size-change="handleBuildSizeChange"
-          @current-change="handleBuildCurrentChange"
+          :total="mainTotal"
+          @size-change="handleMainSizeChange"
+          @current-change="handleMainCurrentChange"
         />
       </div>
     </el-tab-pane>
     <el-tab-pane label="项目版本" name="项目版本">
       <div class="build-card">
-        <el-button type="primary" :icon="CirclePlus" @click="handleEdit('add')" style="margin-bottom: 20px"> 新增 </el-button>
+        <el-button type="primary" :icon="CirclePlus" @click="handleEdit('addBuild')" style="margin-bottom: 20px"> 新增 </el-button>
         <!-- <el-button type="primary" @click="openDownloadDialog = true" style="margin-left: 20px; margin-bottom: 20px"> 拉取包 </el-button> -->
         <el-table :data="state.buildData" border stripe v-loading="isLoading">
           <el-table-column prop="file_name" label="包名称" align="center" width="500" />
@@ -64,13 +63,13 @@
           <el-table-column prop="last_mod_time" label="更新时间" align="center" />
           <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
-              <el-button link type="primary" size="small" @click="handleEdit('edit', scope.row.id)">编辑</el-button>
+              <el-button link type="primary" size="small" @click="handleEdit('editBuild', scope.row.id)">编辑</el-button>
               <el-popconfirm
                 title="确定删除这个文件?"
                 trigger="click"
                 confirm-button-text="确认删除"
                 cancel-button-text="取消"
-                @confirm="handleDelete(scope.row.id)"
+                @confirm="handleDelete('deleteBuild', scope.row.id)"
               >
                 <template #reference>
                   <el-button link type="danger" size="small">删除</el-button>
@@ -99,7 +98,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import PullPackage from './components/PullPackage.vue'
 import UploadPackage from './components/UploadPackage.vue'
-import { getProductPackageApi, deleteProductPackageApi } from '@/api/NetDevOps/index'
+import { getProductPackageApi, deleteProductPackageApi, getMainProductPackageApi, deleteMainProductPackageApi } from '@/api/NetDevOps/index'
 import { ElMessage } from 'element-plus'
 import { CirclePlus, Search } from '@element-plus/icons-vue'
 
@@ -110,38 +109,60 @@ const dialogId = ref(null)
 const buildCurrentPage = ref(1)
 const buildPageSize = ref(10)
 const buildTotal = ref(0)
+const mainCurrentPage = ref(1)
+const mainPageSize = ref(10)
+const mainTotal = ref(0)
 const isLoading = ref(false)
-const tabValue = ref('项目版本')
+const tabValue = ref('主线版本')
 const state: any = reactive({
-  buildData: [] // 包列表数据
+  buildData: [], // 包列表数据
+  mainProductPackageData: [] // 主线版本列表
 })
 
 const handleEdit = (type: String, id?: number) => {
   openUploadDialog.value = true
-  if (type === 'add') {
-    dialogTitle.value = '新增'
-  } else {
-    dialogTitle.value = '编辑'
-    dialogId.value = id
+  switch (type) {
+    case 'addBuild':
+      dialogTitle.value = '新增项目版本'
+      break
+    case 'editBuild':
+      dialogTitle.value = '编辑项目版本'
+      dialogId.value = id
+      break
+    case 'addMain':
+      dialogTitle.value = '新增主线版本'
+      break
+    case 'editMain':
+      dialogTitle.value = '编辑主线版本'
+      dialogId.value = id
+      break
   }
 }
 
-// 删除
-const handleDelete = async id => {
-  let res = await deleteProductPackageApi(id)
+const handleDelete = async (type, id) => {
+  let res = type === 'deleteMain' ? await deleteMainProductPackageApi(id) : await deleteProductPackageApi(id)
   if (res.code === 1000) {
-    buildCurrentPage.value = 1
     ElMessage.success('删除成功')
-    getProductPackage()
+    if (type === 'deleteMain') {
+      mainCurrentPage.value = 1
+      getMainProductPackage()
+    } else {
+      buildCurrentPage.value = 1
+      getProductPackage()
+    }
   }
 }
 
-const handleBuildSizeChange = (val: number) => {
-  console.log(`${val} items per page`)
-}
+const handleBuildSizeChange = (val: number) => {}
 const handleBuildCurrentChange = (val: number) => {
   buildCurrentPage.value = val
   getProductPackage()
+}
+
+const handleMainSizeChange = (val: number) => {}
+const handleMainCurrentChange = (val: number) => {
+  mainCurrentPage.value = val
+  getMainProductPackage()
 }
 
 const closePullPackage = val => {
@@ -150,9 +171,11 @@ const closePullPackage = val => {
 
 const closeUploadPackage = val => {
   openUploadDialog.value = val
-  buildCurrentPage.value = 1
   dialogId.value = null
+  buildCurrentPage.value = 1
   getProductPackage()
+  mainCurrentPage.value = 1
+  getMainProductPackage()
 }
 
 const getProductPackage = async () => {
@@ -165,11 +188,26 @@ const getProductPackage = async () => {
   isLoading.value = false
   if (res.code === 1000) {
     state.buildData = res.data || []
+    // @ts-ignore
     buildTotal.value = res.total
   }
 }
 
+const getMainProductPackage = async () => {
+  const params = {
+    page: mainCurrentPage.value,
+    page_size: mainPageSize.value
+  }
+  let res = await getMainProductPackageApi(params)
+  if (res.code === 1000) {
+    state.mainProductPackageData = res.data || []
+    // @ts-ignore
+    mainTotal.value = res.total
+  }
+}
+
 onMounted(() => {
+  getMainProductPackage()
   getProductPackage()
 })
 </script>

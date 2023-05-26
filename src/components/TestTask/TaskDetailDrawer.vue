@@ -103,11 +103,15 @@
                   @change="getDeployVersion('full', item, index)"
                 >
                   <el-option
-                    :label="it.deploy_version"
-                    :value="it.deploy_version"
+                    :label="it.file_name"
+                    :value="it.file_name"
                     v-for="(it, index) in deployVersionFullList"
                     :key="'deployVersionFullList' + index"
-                  />
+                  >
+                    <span class="main-fileName"> {{ it.file_name }}</span>
+                    <span class="main-type"> {{ it.type === 'project' ? '待测版本' : 'release版本' }} </span>
+                    <span class="main-create_user">{{ it.create_user }} </span>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="项目基线版本列表" prop="packageName" v-if="item.deployType === 'baseline'">
@@ -123,7 +127,11 @@
                     :value="it.file_name"
                     v-for="(it, index) in deployVersionList"
                     :key="'deployVersionList' + index"
-                  />
+                  >
+                    <span class="main-fileName"> {{ it.file_name }}</span>
+                    <span class="main-type"> {{ it.type === 'project' ? '待测版本' : 'release版本' }} </span>
+                    <span class="main-create_user">{{ it.create_user }} </span>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="项目包路径" prop="packagePath" v-show="false">
@@ -219,7 +227,7 @@
 import { ref, reactive, watch, nextTick, onMounted } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
-import { getDeviceApi, getDeployVersionApi, getProductPackageApi } from '@/api/NetDevOps'
+import { getDeviceApi, getDeployVersionApi, getProductPackageApi, getMainProductPackageApi } from '@/api/NetDevOps'
 import { disposeList } from '../../views/lane/data'
 
 const props = defineProps({
@@ -501,13 +509,28 @@ const getDeviceInfo = async (val, index) => {
 }
 
 const selectDeployVersion = async (type, val) => {
-  const params = {
-    deploy_type: val.deployType,
-    device_manage_ip: val.serverName
+  if (type === 'project') {
+    const params = {
+      deploy_type: val.deployType,
+      device_manage_ip: val.serverName
+    }
+    let res = await getDeployVersionApi(params)
+    if (res.code === 1000) {
+      deployVersionList.value = res.data
+    }
+  } else {
+    getMainProductPackage()
   }
-  let res = await getDeployVersionApi(params)
+}
+
+const getMainProductPackage = async () => {
+  const params = {
+    page: 1,
+    page_size: 100
+  }
+  let res = await getMainProductPackageApi(params)
   if (res.code === 1000) {
-    type === 'full' ? (deployVersionFullList.value = res.data) : (deployVersionList.value = res.data)
+    deployVersionFullList.value = res.data
   }
 }
 
@@ -527,6 +550,14 @@ const getDeployVersion = async (type, val, index) => {
 </script>
 
 <style lang="scss">
+.main-type {
+  color: #e6a23c;
+  margin: 0 15px;
+}
+.main-create_user {
+  color: #acafb4;
+  font-size: 13px;
+}
 .taskDetail-drawer {
   width: 35% !important;
   .el-drawer__header {
