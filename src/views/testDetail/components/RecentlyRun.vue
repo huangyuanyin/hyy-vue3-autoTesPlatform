@@ -11,7 +11,7 @@
               :iconName="iconType[props.runResult.status]"
               style="font-size: 16px; margin-right: 8px"
             ></svg-icon>
-            <span>{{ contentType[props.runResult.status] }}</span>
+            <span>{{ contentType[props.runResult.status] }} </span>
           </div>
         </div>
         <div class="left-info">
@@ -25,7 +25,7 @@
           <span>{{ props.runResult.created_time }}</span>
           <div class="info-divider"></div>
           <span class="info-label">持续时间</span>
-          <span>16s</span>
+          <span>{{ props.runResult.duration_time }}s</span>
           <el-tooltip
             popper-class="box-item"
             effect="customized"
@@ -91,7 +91,7 @@
                           <div class="card-title">{{ it.name }}</div>
                           <div class="success-comp" v-if="it.status === 'success'">
                             <div class="card-info">
-                              <span>15s</span>
+                              <span>{{ it.duration_time }}s</span>
                               <div class="operate">
                                 <div class="report">
                                   <!-- <el-icon><Document /></el-icon> <span>扫描报告</span> -->
@@ -144,7 +144,7 @@
                           </div>
                           <div class="fail-comp" v-if="it.status === 'fail'">
                             <div class="card-info">
-                              <span>15s</span>
+                              <span>{{ it.duration_time }}s</span>
                               <div class="operate">
                                 <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon><span>日志</span>
@@ -160,7 +160,7 @@
                           </div>
                           <div class="run-comp" v-if="it.status === 'in_progress'">
                             <div class="card-info">
-                              <span>15s</span>
+                              <span>{{ it.duration_time }}s</span>
                               <div class="operate">
                                 <div class="log" @click.stop="handleLog(it)">
                                   <!-- <el-icon><Document /></el-icon> <span>日志</span> -->
@@ -176,7 +176,7 @@
                           </div>
                           <div class="channel-comp" v-if="it.status === 'channel'">
                             <div class="card-info">
-                              <span>15s</span>
+                              <span>{{ it.duration_time }}s</span>
                               <div class="operate">
                                 <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon> <span>日志</span>
@@ -190,7 +190,7 @@
                               <!-- <div>重试</div> -->
                             </div>
                           </div>
-                          <div class="wait-comp" v-if="it.status === 'not_start'">
+                          <div class="wait-comp" v-if="it.status === 'wait_execute'">
                             <div class="time">
                               <div>0s</div>
                             </div>
@@ -301,21 +301,21 @@ const cardTyp = {
   success: 'success-card',
   fail: 'fail-card',
   in_progress: 'run-card',
-  not_start: 'wait-card',
+  wait_execute: 'wait-card',
   channel: 'channel-card'
 }
 const iconType = {
   success: 'icon-zhengque',
   fail: 'icon-cuowu',
   in_progress: 'icon-shuaxin',
-  not_start: 'icon-shijian',
+  wait_execute: 'icon-shijian',
   channel: 'icon-cuowu'
 }
 const contentType = {
   success: '运行成功',
   fail: '运行失败',
   in_progress: '运行中',
-  not_start: '等待中',
+  wait_execute: '等待中',
   channel: '已取消'
 }
 const infoList = ref([
@@ -711,7 +711,7 @@ const handleMethodsDataCurrentChange = (val: number) => {
                   .in_progress {
                     color: #409eff;
                   }
-                  .not_start {
+                  .wait_execute {
                     color: #909399;
                   }
                   .fail-card {
