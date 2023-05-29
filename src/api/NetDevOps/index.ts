@@ -279,3 +279,52 @@ export function deleteMainProductPackageApi(id: number) {
     urlType: 'NetDevOps'
   })
 }
+
+/* ---------------------------- /devops/favorite_task/ ---------------------------- */
+export function getFavoriteTaskApi(params) {
+  return request({
+    url: `/devops/favorite_task/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+/* ---------------------------- /devops/pipeline_tag/ ---------------------------- */
+export function getPipelineTagApi(params) {
+  return request({
+    url: `/devops/pipeline_tag/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+export function addPipelineTagApi(params) {
+  return request({
+    url: `/devops/pipeline_tag/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+/* ---------------------------- /devops/netsign_version/ ---------------------------- */
+export function getNetsignVersionApi(params) {
+  return request({
+    url: `/devops/netsign_version/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+/* ---------------------------- /devops/netsign_branch/ ---------------------------- */
+export function getNetsignBranchApi(params) {
+  return request({
+    url: `/devops/netsign_branch/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}

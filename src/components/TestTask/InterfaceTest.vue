@@ -212,7 +212,7 @@
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Delete, FullScreen } from '@element-plus/icons-vue'
-import { getDeviceApi, getProductPackageApi } from '@/api/NetDevOps/index'
+import { getDeviceApi, getProductPackageApi, getNetsignVersionApi, getNetsignBranchApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
 import { getInterfaceTestConfigurationFile } from '@/data/InterfaceTestConfigurationFile'
@@ -264,47 +264,15 @@ const selectProductList = ref([])
 let currentFlows = ref(JSON.parse(localStorage.getItem('flows')))
 const isPassVerification = ref(false)
 const hasDeviceList = ref([])
-const branchList = ref([
-  {
-    name: 'GZRCB',
-    value: 'GZRCB'
-  },
-  {
-    name: 'liangye16.1',
-    value: 'liangye16.1'
-  },
-  {
-    name: 'netsign5.6.1project',
-    value: 'netsign5.6.1project'
-  },
-  {
-    name: 'netsign5.6.1project_new',
-    value: 'netsign5.6.1project_new'
-  },
-  {
-    name: 'netsign5.6.5',
-    value: 'netsign5.6.5'
-  }
-])
-const netsignVersionList = ref([
-  {
-    name: '5.5',
-    value: '5.5'
-  },
-  {
-    name: '5.6.4',
-    value: '5.6.4'
-  },
-  {
-    name: '5.6.5',
-    value: '5.6.5'
-  }
-])
+const branchList = ref([])
+const netsignVersionList = ref([])
 
 watch(
   () => props.taskDetailDrawer,
   () => {
     ishowDrawer.value = props.taskDetailDrawer
+    getNetsignVersion()
+    getNetsignBranch()
   }
 )
 
@@ -377,6 +345,28 @@ watch(
     }
   }
 )
+
+const getNetsignVersion = async () => {
+  const params = {
+    page: 1,
+    page_size: 100
+  }
+  let res = await getNetsignVersionApi(params)
+  if (res.code === 1000) {
+    netsignVersionList.value = res.data || []
+  }
+}
+
+const getNetsignBranch = async () => {
+  const params = {
+    page: 1,
+    page_size: 100
+  }
+  let res = await getNetsignBranchApi(params)
+  if (res.code === 1000) {
+    branchList.value = res.data || []
+  }
+}
 
 const closeDrawer = (value?: any) => {
   deviceList.value = JSON.parse(JSON.stringify(disposeList['interfaceTest']))
