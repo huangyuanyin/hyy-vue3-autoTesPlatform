@@ -23,12 +23,14 @@ const taskTotal = ref(0)
 const taskLoading = ref(false)
 const taskTableData = ref([])
 const keywords = ref('')
+const tag_id = ref([])
 
 const getTaskInfo = async () => {
   const params = {
     page: taskCurrentPage.value,
     page_size: taskPageSize.value,
     keywords: keywords.value,
+    task_list: tag_id.value,
     my_pipelines: 0
   }
   taskLoading.value = true
@@ -40,8 +42,9 @@ const getTaskInfo = async () => {
   }
 }
 
-const searchLane = (val: string) => {
-  keywords.value = val
+const searchLane = (val: object) => {
+  keywords.value = val.keywords
+  tag_id.value = val.tag_id
   taskCurrentPage.value = 1
   getTaskInfo()
 }

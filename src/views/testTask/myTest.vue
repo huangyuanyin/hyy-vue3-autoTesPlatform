@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-      <el-tab-pane label="我的流水线" name="first">
+      <el-tab-pane label="我的流水线" name="my">
         <TestTaskComp
           :taskTableData="taskTableData"
           :taskTotal="taskTotal"
@@ -11,12 +11,12 @@
           @searchLane="searchLane"
         />
       </el-tab-pane>
-      <el-tab-pane label="我的收藏" name="second">
+      <el-tab-pane label="我的收藏" name="favorite">
         <TestTaskComp
-          :taskTableData="taskTableData"
-          :taskTotal="taskTotal"
-          :taskLoading="taskLoading"
-          :keywords="keywords"
+          :taskTableData="favoriteTaskTableData"
+          :taskTotal="favoriteTaskTotal"
+          :taskLoading="favoriteTaskLoading"
+          :keywords="favoritekKeywords"
           @update:taskTableData="updateTaskTableData"
           @searchLane="searchLane"
         />
@@ -29,22 +29,28 @@
 import { ref, onMounted } from 'vue'
 // @ts-ignore
 import TestTaskComp from './components/TestTaskComp.vue'
-import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi, releaseDeviceApi } from '@/api/NetDevOps/index'
+import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi, releaseDeviceApi, getFavoriteTaskApi } from '@/api/NetDevOps/index'
 import type { TabsPaneContext } from 'element-plus'
 
-const activeName = ref('first')
+const activeName = ref('my')
 const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
 const taskTotal = ref(0)
 const taskLoading = ref(false)
 const taskTableData = ref([])
+const favoriteTaskTableData = ref([])
+const favoriteTaskTotal = ref(0)
+const favoriteTaskLoading = ref(false)
 const keywords = ref('')
+const favoritekKeywords = ref('')
+const tag_id = ref([])
 
 const getTaskInfo = async () => {
   const params = {
     page: taskCurrentPage.value,
     page_size: taskPageSize.value,
     keywords: keywords.value,
+    task_list: tag_id.value,
     my_pipelines: activeName.value === 'first' ? 1 : 0,
     my_favorite: activeName.value === 'first' ? undefined : 1
   }
@@ -53,14 +59,40 @@ const getTaskInfo = async () => {
   taskLoading.value = false
   if (res.code === 1000) {
     taskTableData.value = res.data || []
+    // @ts-ignore
     taskTotal.value = res.total
   }
 }
 
-const searchLane = (val: string) => {
-  keywords.value = val
-  taskCurrentPage.value = 1
-  getTaskInfo()
+const getFavoriteTask = async () => {
+  const params = {
+    page: taskCurrentPage.value,
+    page_size: taskPageSize.value,
+    keywords: favoritekKeywords.value,
+    task_list: tag_id.value
+  }
+  favoriteTaskLoading.value = true
+  let res = await getFavoriteTaskApi(params)
+  favoriteTaskLoading.value = false
+  if (res.code === 1000) {
+    favoriteTaskTableData.value = res.data || []
+    // @ts-ignore
+    favoriteTaskTotal.value = res.total
+  }
+}
+
+const searchLane = (val: object) => {
+  if (activeName.value === 'my') {
+    keywords.value = val.keywords
+    tag_id.value = val.tag_id
+    taskCurrentPage.value = 1
+    getTaskInfo()
+  } else {
+    favoritekKeywords.value = val.keywords
+    tag_id.value = val.tag_id
+    taskCurrentPage.value = 1
+    getFavoriteTask()
+  }
 }
 
 const updateTaskTableData = (val: number) => {
@@ -71,10 +103,11 @@ const updateTaskTableData = (val: number) => {
 const handleClick = (tab: TabsPaneContext, event: Event) => {
   // @ts-ignore
   activeName.value = tab.paneName
-  getTaskInfo()
+  activeName.value === 'my' ? getTaskInfo() : getFavoriteTask()
 }
 
 onMounted(() => {
+  getFavoriteTask()
   getTaskInfo()
 })
 </script>

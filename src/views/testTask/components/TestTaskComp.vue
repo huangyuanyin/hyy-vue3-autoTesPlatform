@@ -4,8 +4,16 @@
       <!-- <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="taskTemplateDialogVisible = true"> 新建任务</el-button> -->
       <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="handleAdd('noUse')"> 新建任务</el-button>
       <div class="search-wrap">
+        <el-select v-model="tag_id" placeholder="选择标签进行搜索..." multiple clearable @change="searchLane">
+          <el-option :label="item.name" :value="item.id" v-for="(item, index) in labelList" :key="'labelList' + index">
+            <div class="tagStyle">
+              <div class="circle" :style="{ 'background-color': item.color }"></div>
+              <span>{{ item.name }}</span>
+            </div>
+          </el-option>
+        </el-select>
         <el-input
-          v-model="searchKeywords"
+          v-model="searchKeywords.keywords"
           class="w-50 m-2"
           placeholder="输入流水线名称进行搜索..."
           :prefix-icon="Search"
@@ -150,6 +158,61 @@
                     </el-form>
                   </el-popover>
                 </el-dropdown-item>
+                <el-dropdown-item>
+                  <el-popover placement="left" :width="300" trigger="click" popper-class="setLabelDialog" :visible="labelVisible">
+                    <template #reference>
+                      <el-button link type="info" size="small" @click="toSetLabel(item.row)"> 设置标签 </el-button>
+                    </template>
+                    <div class="setLabelDialog-top">
+                      <span>
+                        设置【<span style="color: #409eff">{{ item.row.name }}</span
+                        >】标签
+                      </span>
+                      <el-icon style="cursor: pointer" @click="resetLabelForm(labelFormRef)"><CloseBold /></el-icon>
+                    </div>
+                    <el-form
+                      ref="labelFormRef"
+                      :model="labelForm"
+                      :rules="labelRules"
+                      label-width="120px"
+                      class="demo-setLabelForm"
+                      size="default"
+                      status-icon
+                      label-position="top"
+                    >
+                      <el-form-item label="标签" prop="name">
+                        <el-select v-model="labelForm.name" placeholder="请选择标签" multiple clearable>
+                          <el-option :key="0" :value="0" disabled>
+                            <div class="custom-option">
+                              <el-button
+                                :icon="CirclePlus"
+                                text
+                                type="primary"
+                                size="large"
+                                class="new-label-button"
+                                @click="labelDialogVisible = true"
+                              >
+                                新建标签
+                              </el-button>
+                            </div>
+                          </el-option>
+                          <el-option :label="item.name" :value="item.id" v-for="(item, index) in labelList" :key="'labelList' + index">
+                            <div class="tagStyle">
+                              <div class="circle" :style="{ 'background-color': item.color }"></div>
+                              <span>{{ item.name }}</span>
+                            </div>
+                          </el-option>
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item class="setLabelDialog-bottom">
+                        <div>
+                          <el-button @click="resetLabelForm(labelFormRef)">取消</el-button>
+                          <el-button type="primary" @click="submitLabelForm(labelFormRef)"> 确定 </el-button>
+                        </div>
+                      </el-form-item>
+                    </el-form>
+                  </el-popover>
+                </el-dropdown-item>
                 <el-dropdown-item v-if="item.row.run_count != 0">
                   <el-button link type="success" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
                 </el-dropdown-item>
@@ -207,6 +270,40 @@
         </span>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="labelDialogVisible" title="新建标签" width="35%" :before-close="handleCloseLabelDialog" custom-class="labelDialog">
+      <el-form label-width="100px" :model="addLabelForm" :rules="addLabelRules" ref="addLabelRuleFormRef">
+        <el-form-item label="标签名称" prop="name">
+          <el-input v-model="addLabelForm.name" placeholder="请输入标签名称"></el-input>
+        </el-form-item>
+        <el-form-item label="标签分类">
+          <el-select v-model="addLabelForm.type" placeholder="请选择标签分类" disabled>
+            <el-option v-for="(item, index) in labelTypeList" :key="'labelTypeList' + index" :label="item.label" :value="item.value">
+              <span style="float: left">{{ item.label }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标签颜色" prop="color">
+          <div class="colorSvgList">
+            <div
+              :class="[`colorSvgList${index}`, 'activeColorSvg']"
+              :style="{ 'background-color': item.color }"
+              @click="selectColorSvg(item)"
+              v-for="(item, index) in colorSvgList"
+              :key="'colorSvgList' + index"
+            >
+              <div v-if="item.color === colorSvgIndex" class="tick"></div>
+            </div>
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancelAddLabelDialog(addLabelRuleFormRef)">取 消</el-button>
+          <el-button type="primary" @click="submitAddLabelForm(addLabelRuleFormRef)"> 保 存 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -233,7 +330,9 @@ import {
   stopTaskApi,
   releaseDeviceApi,
   getPipelineGroupApi,
-  updateGroupTagApi
+  updateGroupTagApi,
+  addPipelineTagApi,
+  getPipelineTagApi
 } from '@/api/NetDevOps/index'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -252,8 +351,8 @@ const props = defineProps({
     default: false
   },
   keywords: {
-    type: String,
-    default: ''
+    type: Object,
+    default: {}
   }
 })
 
@@ -271,8 +370,44 @@ const router = useRouter()
 const taskCurrentPage = ref(1)
 const taskPageSize = ref(10)
 const taskTemplateDialogVisible = ref(false)
-const searchKeywords = ref('')
+const tag_id = ref([])
+const searchKeywords = ref({
+  keywords: '',
+  tag_id: ''
+})
 const currentLaneId = ref(null)
+const labelDialogVisible = ref(false)
+const labelDialogTitle = ref('')
+const labelDialogData = ref({})
+const labelFormRef = ref<FormInstance>()
+const labelForm = reactive({
+  name: []
+})
+const labelRules = reactive<FormRules>({})
+const addLabelForm = reactive({
+  name: '',
+  type: -1,
+  color: '#1f9aef'
+})
+const addLabelRuleFormRef = ref<FormInstance>()
+const addLabelRules = reactive<FormRules>({
+  name: [
+    {
+      required: true,
+      message: '请输入标签名称',
+      trigger: 'blur'
+    }
+  ]
+})
+
+const labelList = ref([])
+const labelTypeList = ref([
+  {
+    label: '未分类',
+    value: -1
+  }
+])
+const labelVisible = ref(false)
 const groupVisible = ref(false)
 const groupList = ref([
   {
@@ -300,6 +435,33 @@ const statusMap = {
   fail: '运行失败',
   channel: '已取消'
 }
+const colorSvgIndex = ref('#1f9aef')
+const colorSvgList = ref([
+  {
+    color: '#1f9aef',
+    isSelect: true
+  },
+  {
+    color: '#e63a3a',
+    isSelect: false
+  },
+  {
+    color: '#fa8c15',
+    isSelect: false
+  },
+  {
+    color: '#15ad31',
+    isSelect: false
+  },
+  {
+    color: '#7978e5',
+    isSelect: false
+  },
+  {
+    color: '#8c8c8c',
+    isSelect: false
+  }
+])
 const tableData = [
   {
     id: '0',
@@ -419,8 +581,11 @@ watch(
 
 const searchLane = () => {
   taskCurrentPage.value = 1
+  searchKeywords.value.tag_id = JSON.stringify(tag_id.value)
   emit('searchLane', searchKeywords.value)
 }
+
+const getLabelList = () => {}
 
 const handleAdd = (type: String, index?: number, row?: User) => {
   const routePath = route.path.split('/')[1] === 'compTest'
@@ -438,6 +603,16 @@ const handleAdd = (type: String, index?: number, row?: User) => {
     console.log(index, row)
     router.push({ path: '/testTask/addTestTask', query: { tem: index } })
   }
+}
+
+const toSetLabel = item => {
+  currentLaneId.value = item.id
+  labelVisible.value = true
+  getPipelineTag()
+  labelDialogTitle.value = `设置【${item.name}】标签`
+  labelForm.name = []
+  labelForm.name = item.tag.map(it => it.id)
+  labelDialogData.value = item
 }
 
 const toDetail = (type, item) => {
@@ -492,6 +667,36 @@ const handleDelete = async val => {
     })
 }
 
+const addPipelineTag = async () => {
+  const params = {
+    name: addLabelForm.name,
+    color: addLabelForm.color
+  }
+  let res = await addPipelineTagApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('添加成功')
+    labelDialogVisible.value = false
+    getPipelineTag()
+    cancelAddLabelDialog(addLabelRuleFormRef.value)
+  }
+}
+
+const selectColorSvg = item => {
+  colorSvgIndex.value = item.color
+  addLabelForm.color = item.color
+}
+
+const submitAddLabelForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      addPipelineTag()
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
 const submitMoveGroupForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
@@ -501,6 +706,13 @@ const submitMoveGroupForm = async (formEl: FormInstance | undefined) => {
       console.log('error submit!', fields)
     }
   })
+}
+
+const getPipelineTag = async () => {
+  let res = await getPipelineTagApi({})
+  if (res.code === 1000) {
+    labelList.value = res.data
+  }
 }
 
 const updateGroupTag = async () => {
@@ -518,6 +730,21 @@ const updateGroupTag = async () => {
     ElMessage.success('移动成功')
     groupVisible.value = false
     taskCurrentPage.value = 1
+    emit('update:taskTableData', 1)
+  }
+}
+
+const updateTag = async () => {
+  const params = {
+    task_id: currentLaneId.value,
+    tag_list: labelForm.name
+  }
+  let res = await updateGroupTagApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('标签更新成功')
+    taskCurrentPage.value = 1
+    labelVisible.value = false
+    cancelAddLabelDialog(addLabelRuleFormRef.value)
     emit('update:taskTableData', 1)
   }
 }
@@ -556,6 +783,34 @@ const resetMoveGroupForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.resetFields()
   groupVisible.value = false
+}
+
+const resetLabelForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  labelVisible.value = false
+}
+
+const submitLabelForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      updateTag()
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
+const handleCloseLabelDialog = () => {
+  cancelAddLabelDialog(addLabelRuleFormRef.value)
+}
+
+const cancelAddLabelDialog = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  colorSvgIndex.value = '#1f9aef'
+  labelDialogVisible.value = false
 }
 
 const handleRelease = async val => {
@@ -655,6 +910,7 @@ function reconnectWebSocket() {
 }
 
 onMounted(() => {
+  getPipelineTag()
   intervalId = setInterval(checkWebSocketStatus, 10000)
 })
 
@@ -667,6 +923,18 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .testTask-wrap {
   margin: 20px 0 0 20px;
+  .search-wrap {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    min-width: 25vw;
+    .el-select {
+      min-width: 300px;
+    }
+    .w-50 {
+      margin-left: 20px;
+    }
+  }
 
   .item-ip {
     cursor: pointer;
@@ -789,9 +1057,92 @@ onUnmounted(() => {
     }
   }
 }
+.tagStyle {
+  display: flex;
+  align-items: center;
+  .circle {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin-right: 20px;
+  }
+}
 </style>
 
 <style lang="scss">
+.colorSvgList {
+  display: flex;
+  .colorSvgList0,
+  .colorSvgList1,
+  .colorSvgList2,
+  .colorSvgList3,
+  .colorSvgList4,
+  .colorSvgList5,
+  .colorSvgList6 {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 20px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .tick {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #000;
+    transform: rotate(-45deg);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  .activeColorSvg:before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .activeColorSvg:hover:before,
+  .activeColorSvg:hover .tick {
+    opacity: 1;
+  }
+}
+
+.custom-option {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  .new-label-button {
+    padding-left: 0px;
+    padding-top: 0px;
+    font-size: 14px;
+    .el-icon {
+      font-size: 16px;
+    }
+  }
+}
+.labelDialog {
+  .el-dialog__title {
+    color: #575757;
+  }
+  .el-select {
+    width: 50%;
+  }
+  .el-select-dropdown__item {
+    padding-right: 0 !important;
+  }
+}
 .moveGroupDialog {
   padding: 0px !important;
   .el-select {
@@ -810,6 +1161,32 @@ onUnmounted(() => {
     padding: 15px 20px;
   }
   .moveGroupDialog-bottom {
+    text-align: end;
+    width: 100%;
+    margin-bottom: 0px;
+    div {
+      width: 100%;
+    }
+  }
+}
+.setLabelDialog {
+  padding: 0px !important;
+  .el-select {
+    width: 100%;
+  }
+  .setLabelDialog-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dae0e5;
+    font-size: 16px;
+    color: #575757;
+    padding: 15px 20px;
+  }
+  .demo-setLabelForm {
+    padding: 15px 20px;
+  }
+  .setLabelDialog-bottom {
     text-align: end;
     width: 100%;
     margin-bottom: 0px;
