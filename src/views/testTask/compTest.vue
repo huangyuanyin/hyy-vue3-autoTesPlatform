@@ -43,7 +43,7 @@ const getTaskInfo = async () => {
     page: taskCurrentPage.value,
     page_size: taskPageSize.value,
     keywords: keywords.value,
-    task_list: tag_id.value,
+    tag_list: tag_id.value,
     group_id: route.query.id
   }
   taskLoading.value = true

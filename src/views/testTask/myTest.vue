@@ -50,9 +50,8 @@ const getTaskInfo = async () => {
     page: taskCurrentPage.value,
     page_size: taskPageSize.value,
     keywords: keywords.value,
-    task_list: tag_id.value,
-    my_pipelines: activeName.value === 'first' ? 1 : 0,
-    my_favorite: activeName.value === 'first' ? undefined : 1
+    tag_list: tag_id.value,
+    my_pipelines: 1
   }
   taskLoading.value = true
   let res = await getTaskInfoApi(params)
@@ -69,7 +68,8 @@ const getFavoriteTask = async () => {
     page: taskCurrentPage.value,
     page_size: taskPageSize.value,
     keywords: favoritekKeywords.value,
-    task_list: tag_id.value
+    tag_list: tag_id.value,
+    my_favorite: 1
   }
   favoriteTaskLoading.value = true
   let res = await getFavoriteTaskApi(params)
