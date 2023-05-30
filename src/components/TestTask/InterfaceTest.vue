@@ -569,13 +569,14 @@ const getProductInfo = async (val, index, type?) => {
       deviceList.value[index].packageID = it.id
     }
   })
-  type === 'version'
-    ? netsignVersionList.value.map(item => {
-        if (item.name === val.netsignVersion) {
-          netsign_code_version_id.value = item.id
-        }
-      })
-    : ''
+  if (type === 'version') {
+    deviceList.value[0].branch = ''
+    netsignVersionList.value.map(item => {
+      if (item.name === val.netsignVersion) {
+        netsign_code_version_id.value = item.id
+      }
+    })
+  }
 }
 
 const handleFullscreen = (val, id) => {
