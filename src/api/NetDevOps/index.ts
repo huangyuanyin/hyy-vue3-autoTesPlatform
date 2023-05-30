@@ -290,6 +290,23 @@ export function getFavoriteTaskApi(params) {
   })
 }
 
+export function addFavoriteTaskApi(params) {
+  return request({
+    url: `/devops/favorite_task/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function deleteFavoriteTaskApi(id: number) {
+  return request({
+    url: `/devops/main_product_package/${id}`,
+    method: 'DELETE',
+    urlType: 'NetDevOps'
+  })
+}
+
 /* ---------------------------- /devops/pipeline_tag/ ---------------------------- */
 export function getPipelineTagApi(params) {
   return request({

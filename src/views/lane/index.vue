@@ -202,10 +202,10 @@ const getTaskInfo = async () => {
   const params = { task_id: route.query.id }
   const res = await getTaskInfoApi(params)
   if (res.code === 1000) {
-    taskName.value = res.data.name
-    laneTime.value = res.data.created_time
-    bus.emit('TriggerSettingData', res.data)
-    data.task_swim_lanes = res.data.task_swim_lanes
+    taskName.value = res.data[0].name
+    laneTime.value = res.data[0].created_time
+    bus.emit('TriggerSettingData', res.data[0])
+    data.task_swim_lanes = res.data[0].task_swim_lanes
   }
 }
 

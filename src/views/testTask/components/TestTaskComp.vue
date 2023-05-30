@@ -22,7 +22,15 @@
         />
       </div>
     </div>
-    <el-table :data="props.taskTableData" border style="width: 100%" stripe v-loading="props.taskLoading" max-height="70vh">
+    <el-table
+      :data="props.taskTableData"
+      border
+      style="width: 100%"
+      stripe
+      v-loading="props.taskLoading"
+      max-height="70vh"
+      class="taskTableData"
+    >
       <el-table-column prop="name" label="任务名称" width="250" align="center">
         <template #default="scope">
           <span class="item-ip" @click="toDetail('detail', scope.row)">{{ scope.row.name }}</span>
@@ -89,6 +97,12 @@
       <el-table-column prop="create_user" label="创建人" width="150" align="center" />
       <el-table-column fixed="right" label="操作" align="center" width="180">
         <template #default="item">
+          <el-tooltip class="box-item" effect="dark" content="收藏" placement="top">
+            <el-icon class="starIcon" @click.stop="handleStar(true, item.row)" v-if="!item.row.is_favorite"><StarFilled /></el-icon>
+          </el-tooltip>
+          <el-tooltip class="box-item" effect="dark" content="取消收藏" placement="top">
+            <el-icon class="noStarIcon" @click.stop="handleStar(false, item.row)" v-if="item.row.is_favorite"><StarFilled /></el-icon>
+          </el-tooltip>
           <el-popconfirm
             title="确定执行这个任务流水线?"
             trigger="click"
@@ -97,7 +111,7 @@
             @confirm="handleRunTask(item.row.id)"
           >
             <template #reference>
-              <el-button link type="warning" size="small" v-if="!item.row.draft && item.row.status !== 'in_progress'"> 执行 </el-button>
+              <el-icon class="starIcon hoverIcon" v-if="!item.row.draft && item.row.status !== 'in_progress'"><VideoPlay /></el-icon>
             </template>
           </el-popconfirm>
           <el-popconfirm
@@ -110,16 +124,18 @@
             @confirm="handleEndTask(item.row.id)"
           >
             <template #reference>
-              <el-button link style="color: #ff99ff" size="small" v-if="!item.row.draft && item.row.status === 'in_progress'">
-                取消
-              </el-button>
+              <el-icon class="starIcon hoverIcon" v-if="!item.row.draft && item.row.status === 'in_progress'"><VideoPause /></el-icon>
             </template>
           </el-popconfirm>
-          <el-button v-if="item.row.status !== 'in_progress'" link type="primary" size="small" @click="toDetail('edit', item.row)">
-            编辑
-          </el-button>
+          <el-tooltip class="box-item" effect="dark" content="编辑" placement="top">
+            <el-icon class="starIcon hoverIcon" v-if="item.row.status !== 'in_progress'" @click="toDetail('edit', item.row)">
+              <Edit />
+            </el-icon>
+          </el-tooltip>
           <el-dropdown trigger="click">
-            <el-button link type="info" size="small"> 更多 </el-button>
+            <!-- <el-tooltip class="box-item" effect="dark" content="更多" placement="top"> -->
+            <el-icon class="starIcon hoverIcon"><MoreFilled /></el-icon>
+            <!-- </el-tooltip> -->
             <template #dropdown>
               <el-dropdown-menu :hide-on-click="false">
                 <el-dropdown-item>
@@ -318,7 +334,12 @@ import {
   RemoveFilled,
   RefreshRight,
   Search,
-  CloseBold
+  CloseBold,
+  StarFilled,
+  Edit,
+  MoreFilled,
+  VideoPlay,
+  VideoPause
 } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
 import preview1 from '@/assets/preview1.png'
@@ -332,7 +353,9 @@ import {
   getPipelineGroupApi,
   updateGroupTagApi,
   addPipelineTagApi,
-  getPipelineTagApi
+  getPipelineTagApi,
+  addFavoriteTaskApi,
+  deleteFavoriteTaskApi
 } from '@/api/NetDevOps/index'
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -574,7 +597,7 @@ watch(
   () => props.keywords,
   (val, oldVal) => {
     if (val !== oldVal) {
-      searchKeywords.value = val
+      searchKeywords.value.keywords = val
     }
   }
 )
@@ -746,6 +769,27 @@ const updateTag = async () => {
     labelVisible.value = false
     cancelAddLabelDialog(addLabelRuleFormRef.value)
     emit('update:taskTableData', 1)
+  }
+}
+
+const handleStar = (type, val) => {
+  type ? addFavoriteTask(val.id) : deleteFavoriteTask(val.id)
+}
+
+const addFavoriteTask = async id => {
+  const params = {
+    task_id: id
+  }
+  let res = await addFavoriteTaskApi(params)
+  if (res.code === 1000) {
+    emit('update:taskTableData', taskCurrentPage.value)
+  }
+}
+
+const deleteFavoriteTask = async id => {
+  let res = await deleteFavoriteTaskApi(id)
+  if (res.code === 1000) {
+    emit('update:taskTableData', taskCurrentPage.value)
   }
 }
 
@@ -921,7 +965,31 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.noStarIcon,
+.starIcon {
+  font-size: 20px;
+  cursor: pointer;
+  width: 39px;
+}
+.noStarIcon {
+  color: #e6a23c;
+}
+.starIcon:hover {
+  color: #e6a23c;
+}
+.hoverIcon:hover {
+  color: #1b9aee;
+}
 .testTask-wrap {
+  .svg-icon {
+    font-size: 18px;
+    cursor: pointer;
+    // margin: 0 10px;
+    width: 39px;
+  }
+  .svg-icon:hover {
+    color: #1b9aee;
+  }
   margin: 20px 0 0 20px;
   .search-wrap {
     display: flex;
@@ -941,7 +1009,8 @@ onUnmounted(() => {
     color: #409eff;
   }
   .el-dropdown {
-    margin-left: 12px;
+    // margin-left: 12px;
+    width: 39px;
   }
   .el-pagination {
     display: flex;
@@ -1211,6 +1280,13 @@ onUnmounted(() => {
 .testTask-wrap {
   .el-button--small {
     --el-button-size: 2.313131vw;
+  }
+}
+.taskTableData {
+  .cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>
