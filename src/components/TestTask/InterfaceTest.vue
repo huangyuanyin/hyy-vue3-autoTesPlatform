@@ -169,7 +169,12 @@
               status-icon
             >
               <el-form-item label="适用版本" prop="netsignVersion" :required="true">
-                <el-select v-model="item.netsignVersion" placeholder="请选择适用版本" :key="index" @change="getProductInfo(item, index)">
+                <el-select
+                  v-model="item.netsignVersion"
+                  placeholder="请选择适用版本"
+                  :key="index"
+                  @change="getProductInfo(item, index, 'version')"
+                >
                   <el-option
                     :label="item.name"
                     :value="item.name"
@@ -179,7 +184,13 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="代码分支" prop="branch" :required="true">
-                <el-select v-model="item.branch" placeholder="请选择代码分支" :key="index" @change="getProductInfo(item, index)">
+                <el-select
+                  v-model="item.branch"
+                  placeholder="请选择代码分支"
+                  :key="index"
+                  @visible-change="getBranchList"
+                  @change="getProductInfo(item, index)"
+                >
                   <el-option :label="item.name" :value="item.name" v-for="(item, index) in branchList" :key="'branchList' + index" />
                 </el-select>
               </el-form-item>
@@ -237,6 +248,7 @@ const configFileDialog = ref(false)
 const configFileDialogTitle = ref('')
 const configFileDialogLog = ref('')
 const configId = ref(null)
+const netsign_code_version_id = ref(null)
 const ishowDrawer = ref(false)
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
@@ -272,7 +284,6 @@ watch(
   () => {
     ishowDrawer.value = props.taskDetailDrawer
     getNetsignVersion()
-    getNetsignBranch()
   }
 )
 
@@ -357,10 +368,9 @@ const getNetsignVersion = async () => {
   }
 }
 
-const getNetsignBranch = async () => {
+const getNetsignBranch = async id => {
   const params = {
-    page: 1,
-    page_size: 100
+    netsign_code_version_id: id
   }
   let res = await getNetsignBranchApi(params)
   if (res.code === 1000) {
@@ -542,13 +552,30 @@ const removeDuplicateObj = arr => {
   return arr
 }
 
-const getProductInfo = async (val, index) => {
+const getBranchList = val => {
+  if (val) {
+    if (deviceList.value[0].netsignVersion === '') {
+      ElMessage.error('请先选择适用版本！')
+    } else {
+      getNetsignBranch(netsign_code_version_id.value)
+    }
+  }
+}
+
+const getProductInfo = async (val, index, type?) => {
   selectProductList.value.map(it => {
     if (it.file_name === val.pendingVersion) {
       deviceList.value[index].packagePath = it.file_path
       deviceList.value[index].packageID = it.id
     }
   })
+  type === 'version'
+    ? netsignVersionList.value.map(item => {
+        if (item.name === val.netsignVersion) {
+          netsign_code_version_id.value = item.id
+        }
+      })
+    : ''
 }
 
 const handleFullscreen = (val, id) => {
