@@ -253,6 +253,9 @@ const cancelClick = async (done?: () => void) => {
       for (const item of deviceList.value) {
         item.deviceConfig.ifback = item.ifback
         item.deviceConfig.ifrs = item.ifrs
+        item.deviceConfigString = Object.entries(item.deviceConfig)
+          .map(([key, value]) => `${key}=${value}`)
+          .join('&')
       }
       // @ts-ignore
       deviceList.value.push(isPassVerification.value)

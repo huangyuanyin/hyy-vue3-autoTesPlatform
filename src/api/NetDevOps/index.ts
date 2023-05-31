@@ -301,7 +301,7 @@ export function addFavoriteTaskApi(params) {
 
 export function deleteFavoriteTaskApi(id: number) {
   return request({
-    url: `/devops/main_product_package/${id}`,
+    url: `/devops/favorite_task/${id}`,
     method: 'DELETE',
     urlType: 'NetDevOps'
   })

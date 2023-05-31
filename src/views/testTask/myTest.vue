@@ -72,7 +72,7 @@ const getFavoriteTask = async () => {
     my_favorite: 1
   }
   favoriteTaskLoading.value = true
-  let res = await getFavoriteTaskApi(params)
+  let res = await getTaskInfoApi(params)
   favoriteTaskLoading.value = false
   if (res.code === 1000) {
     favoriteTaskTableData.value = res.data || []

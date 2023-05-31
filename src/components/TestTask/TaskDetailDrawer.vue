@@ -351,6 +351,9 @@ const cancelClick = async (done?: () => void) => {
         item.deviceConfig.ifback = item.ifback
         item.deviceConfig.ifrs = item.ifrs
         item.deviceConfig.startMidwareType = item.startMidwareType
+        item.deviceConfigString = Object.entries(item.deviceConfig)
+          .map(([key, value]) => `${key}=${value}`)
+          .join('&')
       }
       deviceList.value.map(item => {
         if (item.deployType === 'baseline') {

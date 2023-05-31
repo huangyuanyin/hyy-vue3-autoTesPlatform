@@ -27,7 +27,8 @@ export const disposeList = {
         { label: '设备序列号：', value: '' },
         { label: '产品ID：', value: '' }
       ],
-      deviceConfig: {}
+      deviceConfig: {},
+      deviceConfigString: ''
     }
   ],
   netSignArrange: [
@@ -46,6 +47,7 @@ export const disposeList = {
       ],
       serverConfig: {},
       deviceConfig: {},
+      deviceConfigString: '',
       packagePath: '',
       packageName: ''
     }
