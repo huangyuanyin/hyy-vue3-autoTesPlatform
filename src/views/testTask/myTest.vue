@@ -97,7 +97,7 @@ const searchLane = (val: object) => {
 
 const updateTaskTableData = (val: number) => {
   taskCurrentPage.value = val
-  getTaskInfo()
+  activeName.value === 'my' ? getTaskInfo() : getFavoriteTask()
 }
 
 const handleClick = (tab: TabsPaneContext, event: Event) => {
