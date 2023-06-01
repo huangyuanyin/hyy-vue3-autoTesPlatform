@@ -208,9 +208,9 @@ const closeDialog = () => {
 }
 
 const cancel = (formEl: FormInstance | undefined) => {
-  uploadFile.value.clearFiles()
+  // uploadFile.value.clearFiles()
   uploadFileList.value = []
-  if (props.dialogTitle === '新增') {
+  if (props.dialogTitle.includes('新增')) {
     uploadFile.value.clearFiles()
   }
   ruleFormRef.value.resetFields()

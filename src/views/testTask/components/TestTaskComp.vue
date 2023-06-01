@@ -591,7 +591,7 @@ const tableData = [
   }
 ]
 let intervalId = ref(null)
-let socket = new WebSocket('ws://10.4.150.27:8021/ws/get_task_result/')
+let socket = new WebSocket(`ws://10.4.150.55:8021/ws/get_task_result/`)
 
 watch(
   () => props.keywords,
