@@ -62,6 +62,7 @@
               <li>-</li>
               <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[item.row.status]}`" placement="top">
                 <li>
+                  <el-icon v-if="item.row.status === 'wait_execute'" style="color: #000"><InfoFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
@@ -452,7 +453,8 @@ const groupRules = reactive<FormRules>({
   ]
 })
 const statusMap = {
-  not_start: '待运行',
+  wait_execute: '待执行',
+  not_start: '未运行',
   in_progress: '运行中',
   success: '运行成功',
   fail: '运行失败',
@@ -591,7 +593,7 @@ const tableData = [
   }
 ]
 let intervalId = ref(null)
-let socket = new WebSocket(`ws://10.4.150.55:8021/ws/get_task_result/`)
+let socket = new WebSocket(`ws://10.4.150.27:8023/ws/get_task_result/`)
 
 watch(
   () => props.keywords,
@@ -943,7 +945,7 @@ function checkWebSocketStatus() {
 }
 
 function reconnectWebSocket() {
-  socket = new WebSocket('ws://10.4.150.27:8021/ws/get_task_result/')
+  socket = new WebSocket('ws://10.4.150.27:8022/ws/get_task_result/')
   socket.onopen = function (event) {
     console.log('WebSocket连接已经重新连接')
   }
@@ -1100,6 +1102,11 @@ onUnmounted(() => {
           border: 2px solid #e6a23c !important;
           color: #e6a23c;
           background: #e6a23c;
+        }
+        .wait_execute {
+          border: 2px solid #000 !important;
+          color: #000;
+          background: #000;
         }
         .channel {
           border: 2px solid #909399 !important;

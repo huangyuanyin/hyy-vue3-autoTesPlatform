@@ -35,7 +35,6 @@ const code = ref('')
 watch(
   () => props.code,
   () => {
-    console.log(`output->props.code`, props.code)
     code.value = props.code
   },
   {

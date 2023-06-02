@@ -12,7 +12,11 @@
             <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[scope.row.status]}`" placement="top">
               <div class="pipe-status-item" v-if="scope.row.status === 'not_start'">
                 <el-icon style="color: #e6a23c"><InfoFilled /></el-icon>
-                待运行
+                未运行
+              </div>
+              <div class="pipe-status-item" v-if="scope.row.status === 'wait_execute'">
+                <el-icon style="color: #000"><InfoFilled /></el-icon>
+                待执行
               </div>
               <div class="pipe-status-item" v-if="scope.row.status === 'success'">
                 <el-icon style="color: #67c23a"><CircleCheckFilled /></el-icon>
@@ -100,7 +104,8 @@ const emit = defineEmits(['handleClick'])
 const route = useRoute()
 const tableData = ref([])
 const statusMap = {
-  not_start: '待运行',
+  wait_execute: '待执行',
+  not_start: '未运行',
   in_progress: '运行中',
   success: '运行成功',
   fail: '运行失败',
@@ -223,6 +228,11 @@ onMounted(() => {
           border: 2px solid #1b9aee !important;
           color: #1b9aee;
           background: #1b9aee;
+        }
+        .wait_execute {
+          border: 2px solid #000 !important;
+          color: #000;
+          background: #000;
         }
         .not_start {
           border: 2px solid #e6a23c !important;

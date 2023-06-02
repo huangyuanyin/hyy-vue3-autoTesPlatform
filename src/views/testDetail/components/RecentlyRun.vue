@@ -25,7 +25,7 @@
           <span>{{ props.runResult.created_time }}</span>
           <div class="info-divider"></div>
           <span class="info-label">持续时间</span>
-          <span>{{ props.runResult.duration_time }}s</span>
+          <span>{{ props.runResult.duration_time }}</span>
           <el-tooltip
             popper-class="box-item"
             effect="customized"
@@ -91,7 +91,7 @@
                           <div class="card-title">{{ it.name }}</div>
                           <div class="success-comp" v-if="it.status === 'success'">
                             <div class="card-info">
-                              <span>{{ it.duration_time }}s</span>
+                              <span>{{ it.duration_time }}</span>
                               <div class="operate">
                                 <div class="report">
                                   <!-- <el-icon><Document /></el-icon> <span>扫描报告</span> -->
@@ -144,7 +144,7 @@
                           </div>
                           <div class="fail-comp" v-if="it.status === 'fail'">
                             <div class="card-info">
-                              <span>{{ it.duration_time }}s</span>
+                              <span>{{ it.duration_time }}</span>
                               <div class="operate">
                                 <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon><span>日志</span>
@@ -160,10 +160,10 @@
                           </div>
                           <div class="run-comp" v-if="it.status === 'in_progress'">
                             <div class="card-info">
-                              <span>{{ it.duration_time }}s</span>
+                              <span>{{ it.duration_time }}</span>
                               <div class="operate">
                                 <div class="log" @click.stop="handleLog(it)">
-                                  <!-- <el-icon><Document /></el-icon> <span>日志</span> -->
+                                  <el-icon><Document /></el-icon> <span>日志</span>
                                 </div>
                               </div>
                             </div>
@@ -176,7 +176,7 @@
                           </div>
                           <div class="channel-comp" v-if="it.status === 'channel'">
                             <div class="card-info">
-                              <span>{{ it.duration_time }}s</span>
+                              <span>{{ it.duration_time }}</span>
                               <div class="operate">
                                 <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon> <span>日志</span>
@@ -264,7 +264,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 // @ts-ignore
@@ -346,11 +346,23 @@ const currentId = ref(null)
 const currentMethodsItem = ref(null)
 const currentMethodsId = ref(null)
 const currentMethodsType = ref(null)
+const currentLogVal = ref(null)
 
 watch(
   () => props.runResult,
   val => {
     groups.value = val.task_swim_lanes_history || []
+    if (currentLogVal.value && currentLogVal.value['status'] === 'in_progress' && logDialog.value) {
+      groups.value.map((item: any) => {
+        item.task_stages_history.map((it: any) => {
+          it.task_details_history.map((i: any) => {
+            if (i.id === currentLogVal.value['id']) {
+              log.value = i.task_execute_record[0].execute_record
+            }
+          })
+        })
+      })
+    }
   },
   {
     immediate: true
@@ -387,7 +399,10 @@ const handleChannel = (item: any) => {
 const handleLog = (item: any) => {
   logDialog.value = true
   logTitle.value = item.name
-  log.value = item.task_execute_record[0].execute_record
+  currentLogVal.value = item
+  if (item.status !== 'in_progress') {
+    log.value = item.task_execute_record[0].execute_record
+  }
 }
 
 const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {

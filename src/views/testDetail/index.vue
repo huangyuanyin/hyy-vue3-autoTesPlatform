@@ -17,6 +17,9 @@
             <el-tab-pane name="operationHistory" label="运行历史">
               <RunHistory @handleClick="handleClick" />
             </el-tab-pane>
+            <el-tab-pane :name="firstRecent" :label="'#' + firstRecent" v-if="isShowFirstRecent" closable>
+              <RecentlyRun :runResult="recentlyRunLog" />
+            </el-tab-pane>
             <el-tab-pane :name="item.name" :label="item.label" v-for="(item, index) in tabList" :key="'tabList' + index" closable>
               <keep-alive>
                 <component
@@ -40,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, markRaw } from 'vue'
+import { ref, reactive, onMounted, markRaw, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Action } from 'element-plus'
@@ -52,16 +55,21 @@ import RunHistory from './components/RunHistory.vue'
 const router = useRouter()
 const route = useRoute()
 const tabName = ref('recentlyRun')
+const isShowFirstRecent = ref(false)
+const firstRecent = ref('')
 const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
 const tabList = ref([])
 const recentlyRunLog = ref({})
 const runDetailLog = ref({})
+let intervalId = ref(null)
+let socket = new WebSocket(`ws://10.4.150.27:8023/ws/get_task_history/${route.query.id}`)
+let additionalSocket = null // 新的 WebSocket 实例
 
 const changeTab = (e: any) => {
   tabName.value = e
   if (!['recentlyRun', 'operationHistory'].includes(tabName.value)) {
     tabList.value.map(item => {
-      if (item.name === tabName.value) {
+      if (item.name === tabName.value && item.status !== 'in_progress') {
         getTaskHistoryDetail(item.id)
       }
     })
@@ -109,25 +117,38 @@ const handleClick = val => {
     })
     return
   }
-  tabName.value = val.execution_number
-  let isExist = tabList.value.some(item => item.name === val.execution_number)
-  if (isExist) {
-    return
+  if (val.status === 'in_progress') {
+    isShowFirstRecent.value = true
+    firstRecent.value = val.execution_number
+    tabName.value = firstRecent.value
+    // createAdditionalSocket(val.task_basic_info)
   } else {
-    tabList.value.push({
-      id: val.id,
-      name: val.execution_number,
-      label: '#' + String(val.execution_number)
-    })
-    tabList.value.map(item => {
-      item.component = markRaw(RecentlyRun)
-    })
+    tabName.value = val.execution_number
+    let isExist = tabList.value.some(item => item.name === val.execution_number)
+    if (isExist) {
+      return
+    } else {
+      tabList.value.push({
+        id: val.id,
+        name: val.execution_number,
+        label: '#' + String(val.execution_number),
+        status: val.status
+      })
+      tabList.value.map(item => {
+        item.component = markRaw(RecentlyRun)
+      })
+    }
+    getTaskHistoryDetail(val.id)
   }
-  getTaskHistoryDetail(val.id)
 }
 
 const removeTab = (e: any) => {
-  tabList.value = tabList.value.filter(item => item.name !== e)
+  const index = tabList.value.findIndex(item => item.name === e)
+  if (index === -1) {
+    isShowFirstRecent.value = false
+  } else {
+    tabList.value = tabList.value.filter(item => item.name !== e)
+  }
   if (tabName.value === e) {
     tabName.value = 'recentlyRun'
   }
@@ -151,12 +172,70 @@ const getTaskHistory = async () => {
   }
   let res = await getTaskHistoryApi(params)
   if (res.code === 1000) {
-    recentlyRunLog.value = res.data[0]
+    res.data[0].status !== 'in_progress' ? (recentlyRunLog.value = res.data[0]) : (intervalId = setInterval(checkWebSocketStatus, 1000))
   }
+}
+
+socket.onopen = function (event) {
+  console.log('WebSocket连接已经建立')
+}
+
+socket.onclose = function (event) {
+  console.log('WebSocket连接已经关闭')
+}
+
+socket.addEventListener('message', event => {
+  const message = JSON.parse(event.data)
+  if (message.code === 1000) {
+    recentlyRunLog.value = message.data
+  }
+})
+
+function checkWebSocketStatus() {
+  if (socket.readyState === WebSocket.CLOSED) {
+    console.log('WebSocket连接已经断开')
+    reconnectWebSocket()
+  } else {
+    console.log('WebSocket连接正常')
+  }
+}
+
+function reconnectWebSocket() {
+  socket = new WebSocket(`ws://10.4.150.27:8023/ws/get_task_history/${route.query.id}`)
+  socket.onopen = function (event) {
+    console.log('WebSocket连接已经重新连接')
+  }
+  socket.onclose = function (event) {
+    console.log('WebSocket连接已经关闭')
+    setTimeout(checkWebSocketStatus, 5000)
+  }
+}
+
+// 新增 WebSocket 连接
+function createAdditionalSocket(id) {
+  additionalSocket = new WebSocket(`ws://10.4.150.27:8023/ws/get_task_history/${id}`) // 根据需要设置 WebSocket 的 URL
+  additionalSocket.onopen = function (event) {
+    console.log('Additional WebSocket连接已经建立')
+  }
+  additionalSocket.onclose = function (event) {
+    console.log('Additional WebSocket连接已经关闭')
+  }
+  additionalSocket.addEventListener('message', event => {
+    const message = JSON.parse(event.data)
+    if (message.code === 1000) {
+      runDetailLog.value = message.data
+    }
+  })
 }
 
 onMounted(() => {
   getTaskHistory()
+})
+
+onUnmounted(() => {
+  socket.close()
+  additionalSocket === null ? '' : additionalSocket.close() // 关闭新的 WebSocket 连接
+  clearInterval(intervalId)
 })
 </script>
 
