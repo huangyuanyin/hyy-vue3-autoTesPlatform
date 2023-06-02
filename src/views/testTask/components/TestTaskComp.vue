@@ -133,16 +133,16 @@
               <Edit />
             </el-icon>
           </el-tooltip>
-          <el-dropdown trigger="click">
+          <el-dropdown trigger="click" @command="handleCommand">
             <!-- <el-tooltip class="box-item" effect="dark" content="更多" placement="top"> -->
             <el-icon class="starIcon hoverIcon"><MoreFilled /></el-icon>
             <!-- </el-tooltip> -->
             <template #dropdown>
               <el-dropdown-menu :hide-on-click="false">
-                <el-dropdown-item>
+                <el-dropdown-item :command="{ name: 'moveGroup', value: item.row }">
                   <el-popover placement="left" :width="300" trigger="click" popper-class="moveGroupDialog" :visible="groupVisible">
                     <template #reference>
-                      <el-button link type="info" size="small" @click="handleMoveGroup(item.row)"> 移动分组 </el-button>
+                      <el-button link type="info" size="small"> 移动分组 </el-button>
                     </template>
                     <div class="moveGroupDialog-top">
                       <span>
@@ -175,10 +175,10 @@
                     </el-form>
                   </el-popover>
                 </el-dropdown-item>
-                <el-dropdown-item>
+                <el-dropdown-item :command="{ name: 'setLabel', value: item.row }">
                   <el-popover placement="left" :width="300" trigger="click" popper-class="setLabelDialog" :visible="labelVisible">
                     <template #reference>
-                      <el-button link type="info" size="small" @click="toSetLabel(item.row)"> 设置标签 </el-button>
+                      <el-button link type="info" size="small"> 设置标签 </el-button>
                     </template>
                     <div class="setLabelDialog-top">
                       <span>
@@ -230,21 +230,13 @@
                     </el-form>
                   </el-popover>
                 </el-dropdown-item>
-                <el-dropdown-item v-if="item.row.run_count != 0">
+                <el-dropdown-item :command="{ name: 'detail', value: item.row }" v-if="item.row.run_count != 0">
                   <el-button link type="success" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
                 </el-dropdown-item>
-                <el-dropdown-item>
-                  <el-button
-                    :disabled="item.row.status === 'in_progress'"
-                    link
-                    type="primary"
-                    size="small"
-                    @click="handleRelease(item.row)"
-                  >
-                    释放
-                  </el-button>
+                <el-dropdown-item :command="{ name: 'release', value: item.row }">
+                  <el-button :disabled="item.row.status === 'in_progress'" link type="primary" size="small"> 释放 </el-button>
                 </el-dropdown-item>
-                <el-dropdown-item>
+                <el-dropdown-item :command="{ name: 'delete', value: item.row }">
                   <el-button :disabled="item.row.status === 'in_progress'" link type="danger" size="small" @click="handleDelete(item.row)">
                     删除
                   </el-button>
@@ -603,6 +595,29 @@ watch(
     }
   }
 )
+
+const handleCommand = item => {
+  let tmp = item.value
+  switch (item.name) {
+    case 'moveGroup':
+      handleMoveGroup(tmp)
+      break
+    case 'setLabel':
+      toSetLabel(tmp)
+      break
+    case 'detail':
+      toDetail('detail', tmp)
+      break
+    case 'release':
+      handleRelease(tmp)
+      break
+    case 'delete':
+      handleDelete(tmp)
+      break
+    default:
+      break
+  }
+}
 
 const searchLane = () => {
   taskCurrentPage.value = 1
