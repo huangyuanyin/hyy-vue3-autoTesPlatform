@@ -107,7 +107,6 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
 }
 
 onMounted(() => {
-  getFavoriteTask()
   getTaskInfo()
 })
 </script>

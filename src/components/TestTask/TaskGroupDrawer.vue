@@ -153,6 +153,11 @@ const deployList = ref([
     plugin: 'netSignArrange',
     name: 'NetSign项目部署',
     desc: '这是一段NetSign项目部署'
+  },
+  {
+    plugin: 'dockerDeployment',
+    name: 'Docker部署',
+    desc: '这是一段Docker部署'
   }
 ])
 const orderList = ref([

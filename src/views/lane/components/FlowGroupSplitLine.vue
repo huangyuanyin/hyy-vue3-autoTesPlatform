@@ -49,6 +49,9 @@ const changeDrawer = (value: any) => {
     if (value[1].indexOf('测试') !== -1) {
       name = '测试'
     }
+    if (value[1].indexOf('Docker部署') !== -1) {
+      name = 'Docker部署'
+    }
     emit('add-stage', {
       name,
       task_stages: [
@@ -58,7 +61,7 @@ const changeDrawer = (value: any) => {
               plugin: value[2],
               name: value[1],
               dispose: disposeList2[value[2]],
-              is_pass: ['netSignPrepare', 'netSignArrange', 'interfaceTest'].includes(value[2]) ? false : true
+              is_pass: ['netSignPrepare', 'netSignArrange', 'interfaceTest', 'dockerDeployment'].includes(value[2]) ? false : true
             }
           ]
         }

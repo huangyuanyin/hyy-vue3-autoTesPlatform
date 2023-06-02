@@ -229,7 +229,7 @@ function createAdditionalSocket(id) {
 }
 
 onMounted(() => {
-  getTaskHistory()
+  // getTaskHistory()
 })
 
 onUnmounted(() => {

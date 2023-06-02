@@ -88,6 +88,13 @@
     @closeDrawer="closeDrawer"
     @deleteTask="handleRemoveParallel(taskId)"
   />
+  <DockerDeployment
+    :taskDetailName="taskDetailName"
+    :taskDetailInfo="taskDetailInfo"
+    :taskDetailDrawer="dockerDeployment"
+    @closeDrawer="closeDrawer"
+    @deleteTask="handleRemoveParallel(taskId)"
+  />
 
   <TaskGroupDrawer :drawer="drawer" @changeDrawer="changeDrawer" />
 </template>
@@ -98,6 +105,7 @@ import TaskDetailDrawer from '@/components/TestTask/TaskDetailDrawer.vue'
 import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 import ExecuteCommand from '@/components/TestTask/ExecuteCommand.vue'
 import InterfaceTest from '@/components/TestTask/InterfaceTest.vue'
+import DockerDeployment from '@/components/TestTask/DockerDeployment.vue'
 import { ElMessage } from 'element-plus'
 import { RemoveFilled, WarningFilled } from '@element-plus/icons-vue'
 import { disposeList } from '../data'
@@ -123,6 +131,7 @@ const taskDetailInfo = ref([])
 const NetSignProjectDeployDrawer = ref(false)
 const interfaceTestDrawer = ref(false)
 const executeCommandDrawer = ref(false)
+const dockerDeployment = ref(false)
 const taskDetailName = ref('')
 const taskId = ref('')
 const stageID = ref(null)
@@ -177,6 +186,10 @@ const openTaskDetailDrawer = (item: any, id: any) => {
     case 'executeCommand':
       executeCommandDrawer.value = true
       break
+    case 'dockerDeployment':
+      dockerDeployment.value = true
+      taskDetailInfo.value = item.dispose
+      break
   }
   taskId.value = id
   taskDetailName.value = item.name
@@ -192,6 +205,7 @@ const closeDrawer = (value?: any) => {
   NetSignProjectDeployDrawer.value = value[0]
   interfaceTestDrawer.value = value[0]
   executeCommandDrawer.value = value[0]
+  dockerDeployment.value = value[0]
 }
 
 const handleCommand = (command: string | number | object, id: string) => {
