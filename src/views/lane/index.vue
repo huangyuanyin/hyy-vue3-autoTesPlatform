@@ -25,7 +25,13 @@
       </el-row>
     </div>
     <div class="lan-container">
-      <basicInformation v-show="tabName === 'basicInformation'" @submitName="submitName" :taskName="taskName" />
+      <basicInformation
+        v-show="tabName === 'basicInformation'"
+        @submitName="submitName"
+        @submitGroup="submitGroup"
+        :taskName="taskName"
+        :taskGroup="taskGroup"
+      />
       <Lane v-show="tabName === 'processConfig'" :flows="data.task_swim_lanes" />
       <TriggerSetting v-show="tabName === 'triggerSetting'" @formLabelAlign="formLabelAlign" />
     </div>
@@ -47,11 +53,13 @@ const route = useRoute()
 const tabName = ref('processConfig')
 const isDetail = ref(true)
 const taskName = ref('')
+const taskGroup = ref('')
 const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
 const oldFlows = ref('')
 
 const data = reactive({
   name: '',
+  group_id: '',
   draft: '',
   task_swim_lanes: [
     // {
@@ -131,7 +139,7 @@ const addTaskInfo = async () => {
     }
   })
   // @ts-ignore
-  params.group_id = route.query.groupId ? Number(route.query.groupId) : undefined
+  params.group_id = data.group_id
   const res = await addTaskInfoApi(params)
   if (res.code === 1000) {
     ElMessage.success('任务创建成功')
@@ -168,7 +176,7 @@ const editTaskInfo = async () => {
     }
   })
   // @ts-ignore
-  params.group_id = route.query.groupId ? Number(route.query.groupId) : undefined
+  params.group_id = data.group_id
   console.log(`output->修改流水线data`, data)
   console.log(`output->修改流水线params`, params)
 
@@ -188,6 +196,10 @@ const submitName = (e: any) => {
   data.name = e
 }
 
+const submitGroup = (e: any) => {
+  data.group_id = e
+}
+
 const formLabelAlign = (e: any) => {
   // 循环e中的每一个值，循环data，将值赋给data
   for (const key in e) {
@@ -203,6 +215,7 @@ const getTaskInfo = async () => {
   const res = await getTaskInfoApi(params)
   if (res.code === 1000) {
     taskName.value = res.data[0].name
+    taskGroup.value = res.data[0].group.name
     laneTime.value = res.data[0].created_time
     bus.emit('TriggerSettingData', res.data[0])
     data.task_swim_lanes = res.data[0].task_swim_lanes

@@ -269,9 +269,7 @@
                   <el-button :disabled="item.row.status === 'in_progress'" link type="primary" size="small"> 释放 </el-button>
                 </el-dropdown-item>
                 <el-dropdown-item :command="{ name: 'delete', value: item.row }">
-                  <el-button :disabled="item.row.status === 'in_progress'" link type="danger" size="small" @click="handleDelete(item.row)">
-                    删除
-                  </el-button>
+                  <el-button :disabled="item.row.status === 'in_progress'" link type="danger" size="small"> 删除 </el-button>
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -657,8 +655,6 @@ const searchLane = () => {
   emit('searchLane', searchKeywords.value)
 }
 
-const getLabelList = () => {}
-
 const handleAdd = (type: String, index?: number, row?: User) => {
   const routePath = route.path.split('/')[1] === 'compTest'
   taskTemplateDialogVisible.value = false
@@ -732,10 +728,10 @@ const handleDelete = async val => {
       }
     })
     .catch(() => {
-      // ElMessage({
-      //   type: 'info',
-      //   message: '取消删除'
-      // })
+      ElMessage({
+        type: 'info',
+        message: '取消删除'
+      })
     })
 }
 

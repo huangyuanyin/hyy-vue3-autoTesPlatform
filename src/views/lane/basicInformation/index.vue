@@ -24,15 +24,14 @@
             />
           </el-form-item>
           <el-form-item label="标签" prop="region">
-            <el-select v-model="basicInformationForm.group_id" placeholder="待联调" :disabled="true">
+            <el-select v-model="basicInformationForm.tag_list" placeholder="待联调" :disabled="true">
               <el-option label="Zone one" value="shanghai" />
               <el-option label="Zone two" value="beijing" />
             </el-select>
           </el-form-item>
           <el-form-item label="分组" prop="region">
-            <el-select v-model="basicInformationForm.group_id" placeholder="待联调" :disabled="true">
-              <el-option label="Zone one" value="shanghai" />
-              <el-option label="Zone two" value="beijing" />
+            <el-select v-model="basicInformationForm.group_id" placeholder="请选择分组" @change="selectGroup">
+              <el-option :label="item.name" :value="item.name" v-for="(item, index) in groupList" :key="'groupList' + index" />
             </el-select>
           </el-form-item>
           <el-form-item>
@@ -60,26 +59,32 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, watch, toRefs } from 'vue'
+import { reactive, ref, watch, toRefs, onMounted } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
-import { deleteTaskInfoApi } from '@/api/NetDevOps'
+import { deleteTaskInfoApi, getPipelineGroupApi } from '@/api/NetDevOps'
 
-const emit = defineEmits(['submitName'])
+const emit = defineEmits(['submitName', 'submitGroup'])
 const props = defineProps({
   taskName: {
     type: String,
     default: ''
+  },
+  taskGroup: {
+    type: String,
+    default: ''
   }
 })
-const { taskName } = toRefs(props)
+const { taskName, taskGroup } = toRefs(props)
 
 const route = useRoute()
 const router = useRouter()
 const isDisabled = route.query.type === 'detail' ? true : false
 const dialogVisible = ref(false)
+const groupList = ref([])
 const basicInformationForm = reactive({
-  name: ''
+  name: '',
+  group_id: ''
 })
 const basicInformationFormRef = ref<FormInstance>()
 const basicInformationRules = reactive<FormRules>({
@@ -97,13 +102,32 @@ watch(
   { immediate: true }
 )
 
+watch(
+  taskGroup,
+  val => {
+    if (taskGroup) {
+      basicInformationForm.group_id = val
+      groupList.value.forEach(item => {
+        if (item.name === val) {
+          emit('submitGroup', item.id)
+        }
+      })
+    }
+  },
+  { immediate: true }
+)
+
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
-    if (valid) {
-      emit('submitName', basicInformationForm.name)
-    } else {
-      emit('submitName', basicInformationForm.name)
+    emit('submitName', basicInformationForm.name)
+  })
+}
+
+const selectGroup = val => {
+  groupList.value.forEach(item => {
+    if (item.name === val) {
+      emit('submitGroup', item.id)
     }
   })
 }
@@ -125,6 +149,42 @@ const deleteTaskInfo = async id => {
     router.go(-1)
   }
 }
+
+const getPipelineGroup = async () => {
+  groupList.value = [
+    {
+      name: '未分组',
+      id: -1
+    }
+  ]
+  const params = {
+    page: 1,
+    page_size: 10
+  }
+  let res = await getPipelineGroupApi(params)
+  if (res.code === 1000) {
+    if (res.data.length !== 0) {
+      groupList.value.splice(0, 0, ...res.data)
+    }
+  }
+}
+
+onMounted(async () => {
+  await getPipelineGroup()
+  if (route.path === '/testTask/addTestTask') {
+    if (route.query.groupId) {
+      groupList.value.forEach(item => {
+        if (item.id === Number(route.query.groupId)) {
+          basicInformationForm.group_id = item.name
+          emit('submitGroup', item.id)
+        }
+      })
+    } else {
+      basicInformationForm.group_id = '未分组'
+      emit('submitGroup', -1)
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -136,6 +196,14 @@ const deleteTaskInfo = async id => {
   box-sizing: border-box;
   :deep(.el-card__body) {
     padding: 0px;
+  }
+  .basicInformation-ruleForm {
+    :deep(.el-input) {
+      width: 30vw;
+    }
+    :deep(.el-button) {
+      margin-top: 10px;
+    }
   }
   .el-card {
     width: 80%;
