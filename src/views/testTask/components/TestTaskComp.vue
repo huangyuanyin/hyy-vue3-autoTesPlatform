@@ -77,62 +77,89 @@
       <el-table-column label="最近运行阶段" align="center" prop="pipeHistory" min-width="350">
         <template #default="scope">
           <div class="pipe-history">
-            <el-tooltip
-              v-for="(item, index) in scope.row.run_phase"
-              :key="'run_phase' + index"
-              :content="`${item.name}：${statusMap[item.status]}`"
-              popper-class="box-item"
-              effect="customized"
-              placement="top"
-            >
-              <div class="group-status">
-                <div class="content">
-                  <div class="title">{{ item.name }}</div>
-                  <div class="point" :class="item.status"></div>
+            <div v-for="(item, index) in scope.row.run_phase" :key="'run_phase' + index">
+              <el-tooltip :content="`${item.name}：${statusMap[item.status]}`" popper-class="box-item" effect="customized" placement="top">
+                <div class="group-status">
+                  <div class="content">
+                    <div class="title">{{ item.name }}</div>
+                    <div class="point" :class="item.status"></div>
+                  </div>
                 </div>
-              </div>
-            </el-tooltip>
+              </el-tooltip>
+            </div>
           </div>
         </template>
       </el-table-column>
       <el-table-column prop="create_user" label="创建人" width="150" align="center" />
       <el-table-column fixed="right" label="操作" align="center" width="180">
         <template #default="item">
-          <el-tooltip class="box-item" effect="dark" content="收藏" placement="top">
-            <el-icon class="starIcon" @click.stop="handleStar(true, item.row)" v-if="!item.row.is_favorite"><StarFilled /></el-icon>
-          </el-tooltip>
-          <el-tooltip class="box-item" effect="dark" content="取消收藏" placement="top">
-            <el-icon class="noStarIcon" @click.stop="handleStar(false, item.row)" v-if="item.row.is_favorite"><StarFilled /></el-icon>
-          </el-tooltip>
-          <el-popconfirm
-            title="确定执行这个任务流水线?"
-            trigger="click"
-            confirm-button-text="确认执行"
-            cancel-button-text="取消"
-            @confirm="handleRunTask(item.row.id)"
-          >
-            <template #reference>
-              <el-icon class="starIcon hoverIcon" v-if="!item.row.draft && item.row.status !== 'in_progress'"><VideoPlay /></el-icon>
-            </template>
-          </el-popconfirm>
-          <el-popconfirm
-            title="确定取消运行这个任务流水线?"
-            trigger="click"
-            :icon="WarningFilled"
-            icon-color="#F56C6C"
-            confirm-button-text="确认取消"
-            cancel-button-text="取消"
-            @confirm="handleEndTask(item.row.id)"
-          >
-            <template #reference>
-              <el-icon class="starIcon hoverIcon" v-if="!item.row.draft && item.row.status === 'in_progress'"><VideoPause /></el-icon>
-            </template>
-          </el-popconfirm>
-          <el-tooltip class="box-item" effect="dark" content="编辑" placement="top">
-            <el-icon class="starIcon hoverIcon" v-if="item.row.status !== 'in_progress'" @click="toDetail('edit', item.row)">
-              <Edit />
-            </el-icon>
-          </el-tooltip>
+          <div>
+            <el-tooltip class="box-item" effect="dark" content="收藏" placement="top">
+              <div>
+                <el-icon class="starIcon" @click.stop="handleStar(true, item.row)" v-if="!item.row.is_favorite"><StarFilled /></el-icon>
+              </div>
+            </el-tooltip>
+          </div>
+          <div>
+            <el-tooltip class="box-item" effect="dark" content="取消收藏" placement="top">
+              <div>
+                <el-icon class="noStarIcon" @click.stop="handleStar(false, item.row)" v-if="item.row.is_favorite"><StarFilled /></el-icon>
+              </div>
+            </el-tooltip>
+          </div>
+          <div>
+            <el-popconfirm
+              title="确定执行这个任务流水线?"
+              trigger="click"
+              confirm-button-text="确认执行"
+              cancel-button-text="取消"
+              @confirm="handleRunTask(item.row.id)"
+            >
+              <template #reference>
+                <div>
+                  <el-tooltip class="box-item" effect="dark" content="执行" placement="top">
+                    <div>
+                      <el-icon class="starIcon hoverIcon" v-if="!item.row.draft && item.row.status !== 'in_progress'"
+                        ><VideoPlay
+                      /></el-icon>
+                    </div>
+                  </el-tooltip>
+                </div>
+              </template>
+            </el-popconfirm>
+          </div>
+          <div>
+            <el-popconfirm
+              title="确定取消运行这个任务流水线?"
+              trigger="click"
+              :icon="WarningFilled"
+              icon-color="#F56C6C"
+              confirm-button-text="确认取消"
+              cancel-button-text="取消"
+              @confirm="handleEndTask(item.row.id)"
+            >
+              <template #reference>
+                <div style="display: flex; align-item: center">
+                  <el-tooltip class="box-item" effect="dark" content="取消运行" placement="top">
+                    <div>
+                      <el-icon class="starIcon hoverIcon" v-if="!item.row.draft && item.row.status === 'in_progress'"
+                        ><VideoPause
+                      /></el-icon>
+                    </div>
+                  </el-tooltip>
+                </div>
+              </template>
+            </el-popconfirm>
+          </div>
+          <div>
+            <el-tooltip class="box-item" effect="dark" content="编辑" placement="top">
+              <div>
+                <el-icon class="starIcon hoverIcon" v-if="item.row.status !== 'in_progress'" @click="toDetail('edit', item.row)">
+                  <Edit />
+                </el-icon>
+              </div>
+            </el-tooltip>
+          </div>
           <el-dropdown trigger="click" @command="handleCommand">
             <!-- <el-tooltip class="box-item" effect="dark" content="更多" placement="top"> -->
             <el-icon class="starIcon hoverIcon"><MoreFilled /></el-icon>
@@ -700,10 +727,10 @@ const handleDelete = async val => {
       }
     })
     .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: '取消删除'
-      })
+      // ElMessage({
+      //   type: 'info',
+      //   message: '取消删除'
+      // })
     })
 }
 
@@ -889,10 +916,10 @@ const handleRelease = async val => {
       }
     })
     .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: '取消释放'
-      })
+      // ElMessage({
+      //   type: 'info',
+      //   message: '取消释放'
+      // })
     })
 }
 
@@ -982,6 +1009,9 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+:deep(.el-tooltip__trigger) {
+  display: flex;
+}
 .noStarIcon,
 .starIcon {
   font-size: 20px;

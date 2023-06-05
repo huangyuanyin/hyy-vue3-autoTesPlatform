@@ -172,7 +172,10 @@ const getTaskHistory = async () => {
   }
   let res = await getTaskHistoryApi(params)
   if (res.code === 1000) {
-    res.data[0].status !== 'in_progress' ? (recentlyRunLog.value = res.data[0]) : (intervalId = setInterval(checkWebSocketStatus, 1000))
+    recentlyRunLog.value = res.data[0]
+    if (res.data[0].status === 'in_progress') {
+      intervalId = setInterval(checkWebSocketStatus, 1000)
+    }
   }
 }
 
@@ -229,7 +232,7 @@ function createAdditionalSocket(id) {
 }
 
 onMounted(() => {
-  // getTaskHistory()
+  getTaskHistory()
 })
 
 onUnmounted(() => {
