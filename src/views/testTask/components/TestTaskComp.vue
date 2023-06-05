@@ -77,16 +77,21 @@
       <el-table-column label="最近运行阶段" align="center" prop="pipeHistory" min-width="350">
         <template #default="scope">
           <div class="pipe-history">
-            <div v-for="(item, index) in scope.row.run_phase" :key="'run_phase' + index">
-              <el-tooltip :content="`${item.name}：${statusMap[item.status]}`" popper-class="box-item" effect="customized" placement="top">
-                <div class="group-status">
-                  <div class="content">
-                    <div class="title">{{ item.name }}</div>
-                    <div class="point" :class="item.status"></div>
-                  </div>
+            <el-tooltip
+              v-for="(item, index) in scope.row.run_phase"
+              :key="'run_phase' + index"
+              :content="`${item.name}：${statusMap[item.status]}`"
+              popper-class="box-item"
+              effect="customized"
+              placement="top"
+            >
+              <div class="group-status">
+                <div class="content">
+                  <div class="title">{{ item.name }}</div>
+                  <div class="point" :class="item.status"></div>
                 </div>
-              </el-tooltip>
-            </div>
+              </div>
+            </el-tooltip>
           </div>
         </template>
       </el-table-column>
