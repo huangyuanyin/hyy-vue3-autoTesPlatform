@@ -1,5 +1,5 @@
 <template>
-  <div class="add-stage-container">
+  <div class="add-stage-container" v-if="route.path !== '/testTask/lookTestTaskConfig'">
     <div class="add-stage ignore-add-stage" @mouseenter="isExitHover = true" @mouseleave="isExitHover = false" @click="handleAddParaller">
       <svg-icon v-if="!isExitHover" iconName="icon-jiahao"></svg-icon>
       <svg-icon v-else="isExitHover" iconName="icon-jiahao-copy-copy"></svg-icon>
@@ -14,6 +14,7 @@
 import { ref } from 'vue'
 import TaskGroupDrawer from '@/components/TestTask/TaskGroupDrawer.vue'
 import { disposeList } from '../data'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
   stages: {
@@ -22,6 +23,7 @@ const props = defineProps({
   }
 })
 
+const route = useRoute()
 const isExitHover = ref(false)
 const drawer = ref(false)
 

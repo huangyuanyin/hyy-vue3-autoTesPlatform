@@ -286,7 +286,11 @@ onMounted(async () => {
 // 判断是否有未保存的流水线
 const judegeSave = callback => {
   console.log(`output->`, JSON.stringify(data.task_swim_lanes), oldFlows.value)
-  if (data.task_swim_lanes.length === 0 || JSON.stringify(data.task_swim_lanes) === oldFlows.value) {
+  if (
+    data.task_swim_lanes.length === 0 ||
+    JSON.stringify(data.task_swim_lanes) === oldFlows.value ||
+    route.path === '/testTask/lookTestTaskConfig'
+  ) {
     callback()
   } else {
     ElMessageBox.confirm('当前有未保存的流水线，是否离开？', '提示', {

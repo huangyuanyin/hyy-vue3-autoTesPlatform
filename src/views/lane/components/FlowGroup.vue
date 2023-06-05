@@ -1,5 +1,9 @@
 <template>
-  <div class="flow-group" @mouseenter="isShowIcon = true" @mouseleave="isShowIcon = false">
+  <div
+    class="flow-group"
+    @mouseenter="route.path === '/testTask/lookTestTaskConfig' ? '' : (isShowIcon = true)"
+    @mouseleave="isShowIcon = false"
+  >
     <div class="group-head">
       <div class="name">
         <span @dblclick="handleEditor" v-if="!data.isEditor">{{ props.flow.name }}</span>
@@ -39,6 +43,7 @@ import Stage from './Stage.vue'
 import AddStage from './AddStage.vue'
 import DeleteGroupDialog from '@/components/TestTask/DeleteGroupDialog.vue'
 import { ElMessage } from 'element-plus'
+import { useRoute } from 'vue-router'
 
 const emit = defineEmits(['removeFlow'])
 const props = defineProps({
@@ -53,7 +58,7 @@ const data = reactive({
   value: props.flow.name
 })
 
-onMounted(() => {})
+const route = useRoute()
 const isShowIcon = ref(false)
 const isShowDeleteGroupDialog = ref(false)
 const flowName = ref('')
