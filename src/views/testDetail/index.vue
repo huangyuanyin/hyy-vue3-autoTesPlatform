@@ -15,7 +15,7 @@
               <RecentlyRun :runResult="recentlyRunLog" />
             </el-tab-pane>
             <el-tab-pane name="operationHistory" label="运行历史">
-              <RunHistory @handleClick="handleClick" />
+              <RunHistory @handleClick="handleClick" :isUpdateHistory="isUpdateHistory" />
             </el-tab-pane>
             <el-tab-pane :name="firstRecent" :label="'#' + firstRecent" v-if="isShowFirstRecent" closable>
               <RecentlyRun :runResult="recentlyRunLog" />
@@ -63,7 +63,8 @@ const tabList = ref([])
 const recentlyRunLog = ref({})
 const runDetailLog = ref({})
 let intervalId = ref(null)
-let socket = new WebSocket(`ws://10.4.150.27:8023/ws/get_task_history/${route.query.id}`)
+const isUpdateHistory = ref(false)
+let socket = new WebSocket(`ws://10.4.150.55:8023/ws/get_task_history/${route.query.id}`)
 let additionalSocket = null // 新的 WebSocket 实例
 
 const changeTab = (e: any) => {
@@ -81,6 +82,8 @@ const handleRunTask = async id => {
   let res = await runTaskInfoApi({ task_id: id })
   if (res.code === 1000) {
     ElMessage.success('任务开始执行！')
+    getTaskHistory()
+    isUpdateHistory.value = true
   }
 }
 
@@ -214,7 +217,7 @@ function checkWebSocketStatus() {
 }
 
 function reconnectWebSocket() {
-  socket = new WebSocket(`ws://10.4.150.27:8023/ws/get_task_history/${route.query.id}`)
+  socket = new WebSocket(`ws://10.4.150.55:8023/ws/get_task_history/${route.query.id}`)
   socket.onopen = function (event) {
     console.log('WebSocket连接已经重新连接')
   }
@@ -226,7 +229,7 @@ function reconnectWebSocket() {
 
 // 新增 WebSocket 连接
 function createAdditionalSocket(id) {
-  additionalSocket = new WebSocket(`ws://10.4.150.27:8023/ws/get_task_history/${id}`) // 根据需要设置 WebSocket 的 URL
+  additionalSocket = new WebSocket(`ws://10.4.150.55:8023/ws/get_task_history/${id}`) // 根据需要设置 WebSocket 的 URL
   additionalSocket.onopen = function (event) {
     console.log('Additional WebSocket连接已经建立')
   }
@@ -249,6 +252,7 @@ onUnmounted(() => {
   socket.close()
   additionalSocket === null ? '' : additionalSocket.close() // 关闭新的 WebSocket 连接
   clearInterval(intervalId)
+  isUpdateHistory.value = false
 })
 </script>
 

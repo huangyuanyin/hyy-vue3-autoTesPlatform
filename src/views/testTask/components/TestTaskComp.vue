@@ -265,7 +265,7 @@
                 <el-dropdown-item :command="{ name: 'detail', value: item.row }" v-if="item.row.run_count != 0">
                   <el-button link type="success" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ name: 'release', value: item.row }">
+                <el-dropdown-item :command="{ name: 'release', value: item.row }" v-if="item.row.status !== 'in_progress'">
                   <el-button :disabled="item.row.status === 'in_progress'" link type="primary" size="small"> 释放 </el-button>
                 </el-dropdown-item>
                 <el-dropdown-item :command="{ name: 'delete', value: item.row }">
@@ -615,7 +615,7 @@ const tableData = [
   }
 ]
 let intervalId = ref(null)
-let socket = new WebSocket(`ws://10.4.150.27:8023/ws/get_task_result/`)
+let socket = new WebSocket(`ws://10.4.150.55:8023/ws/get_task_result/`)
 
 watch(
   () => props.keywords,

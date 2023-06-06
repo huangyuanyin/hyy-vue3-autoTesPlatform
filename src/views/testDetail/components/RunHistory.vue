@@ -86,7 +86,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { getTaskHistoryApi } from '@/api/NetDevOps/index'
 import {
@@ -98,6 +98,19 @@ import {
   RemoveFilled,
   RefreshRight
 } from '@element-plus/icons-vue'
+
+const props = defineProps({
+  isUpdateHistory: {
+    type: Boolean,
+    default: false
+  }
+})
+
+watchEffect(() => {
+  if (props.isUpdateHistory) {
+    getTaskHistory()
+  }
+})
 
 const emit = defineEmits(['handleClick'])
 

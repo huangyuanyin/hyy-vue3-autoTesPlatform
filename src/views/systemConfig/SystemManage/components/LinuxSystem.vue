@@ -304,7 +304,11 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      LinuxTitle.value === '添加Linux设备' ? addDevice() : editDevice()
+      LinuxTitle.value === 'Linux设备详情'
+        ? resetForm(ruleFormRef.value)
+        : LinuxTitle.value === '添加Linux设备'
+        ? addDevice()
+        : editDevice()
     } else {
       // ElMessage.warning('有待完善的表单输入项')
     }
@@ -400,6 +404,7 @@ const deviceBorrowing = async (status, val) => {
   form['device_manage_id'] = val.id
   form['using'] = status
   const res = await editDeviceApi(form)
+  resetForm(ruleFormRef.value)
   if (res.code === 1000) {
     status === 1 ? ElMessage.success('设备借用成功！') : ElMessage.success('设备归还成功！')
     systemCurrentPage.value = 1
