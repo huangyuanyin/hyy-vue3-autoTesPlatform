@@ -12,9 +12,9 @@
 
 <script lang="ts" setup>
 import { Codemirror } from 'vue-codemirror'
-// import { javascript } from '@codemirror/lang-javascript'
-import { python } from '@codemirror/lang-python'
-import { oneDark } from '@codemirror/theme-one-dark'
+import { javascript } from '@codemirror/lang-javascript'
+// import { python } from '@codemirror/lang-python'
+// import { oneDark } from '@codemirror/theme-one-dark'
 import { onMounted, ref, watch } from 'vue'
 import { EditorView } from '@codemirror/view'
 
@@ -67,7 +67,7 @@ let myTheme = EditorView.theme(
   { dark: true }
 )
 
-const extensions = [myTheme, python()]
+const extensions = [myTheme, javascript()]
 
 const onCodeChange = () => {
   emit('onCodeChange', code.value)
