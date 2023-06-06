@@ -82,7 +82,7 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="待测版本" prop="pendingVersion" :required="true">
+              <el-form-item label="可选版本" prop="pendingVersion" :required="true">
                 <el-radio-group v-model="item.pendingVersionOrigin" class="ml-4" @change="changePendingVersionOrigin(item, index)">
                   <el-radio label="auto" size="large">版本列表</el-radio>
                   <el-radio label="manual" size="large">Tag</el-radio>
@@ -91,12 +91,12 @@
                   class="input-width"
                   v-show="item.pendingVersionOrigin === 'manual'"
                   v-model="item.pendingVersion"
-                  placeholder="请输入待测版本..."
+                  placeholder="请输入可选版本..."
                 ></el-input>
                 <el-select
                   v-show="item.pendingVersionOrigin === 'auto'"
                   v-model="item.pendingVersion"
-                  placeholder="请选择待测版本"
+                  placeholder="请选择版本"
                   :key="index"
                   @visible-change="selectProduct(item)"
                   @change="getProductInfo(item, index)"
@@ -223,7 +223,13 @@
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Delete, FullScreen } from '@element-plus/icons-vue'
-import { getDeviceApi, getProductPackageApi, getNetsignVersionApi, getNetsignBranchApi } from '@/api/NetDevOps/index'
+import {
+  getDeviceApi,
+  getProductPackageApi,
+  getMainProductPackageApi,
+  getNetsignVersionApi,
+  getNetsignBranchApi
+} from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
 import { getInterfaceTestConfigurationFile } from '@/data/InterfaceTestConfigurationFile'
@@ -539,6 +545,14 @@ const selectProduct = async val => {
         // 过滤掉file_name不包含.zip的
         // selectProductList.value = res.data.filter(item => item.file_name.includes('.zip'))
         selectProductList.value = res.data
+      }
+      const params2 = {
+        page: 1,
+        page_size: 100
+      }
+      let res2 = await getMainProductPackageApi(params2)
+      if (res2.code === 1000) {
+        selectProductList.value = selectProductList.value.concat(res2.data)
       }
     }
   }

@@ -988,7 +988,7 @@ function checkWebSocketStatus() {
 }
 
 function reconnectWebSocket() {
-  socket = new WebSocket('ws://10.4.150.27:8022/ws/get_task_result/')
+  socket = new WebSocket('ws://10.4.150.55:8022/ws/get_task_result/')
   socket.onopen = function (event) {
     console.log('WebSocket连接已经重新连接')
   }

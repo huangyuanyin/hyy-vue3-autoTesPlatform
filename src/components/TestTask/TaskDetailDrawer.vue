@@ -108,9 +108,15 @@
                     v-for="(it, index) in deployVersionFullList"
                     :key="'deployVersionFullList' + index"
                   >
-                    <span class="main-fileName"> {{ it.file_name }}</span>
-                    <span class="main-type"> {{ it.type === 'project' ? '待测版本' : 'release版本' }} </span>
-                    <span class="main-create_user">{{ it.create_user }} </span>
+                    <div style="display: flex; justify-content: space-between">
+                      <span class="main-fileName"> {{ it.file_name }}</span>
+                      <div>
+                        <span class="main-type" :style="{ color: it.type === 'project' ? '#67C23A' : '#e6a23c' }">
+                          {{ it.type === 'project' ? '待测版本' : 'release版本' }}
+                        </span>
+                        <span class="main-create_user">{{ it.create_user }} </span>
+                      </div>
+                    </div>
                   </el-option>
                 </el-select>
               </el-form-item>
@@ -128,9 +134,15 @@
                     v-for="(it, index) in deployVersionList"
                     :key="'deployVersionList' + index"
                   >
-                    <span class="main-fileName"> {{ it.file_name }}</span>
-                    <span class="main-type"> {{ it.type === 'project' ? '待测版本' : 'release版本' }} </span>
-                    <span class="main-create_user">{{ it.create_user }} </span>
+                    <div style="display: flex; justify-content: space-between">
+                      <span class="main-fileName"> {{ it.file_name }}</span>
+                      <div>
+                        <span class="main-type" :style="{ color: it.type === 'project' ? '#67C23A' : '#e6a23c' }">
+                          {{ it.type === 'project' ? '待测版本' : 'release版本' }}
+                        </span>
+                        <span class="main-create_user">{{ it.create_user }} </span>
+                      </div>
+                    </div>
                   </el-option>
                 </el-select>
               </el-form-item>
@@ -560,6 +572,10 @@ const getDeployVersion = async (type, val, index) => {
 .main-create_user {
   color: #acafb4;
   font-size: 13px;
+  display: inline-block;
+  width: 90px;
+  max-width: 90px;
+  margin-left: 10px;
 }
 .taskDetail-drawer {
   width: 35% !important;

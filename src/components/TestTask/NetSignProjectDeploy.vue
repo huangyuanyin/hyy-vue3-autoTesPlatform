@@ -103,7 +103,17 @@
                     :value="item.file_name"
                     v-for="(item, index) in selectProductList"
                     :key="'selectProductList' + index"
-                  />
+                  >
+                    <div style="display: flex; justify-content: space-between">
+                      <span class="main-fileName"> {{ item.file_name }}</span>
+                      <div>
+                        <span class="main-type" :style="{ color: item.type === 'project' ? '#67C23A' : '#e6a23c' }">
+                          {{ item.type === 'project' ? '待测版本' : 'release版本' }}
+                        </span>
+                        <span class="main-create_user">{{ item.create_user }} </span>
+                      </div>
+                    </div>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-collapse class="collapseItem">
