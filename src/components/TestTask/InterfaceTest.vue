@@ -518,17 +518,17 @@ const getDeviceInfo = async (val, index) => {
 
 const selectProduct = async val => {
   selectProductList.value = []
-  currentFlows.value.map(item => {
-    item.task_stages.map(it => {
-      it.task_details.map(i => {
-        if (i.plugin === 'netSignArrange') {
-          selectProductList.value.push({ file_name: i.dispose[0].packageName, id: i.dispose[0].packageID })
-        }
-      })
-    })
-  })
+  // currentFlows.value.map(item => {
+  //   item.task_stages.map(it => {
+  //     it.task_details.map(i => {
+  //       if (i.plugin === 'netSignArrange') {
+  //         selectProductList.value.push({ file_name: i.dispose[0].packageName, id: i.dispose[0].packageID })
+  //       }
+  //     })
+  //   })
+  // })
 
-  selectProductList.value = removeDuplicateObj(selectProductList.value)
+  // selectProductList.value = removeDuplicateObj(selectProductList.value)
   if (selectProductList.value.length === 0) {
     if (val.showServerConfig[1].value) {
       const params = {
@@ -537,7 +537,8 @@ const selectProduct = async val => {
       let res = await getProductPackageApi(params)
       if (res.code === 1000) {
         // 过滤掉file_name不包含.zip的
-        selectProductList.value = res.data.filter(item => item.file_name.includes('.zip'))
+        // selectProductList.value = res.data.filter(item => item.file_name.includes('.zip'))
+        selectProductList.value = res.data
       }
     }
   }

@@ -32,9 +32,10 @@
             </el-tab-pane>
           </el-tabs>
         </el-col>
-        <el-col class="buttonList" :span="6">
+        <el-col class="buttonList" :span="6" v-if="tabName === 'recentlyRun' || tabName === 'operationHistory'">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="default" @click="toEdit()" :disabled="recentlyRunLog.status === 'in_progress'">编辑</el-button>
+          <el-button type="default" @click="toEdit()" v-if="recentlyRunLog.status !== 'in_progress'">编辑</el-button>
+          <el-button type="default" @click="toLook()" v-if="recentlyRunLog.status === 'in_progress'">查看</el-button>
           <el-button type="primary" @click="toRun()" :disabled="recentlyRunLog.status === 'in_progress'">执行</el-button>
         </el-col>
       </el-row>
@@ -103,6 +104,15 @@ const toRun = () => {
 const toEdit = () => {
   router.push({
     path: '/testTask/editTestTask',
+    query: {
+      id: route.query.id
+    }
+  })
+}
+
+const toLook = () => {
+  router.push({
+    name: 'LookTestTaskConfig',
     query: {
       id: route.query.id
     }

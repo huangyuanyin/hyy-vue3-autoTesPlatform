@@ -134,13 +134,13 @@ const data = reactive({
 const testList = ref([
   {
     plugin: 'interfaceTest',
-    name: 'Netsign接口测试',
-    desc: '这是一段Netsign接口测试'
+    name: 'NetSign接口测试',
+    desc: '这是一段NetSign接口测试'
   },
   {
     plugin: 'netsignUITest',
-    name: 'Netsign UI测试',
-    desc: '这是一段Netsign UI测试'
+    name: 'NetSign UI测试',
+    desc: '这是一段NetSign UI测试'
   }
 ])
 const deployList = ref([
@@ -153,12 +153,12 @@ const deployList = ref([
     plugin: 'netSignArrange',
     name: 'NetSign项目部署',
     desc: '这是一段NetSign项目部署'
-  },
-  {
-    plugin: 'dockerDeployment',
-    name: 'Docker部署',
-    desc: '这是一段Docker部署'
   }
+  // {
+  //   plugin: 'dockerDeployment',
+  //   name: 'Docker部署',
+  //   desc: '这是一段Docker部署'
+  // }
 ])
 const orderList = ref([
   {

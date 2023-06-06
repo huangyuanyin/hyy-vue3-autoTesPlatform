@@ -397,6 +397,7 @@ const handleChannel = (item: any) => {
 }
 
 const handleLog = (item: any) => {
+  log.value = '暂无日志...'
   logDialog.value = true
   logTitle.value = item.name
   currentLogVal.value = item
@@ -438,12 +439,12 @@ const getRowCount = arr => {
 }
 
 const toLookTestTaskConfig = () => {
-  router.push({
-    name: 'LookTestTaskConfig',
-    query: {
-      id: route.query.id
-    }
-  })
+  // router.push({
+  //   name: 'LookTestTaskConfig',
+  //   query: {
+  //     id: route.query.id
+  //   }
+  // })
 }
 
 const getClassName = async (item: any, id) => {
