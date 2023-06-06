@@ -897,6 +897,17 @@ const handleMethodsDataCurrentChange = (val: number) => {
                   margin-top: 5%;
                 }
               }
+              .channel-card {
+                display: flex !important;
+                flex-direction: column !important;
+                border-left-color: #f7aaa3 !important;
+                .card-content {
+                  height: 120px !important;
+                }
+                .content-job {
+                  margin-top: 5%;
+                }
+              }
               .run-card {
                 display: flex !important;
                 flex-direction: column !important;
@@ -984,6 +995,18 @@ const handleMethodsDataCurrentChange = (val: number) => {
     .card-content {
       height: 165px !important;
       border-left-color: #90deb5 !important;
+    }
+    .run-card {
+      height: 120px !important;
+      border-left-color: #75c0f2 !important;
+    }
+    .channel-card {
+      height: 120px !important;
+      border-left-color: #f7aaa3 !important;
+    }
+    .wait-card {
+      height: 75px !important;
+      border-left-color: #dbdbdb !important;
     }
     .content-job {
       margin-top: 5%;
