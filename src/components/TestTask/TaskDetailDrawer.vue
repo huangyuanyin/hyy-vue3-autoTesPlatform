@@ -99,6 +99,7 @@
                   v-model="item.deployVersion"
                   placeholder="请选择全量基线版本"
                   :key="index"
+                  filterable
                   @visible-change="selectDeployVersion('full', item)"
                   @change="getDeployVersion('full', item, index)"
                 >
@@ -125,6 +126,7 @@
                   v-model="item.packageName"
                   placeholder="请选择项目基线版本"
                   :key="index"
+                  filterable
                   @visible-change="selectDeployVersion('project', item)"
                   @change="getDeployVersion('project', item, index)"
                 >

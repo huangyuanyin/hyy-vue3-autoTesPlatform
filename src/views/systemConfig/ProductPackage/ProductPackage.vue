@@ -16,6 +16,7 @@
           <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
               <el-button link type="primary" size="small" @click="handleEdit('editMain', scope.row.id)">编辑</el-button>
+              <el-button link type="warning" size="small" @click="handleDownload(scope.row.id)">下载</el-button>
               <el-popconfirm
                 title="确定删除这个文件?"
                 trigger="click"
@@ -64,6 +65,7 @@
           <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
               <el-button link type="primary" size="small" @click="handleEdit('editBuild', scope.row.id)">编辑</el-button>
+              <el-button link type="warning" size="small" @click="handleDownload(scope.row.id)">下载</el-button>
               <el-popconfirm
                 title="确定删除这个文件?"
                 trigger="click"
@@ -136,6 +138,15 @@ const handleEdit = (type: String, id?: number) => {
       dialogTitle.value = '编辑主线版本'
       dialogId.value = id
       break
+  }
+}
+
+const handleDownload = async id => {
+  return ElMessage.warning('暂不支持')
+  isLoading.value = true
+  let res = await getProductPackageApi({ download_id: id })
+  isLoading.value = false
+  if (res.code === 1000) {
   }
 }
 

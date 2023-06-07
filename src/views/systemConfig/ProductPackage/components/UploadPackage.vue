@@ -133,8 +133,12 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate((valid, fields) => {
     if (valid) {
       const { file_name, ...params } = form
-      if (form.upload_type === 'hands' && uploadFileList.value.length <= 0 && props.dialogTitle === '新增') {
+      if (form.upload_type === 'hands' && uploadFileList.value.length <= 0 && props.dialogTitle.includes('新增')) {
         ElMessage.error('至少上传一个包！')
+        return
+      }
+      if (!['application/x-zip-msdownload', 'application/x-compressed'].includes(uploadFileList.value.type)) {
+        ElMessage.error('请上传zip或tgz格式的文件！')
         return
       }
       const fd = new FormData()

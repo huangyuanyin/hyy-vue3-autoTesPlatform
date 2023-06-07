@@ -104,7 +104,13 @@
                             <div class="card-num" v-if="it.plugin === 'interfaceTest'">
                               <div class="stat-info">
                                 <div class="stat-info-item" v-for="(item, index) in it.total_statistics" :key="'total_statistics' + index">
-                                  <el-popover placement="top" :width="500" trigger="click" @show="getClassName(item, it.id)">
+                                  <el-popover
+                                    placement="top"
+                                    :width="500"
+                                    trigger="click"
+                                    @show="getClassName(item, it.id)"
+                                    :disabled="statList[item.name] === '总数'"
+                                  >
                                     <template #reference>
                                       <div class="stat-info-item-value" :class="[statColor[item.name]]">
                                         {{ item.value }}
@@ -234,9 +240,9 @@
         <div class="my-header">
           <div class="left">
             <h4 :id="titleId" :class="titleClass">{{ methodsTitle }}</h4>
-            <span :class="[statColor[classNameTitle]]"
-              >【 <span>{{ statList[classNameTitle] }}用例</span> 】</span
-            >
+            <span :class="[statColor[classNameTitle]]">
+              【 <span>{{ statList[classNameTitle] }}用例</span> 】
+            </span>
           </div>
           <el-button type="danger" @click="close">
             <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>

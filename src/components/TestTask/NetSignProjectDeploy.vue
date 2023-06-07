@@ -95,6 +95,7 @@
                   v-model="item.packageName"
                   placeholder="请选择项目包"
                   :key="index"
+                  filterable
                   @visible-change="selectProduct(item)"
                   @change="getProductInfo(item, index)"
                 >

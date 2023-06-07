@@ -98,6 +98,7 @@
                   v-model="item.pendingVersion"
                   placeholder="请选择版本"
                   :key="index"
+                  filterable
                   @visible-change="selectProduct(item)"
                   @change="getProductInfo(item, index)"
                 >
@@ -118,6 +119,24 @@
                     </div>
                   </el-option>
                 </el-select>
+              </el-form-item>
+              <el-form-item label="jar包上传" prop="jarVersion" :required="true" v-if="item.pendingVersion.includes('.tgz')">
+                <el-upload
+                  ref="uploadFile"
+                  class="upload-demo"
+                  action=""
+                  with-credentials
+                  accept=".jar"
+                  :limit="1"
+                  :on-exceed="handleExceed"
+                  :on-change="handleChange"
+                >
+                  <el-button size="small" type="primary">点击上传</el-button>
+                  <span class="file_name">{{ item.jarVersion }}</span>
+                  <template #tip>
+                    <div class="el-upload__tip">Tips：一次只能上传一个文件,新文件将会覆盖旧文件</div>
+                  </template>
+                </el-upload>
               </el-form-item>
               <!-- <el-card class="config-card" shadow="never" :key="index">
                 <template #header>
@@ -231,14 +250,17 @@
 
 <script lang="ts" setup>
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
-import { ElMessage, FormInstance, FormRules } from 'element-plus'
+import { ElMessage, FormInstance, FormRules, genFileId, UploadInstance, UploadRawFile } from 'element-plus'
 import { Delete, FullScreen } from '@element-plus/icons-vue'
+import type { UploadProps, UploadUserFile } from 'element-plus'
 import {
   getDeviceApi,
   getProductPackageApi,
   getMainProductPackageApi,
   getNetsignVersionApi,
-  getNetsignBranchApi
+  getNetsignBranchApi,
+  getAllProductPackagApi,
+  uploadSupplyJarApi
 } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
@@ -261,6 +283,8 @@ const props = defineProps({
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
 
 const configFileDialog = ref(false)
+const uploadFile = ref<UploadInstance>()
+const jarFile = ref(null)
 const configFileDialogTitle = ref('')
 const configFileDialogLog = ref('')
 const configId = ref(null)
@@ -391,6 +415,28 @@ const getNetsignBranch = async id => {
   let res = await getNetsignBranchApi(params)
   if (res.code === 1000) {
     branchList.value = res.data || []
+  }
+}
+
+const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
+  uploadFile.value!.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  uploadFile.value!.handleStart(file)
+}
+
+const handleChange = async (file, fileList) => {
+  const formData = new FormData()
+  formData.append('upload_file', file.raw)
+  let res = await uploadSupplyJarApi(formData)
+  if (res.code === 1000) {
+    ElMessage.success({
+      message: '上传成功',
+      type: 'success',
+      grouping: true
+    })
+    deviceList.value[0].jarVersion = res.data.file_name
+    deviceList.value[0].jarPath = res.data.file_path
   }
 }
 
@@ -548,23 +594,11 @@ const selectProduct = async val => {
   if (selectProductList.value.length === 0) {
     if (val.showServerConfig[1].value) {
       const params = {
-        // main_board_type: val.showServerConfig[1].value === 'x86' ? 'x86' : 'other'
-        page: 1,
-        page_size: 100
+        main_board_type: val.showServerConfig[1].value === 'x86' ? 'x86' : 'other'
       }
-      let res = await getProductPackageApi(params)
+      let res = await getAllProductPackagApi(params)
       if (res.code === 1000) {
-        // 过滤掉file_name不包含.zip的
-        // selectProductList.value = res.data.filter(item => item.file_name.includes('.zip'))
-        selectProductList.value = res.data
-      }
-      const params2 = {
-        page: 1,
-        page_size: 100
-      }
-      let res2 = await getMainProductPackageApi(params2)
-      if (res2.code === 1000) {
-        selectProductList.value = selectProductList.value.concat(res2.data).filter(item => item.file_name !== 'netsign_x10_x11')
+        selectProductList.value = selectProductList.value.concat(res.data['main'], res.data['project'])
       }
     }
   }
@@ -594,6 +628,10 @@ const getProductInfo = async (val, index, type?) => {
     if (it.file_name === val.pendingVersion) {
       deviceList.value[index].packagePath = it.file_path
       deviceList.value[index].packageID = it.id
+    }
+    if (val.pendingVersion.includes('.zip')) {
+      deviceList.value[index].jarVersion = undefined
+      deviceList.value[index].jarPath = undefined
     }
   })
   if (type === 'version') {
@@ -905,5 +943,17 @@ const onCodeChange = val => {
 .detail {
   display: flex !important;
   white-space: nowrap !important;
+}
+</style>
+
+<style lang="scss" scoped>
+.upload-demo {
+  .el-upload__tip {
+    color: #f56c6c !important;
+  }
+  .file_name {
+    margin-left: 10px;
+    display: inline-block;
+  }
 }
 </style>

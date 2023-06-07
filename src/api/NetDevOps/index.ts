@@ -345,3 +345,23 @@ export function getNetsignBranchApi(params) {
     params
   })
 }
+
+/* ---------------------------- /devops/all_product_package/ ---------------------------- */
+export function getAllProductPackagApi(params) {
+  return request({
+    url: `/devops/all_product_package/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+/* ---------------------------- /devops/interface/supply_jar/ ---------------------------- */
+export function uploadSupplyJarApi(params) {
+  return request({
+    url: `/devops/interface/supply_jar`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
