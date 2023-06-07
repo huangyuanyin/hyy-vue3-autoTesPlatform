@@ -159,7 +159,7 @@
           <div>
             <el-tooltip class="box-item" effect="dark" content="编辑" placement="top">
               <div>
-                <el-icon class="starIcon hoverIcon" v-if="item.row.status !== 'in_progress'" @click="toDetail('edit', item.row)">
+                <el-icon class="starIcon hoverIcon" @click="toDetail('edit', item.row)">
                   <Edit />
                 </el-icon>
               </div>
@@ -171,7 +171,7 @@
             <!-- </el-tooltip> -->
             <template #dropdown>
               <el-dropdown-menu :hide-on-click="false">
-                <el-dropdown-item :command="{ name: 'moveGroup', value: item.row }">
+                <el-dropdown-item :command="{ name: 'moveGroup', value: item.row }" v-if="item.row.status !== 'in_progress'">
                   <el-popover placement="left" :width="300" trigger="click" popper-class="moveGroupDialog" :visible="groupVisible">
                     <template #reference>
                       <el-button link type="info" size="small"> 移动分组 </el-button>
@@ -207,7 +207,7 @@
                     </el-form>
                   </el-popover>
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ name: 'setLabel', value: item.row }">
+                <el-dropdown-item :command="{ name: 'setLabel', value: item.row }" v-if="item.row.status !== 'in_progress'">
                   <el-popover placement="left" :width="300" trigger="click" popper-class="setLabelDialog" :visible="labelVisible">
                     <template #reference>
                       <el-button link type="info" size="small"> 设置标签 </el-button>
@@ -266,10 +266,10 @@
                   <el-button link type="success" size="small" @click="toDetail('detail', item.row)"> 详情 </el-button>
                 </el-dropdown-item>
                 <el-dropdown-item :command="{ name: 'release', value: item.row }" v-if="item.row.status !== 'in_progress'">
-                  <el-button :disabled="item.row.status === 'in_progress'" link type="primary" size="small"> 释放 </el-button>
+                  <el-button link type="primary" size="small"> 释放 </el-button>
                 </el-dropdown-item>
-                <el-dropdown-item :command="{ name: 'delete', value: item.row }">
-                  <el-button :disabled="item.row.status === 'in_progress'" link type="danger" size="small"> 删除 </el-button>
+                <el-dropdown-item :command="{ name: 'delete', value: item.row }" v-if="item.row.status !== 'in_progress'">
+                  <el-button link type="danger" size="small"> 删除 </el-button>
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -691,6 +691,10 @@ const toDetail = (type, item) => {
       router.push({ path: '/testTask/detailTestTask', query: { id: item.id } })
     }
   } else {
+    if (item.status === 'in_progress') {
+      ElMessage.warning('任务正在执行中，无法编辑！')
+      return
+    }
     router.push({ path: '/testTask/editTestTask', query: { id: item.id } })
   }
 }

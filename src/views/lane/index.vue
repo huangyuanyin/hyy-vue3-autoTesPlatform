@@ -88,8 +88,33 @@ const goBack = () => {
 const sumbitTask = type => {
   data.draft = type
   if (data.name === '') {
-    return ElMessage.error('请输入任务名称')
+    ElMessageBox.prompt('请输入任务名称', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputValidator: value => {
+        if (!value) {
+          return '任务名称不能为空'
+        }
+        return true
+      }
+    })
+      .then(({ value }) => {
+        taskName.value = data.name = value
+        validateForm(type)
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '取消输入'
+        })
+      })
+    return
+  } else {
+    validateForm(type)
   }
+}
+
+const validateForm = type => {
   const isName = data.task_swim_lanes.some(item => {
     return item.name === ''
   })

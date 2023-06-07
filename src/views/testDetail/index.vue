@@ -6,7 +6,7 @@
           <div class="grid-content ep-bg-purple" />
           <el-button @click="router.go(-1)">返回</el-button>
           <span style="color: #303133; font-weight: 600; margin-right: 5px">{{ recentlyRunLog.name }} </span>
-          <span>{{ laneTime }}</span>
+          <span>{{ recentlyRunLog.created_time }}</span>
         </el-col>
         <el-col :span="11">
           <div class="grid-content ep-bg-purple" />

@@ -567,7 +567,9 @@ const getDeployVersion = async (type, val, index) => {
 <style lang="scss">
 .main-type {
   color: #e6a23c;
-  margin: 0 15px;
+  margin-left: 15px;
+  display: inline-block;
+  width: 80px;
 }
 .main-create_user {
   color: #acafb4;

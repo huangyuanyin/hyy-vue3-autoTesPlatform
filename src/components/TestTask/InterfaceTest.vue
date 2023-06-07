@@ -106,7 +106,17 @@
                     :value="item.file_name"
                     v-for="(item, index) in selectProductList"
                     :key="'selectProductList' + index"
-                  />
+                  >
+                    <div style="display: flex; justify-content: space-between">
+                      <span class="main-fileName"> {{ item.file_name }}</span>
+                      <div>
+                        <span class="main-type" :style="{ color: item.type === 'project' ? '#67C23A' : '#e6a23c' }">
+                          {{ item.type === 'project' ? '待测版本' : 'release版本' }}
+                        </span>
+                        <span class="main-create_user">{{ item.create_user }} </span>
+                      </div>
+                    </div>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <!-- <el-card class="config-card" shadow="never" :key="index">
@@ -538,7 +548,9 @@ const selectProduct = async val => {
   if (selectProductList.value.length === 0) {
     if (val.showServerConfig[1].value) {
       const params = {
-        main_board_type: val.showServerConfig[1].value === 'x86' ? 'x86' : 'other'
+        // main_board_type: val.showServerConfig[1].value === 'x86' ? 'x86' : 'other'
+        page: 1,
+        page_size: 100
       }
       let res = await getProductPackageApi(params)
       if (res.code === 1000) {
@@ -552,7 +564,7 @@ const selectProduct = async val => {
       }
       let res2 = await getMainProductPackageApi(params2)
       if (res2.code === 1000) {
-        selectProductList.value = selectProductList.value.concat(res2.data)
+        selectProductList.value = selectProductList.value.concat(res2.data).filter(item => item.file_name !== 'netsign_x10_x11')
       }
     }
   }

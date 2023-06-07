@@ -82,12 +82,21 @@ service.interceptors.response.use(
     }
   },
   function (error) {
-    // 对响应错误做点什么
-    ElMessage({
-      message: error.response.data?.msg || '请求失败',
-      type: 'error',
-      duration: 3500
-    })
+    if (error.response.status === 403) {
+      ElMessage({
+        message: error.response.data?.msg || '请求失败',
+        type: 'error',
+        duration: 3500,
+        grouping: true
+      })
+    } else {
+      // 对响应错误做点什么
+      ElMessage({
+        message: error.response.data?.msg || '请求失败',
+        type: 'error',
+        duration: 3500
+      })
+    }
     // return Promise.reject(error);
   }
 )
