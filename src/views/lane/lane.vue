@@ -27,22 +27,30 @@ const handleAddStage = (val: any, index: any) => {
   props.flows.splice(index, 0, val)
 }
 
-const handleRemoveFlow = (val: any, id: any) => {
-  let isHasCount = 0
-  if (val.name === '环境准备') {
-    JSON.parse(localStorage.getItem('flows')).map((item, index) => {
-      item.task_stages.map(it => {
-        it.task_details.map(i => {
-          if (i.plugin === 'netSignArrange') {
-            isHasCount++
-          }
-        })
+function hasNetSignArrangeAfterIndex(obj, index) {
+  for (let i = index + 1; i < obj.length; i++) {
+    const taskStages = obj[i].task_stages
+    if (
+      taskStages &&
+      taskStages.some(stage => {
+        const taskDetails = stage.task_details
+        return taskDetails && taskDetails.some(detail => detail.plugin === 'netSignArrange')
       })
-    })
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+const handleRemoveFlow = (val: any, id: any) => {
+  let hasNetSignArrange
+  if (val.name === '环境准备') {
+    hasNetSignArrange = hasNetSignArrangeAfterIndex(JSON.parse(localStorage.getItem('flows')), id)
   }
 
-  if (isHasCount !== 0) {
-    ElMessage.error('监测到项目准备任务后有项目部署任务，请先删除环境部署任务！')
+  if (hasNetSignArrange) {
+    ElMessage.error('环境部署必须在环境准备之后，请先删除环境部署任务！')
     return
   } else {
     ElMessage({

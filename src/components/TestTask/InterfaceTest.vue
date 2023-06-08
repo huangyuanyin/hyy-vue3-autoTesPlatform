@@ -132,7 +132,8 @@
                   :on-change="handleChange"
                 >
                   <el-button size="small" type="primary">点击上传</el-button>
-                  <span class="file_name">{{ item.jarVersion }}</span>
+                  <span class="file_name" v-if="item.jarVersion">{{ item.jarVersion }}</span>
+                  <span class="file_name" v-else>未选择文件</span>
                   <template #tip>
                     <div class="el-upload__tip">Tips：一次只能上传一个文件,新文件将会覆盖旧文件</div>
                   </template>
