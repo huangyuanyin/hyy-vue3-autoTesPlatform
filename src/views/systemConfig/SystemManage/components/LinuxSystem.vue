@@ -46,10 +46,10 @@
           <span class="item-ip" @click="openLinuxDialog('detail', scope.row.id)">{{ scope.row.ip }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="using" label="使用状态" width="160" align="center">
+      <el-table-column prop="using" label="占用状态" width="160" align="center">
         <template #default="scope">
           <el-tag :type="scope.row.using === true ? 'danger' : ''" disable-transitions>
-            {{ scope.row.using === true ? '使用中' : '空闲中' }}
+            {{ scope.row.using === true ? '占用中' : '未占用' }}
           </el-tag>
         </template>
       </el-table-column>

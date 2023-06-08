@@ -472,7 +472,10 @@ const selectDevice = async val => {
     let res = await getDeviceApi(params)
     if (res.code === 1000) {
       // 过滤掉using为true的设备
-      selectDeviceList.value = res.data.filter(item => item.using === false)
+      selectDeviceList.value = res.data.filter(
+        item =>
+          item.using === false || item.operate_user === null || item.operate_user === JSON.parse(localStorage.getItem('userInfo')).username
+      )
       // 遍历hasDeviceList，将已经选择的设备增加字段disabled为true
       hasDeviceList.value.map(item => {
         selectDeviceList.value.map(it => {

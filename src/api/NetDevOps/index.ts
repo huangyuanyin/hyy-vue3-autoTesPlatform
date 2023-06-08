@@ -365,3 +365,13 @@ export function uploadSupplyJarApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/task_history_report/ ---------------------------- */
+export function getHistoryReportApi(params) {
+  return request({
+    url: `/devops/task_history_report/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}

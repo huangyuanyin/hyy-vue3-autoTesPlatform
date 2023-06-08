@@ -124,18 +124,17 @@
                 <el-upload
                   ref="uploadFile"
                   class="upload-demo"
+                  v-model:file-list="jarList"
+                  multiple
                   action=""
                   with-credentials
                   accept=".jar"
-                  :limit="1"
-                  :on-exceed="handleExceed"
                   :on-change="handleChange"
                 >
                   <el-button size="small" type="primary">点击上传</el-button>
-                  <span class="file_name" v-if="item.jarVersion">{{ item.jarVersion }}</span>
-                  <span class="file_name" v-else>未选择文件</span>
+                  <span class="file_name" v-if="jarList.length === 0">未选择文件</span>
                   <template #tip>
-                    <div class="el-upload__tip">Tips：一次只能上传一个文件,新文件将会覆盖旧文件</div>
+                    <div class="el-upload__tip">Tips：支持多个jar包上传</div>
                   </template>
                 </el-upload>
               </el-form-item>
@@ -319,6 +318,7 @@ const isPassVerification = ref(false)
 const hasDeviceList = ref([])
 const branchList = ref([])
 const netsignVersionList = ref([])
+const jarList = ref<UploadUserFile[]>([])
 
 watch(
   () => props.taskDetailDrawer,
@@ -372,7 +372,12 @@ watch(
       }
       let res = await getDeviceApi(params)
       if (res.code === 1000) {
-        hasDeviceList.value = res.data.filter(item => item.using === false)
+        hasDeviceList.value = res.data.filter(
+          item =>
+            item.using === false ||
+            item.operate_user === null ||
+            item.operate_user === JSON.parse(localStorage.getItem('userInfo')).username
+        )
         // 遍历currentDevice和hasDeviceList，如果currentDevice中的设备在hasDeviceList中，则将其置为不可选
         currentDevice.map(item => {
           hasDeviceList.value.map(it => {
@@ -419,14 +424,12 @@ const getNetsignBranch = async id => {
   }
 }
 
-const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
-  uploadFile.value!.clearFiles()
-  const file = files[0] as UploadRawFile
-  file.uid = genFileId()
-  uploadFile.value!.handleStart(file)
-}
-
+let handleChangeTriggered = false // 标志变量
 const handleChange = async (file, fileList) => {
+  if (handleChangeTriggered) {
+    return
+  }
+  handleChangeTriggered = true
   const formData = new FormData()
   formData.append('upload_file', file.raw)
   let res = await uploadSupplyJarApi(formData)
@@ -436,8 +439,15 @@ const handleChange = async (file, fileList) => {
       type: 'success',
       grouping: true
     })
-    deviceList.value[0].jarVersion = res.data.file_name
-    deviceList.value[0].jarPath = res.data.file_path
+    const newObj = {
+      name: res.data.file_name || '',
+      url: res.data.file_path || ''
+    }
+    jarList.value.push(newObj)
+    jarList.value = jarList.value.filter(
+      (obj, index, self) => index === self.findIndex(item => item.name === obj.name && item.url === obj.url)
+    )
+    handleChangeTriggered = false
   }
 }
 
@@ -450,6 +460,12 @@ const cancelClick = async (done?: () => void) => {
   if (!taskDetailFormRef.value) return
   await taskDetailFormRef.value.validate(async (valid, fields) => {
     if (valid) {
+      deviceList.value[0].jarList = jarList.value.map(item => {
+        return {
+          jarName: item.name,
+          jarPath: item.url
+        }
+      })
       const forms = deviceFormRef.value
       const forms2 = deviceFormRef2.value
       const forms3 = forms.concat(forms2)
@@ -631,8 +647,7 @@ const getProductInfo = async (val, index, type?) => {
       deviceList.value[index].packageID = it.id
     }
     if (val.pendingVersion.includes('.zip')) {
-      deviceList.value[index].jarVersion = undefined
-      deviceList.value[index].jarPath = undefined
+      deviceList.value[index].jarList = undefined
     }
   })
   if (type === 'version') {

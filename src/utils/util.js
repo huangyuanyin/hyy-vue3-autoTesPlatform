@@ -56,3 +56,16 @@ export const computer = date => {
   let str = day + '天' + h + '小时' + m + '分' + s + '秒'
   return { day, h, m, s }
 }
+
+// 浏览器下载
+export function downloadFile(url) {
+  const link = document.createElement('a')
+  link.href = url
+  link.target = '_blank'
+  link.setAttribute('download', '')
+
+  document.body.appendChild(link)
+  link.click()
+
+  document.body.removeChild(link)
+}

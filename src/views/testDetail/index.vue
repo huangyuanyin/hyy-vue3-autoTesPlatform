@@ -32,15 +32,28 @@
             </el-tab-pane>
           </el-tabs>
         </el-col>
-        <el-col class="buttonList" :span="6" v-if="tabName === 'recentlyRun' || tabName === 'operationHistory'">
+        <el-col class="buttonList" :span="6" v-if="tabName === 'recentlyRun'">
           <div class="grid-content ep-bg-purple" />
+          <el-button type="success" @click="toReport('recent')" v-if="recentlyRunLog.status !== 'in_progress'">报告</el-button>
           <el-button type="default" @click="toEdit()" v-if="recentlyRunLog.status !== 'in_progress'">编辑</el-button>
           <el-button type="default" @click="toLook()" v-if="recentlyRunLog.status === 'in_progress'">查看</el-button>
           <el-button type="primary" @click="toRun()" :disabled="recentlyRunLog.status === 'in_progress'">执行</el-button>
         </el-col>
+        <el-col class="buttonList" :span="6" v-if="tabName !== 'recentlyRun' && tabName !== 'operationHistory'">
+          <div class="grid-content ep-bg-purple" />
+          <el-button type="success" @click="toReport">#{{ tabName }} 报告</el-button>
+        </el-col>
       </el-row>
     </div>
   </div>
+  <el-dialog v-model="reportDialogVisible" :title="reportTitle" width="50%" draggable custom-class="report-dialog">
+    <pre>{{ reportData }}</pre>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" @click="dowaloadReport"> 下载报告 </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -48,10 +61,11 @@ import { ref, reactive, onMounted, markRaw, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Action } from 'element-plus'
-import { getTaskHistoryApi, getTaskInfoApi, runTaskInfoApi } from '@/api/NetDevOps/index'
+import { getTaskHistoryApi, getTaskInfoApi, runTaskInfoApi, getHistoryReportApi } from '@/api/NetDevOps/index'
 import bus from '@/utils/bus.js'
 import RecentlyRun from './components/RecentlyRun.vue'
 import RunHistory from './components/RunHistory.vue'
+import { downloadFile } from '@/utils/util.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -64,6 +78,11 @@ const recentlyRunLog = ref({})
 const runDetailLog = ref({})
 let intervalId = ref(null)
 const isUpdateHistory = ref(false)
+const reportDialogVisible = ref(false)
+const reportTitle = ref('')
+const reportData = ref('')
+const reportUrl = ref('')
+const tabId = ref(null)
 let socket = new WebSocket(`ws://10.4.150.55:8023/ws/get_task_history/${route.query.id}`)
 let additionalSocket = null // 新的 WebSocket 实例
 
@@ -73,6 +92,7 @@ const changeTab = (e: any) => {
     tabList.value.map(item => {
       if (item.name === tabName.value && item.status !== 'in_progress') {
         getTaskHistoryDetail(item.id)
+        tabId.value = item.id
       }
     })
   }
@@ -104,6 +124,32 @@ const toRun = () => {
     })
 }
 
+const toReport = (type?) => {
+  reportData.value = ''
+  reportDialogVisible.value = true
+  if (type && type === 'recent') {
+    getHistoryReport('get', recentlyRunLog.value.id)
+    reportTitle.value = `最近运行 报告`
+  } else {
+    getHistoryReport('get', tabId.value)
+    reportTitle.value = `#${tabName.value} 运行报告`
+  }
+}
+
+const dowaloadReport = () => {
+  downloadFile(reportUrl.value)
+}
+
+const getHistoryReport = async (type, id) => {
+  const params = {}
+  type === 'get' ? (params['task_history_id'] = id) : (params['download_id'] = id)
+  let res = await getHistoryReportApi(params)
+  if (res.code === 1000) {
+    reportData.value = res.data.report_data
+    reportUrl.value = res.data.download_url
+  }
+}
+
 const toEdit = () => {
   router.push({
     path: '/testTask/editTestTask',
@@ -123,10 +169,10 @@ const toLook = () => {
 }
 
 const handleClick = val => {
-  if (tabList.value.length >= 5) {
+  if (tabList.value.length >= 4) {
     ElMessage({
       type: 'warning',
-      message: '最多只能查看5个历史运行记录！'
+      message: '最多只能查看4个历史运行记录！'
     })
     return
   }
@@ -188,6 +234,9 @@ const getTaskHistory = async () => {
     recentlyRunLog.value = res.data[0]
     if (res.data[0].status === 'in_progress') {
       intervalId = setInterval(checkWebSocketStatus, 1000)
+    } else {
+      socket.close()
+      clearInterval(intervalId)
     }
   }
 }
@@ -311,6 +360,13 @@ onUnmounted(() => {
         left: 12px;
       }
     }
+  }
+}
+</style>
+<style lang="scss">
+.report-dialog {
+  .el-dialog__body {
+    padding-top: 0px !important;
   }
 }
 </style>
