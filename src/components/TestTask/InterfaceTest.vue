@@ -120,11 +120,11 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="jar包上传" prop="jarVersion" :required="true" v-if="item.pendingVersion.includes('.tgz')">
+              <el-form-item label="上传文件" prop="jarList" :required="true" v-if="String(deviceList[0].packagePath).includes('tgz')">
                 <el-upload
                   ref="uploadFile"
                   class="upload-demo"
-                  v-model:file-list="jarList"
+                  v-model:file-list="item.jarList"
                   multiple
                   action=""
                   with-credentials
@@ -132,7 +132,7 @@
                   :on-change="handleChange"
                 >
                   <el-button size="small" type="primary">点击上传</el-button>
-                  <span class="file_name" v-if="jarList.length === 0">未选择文件</span>
+                  <span class="file_name" v-if="item.jarList === undefined || item.jarList.length === 0">未选择文件</span>
                   <template #tip>
                     <div class="el-upload__tip">Tips：支持多个jar包上传</div>
                   </template>
@@ -307,6 +307,7 @@ const deviceFormRef2 = ref([])
 const deviceFormRules = reactive<FormRules>({
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
   pendingVersion: [{ required: true, message: '待测版本不能为空', trigger: 'blur' }],
+  jarList: [{ required: true, message: 'jar包不能为空', trigger: 'change' }],
   log: [{ required: true, message: '配置文件不能为空', trigger: 'change' }],
   branch: [{ required: true, message: '代码分支不能为空', trigger: 'change' }],
   netsignVersion: [{ required: true, message: '适用版本不能为空', trigger: 'change' }]
@@ -318,7 +319,6 @@ const isPassVerification = ref(false)
 const hasDeviceList = ref([])
 const branchList = ref([])
 const netsignVersionList = ref([])
-const jarList = ref<UploadUserFile[]>([])
 
 watch(
   () => props.taskDetailDrawer,
@@ -439,15 +439,25 @@ const handleChange = async (file, fileList) => {
       type: 'success',
       grouping: true
     })
-    const newObj = {
-      name: res.data.file_name || '',
-      url: res.data.file_path || ''
-    }
-    jarList.value.push(newObj)
-    jarList.value = jarList.value.filter(
-      (obj, index, self) => index === self.findIndex(item => item.name === obj.name && item.url === obj.url)
-    )
-    handleChangeTriggered = false
+    nextTick(() => {
+      const newObj = {
+        name: res.data.file_name || '',
+        url: res.data.file_path || ''
+      }
+      if (deviceList.value[0].jarList) {
+        deviceList.value[0].jarList.push(newObj)
+        deviceList.value[0].jarList = deviceList.value[0].jarList
+          .filter(item => item.url)
+          .filter((obj, index, self) => index === self.findIndex(item => item.name === obj.name && item.url === obj.url))
+      } else {
+        deviceList.value[0].jarList = []
+        deviceList.value[0].jarList.push(newObj)
+        deviceList.value[0].jarList = deviceList.value[0].jarList
+          .filter(item => item.url)
+          .filter((obj, index, self) => index === self.findIndex(item => item.name === obj.name && item.url === obj.url))
+      }
+      handleChangeTriggered = false
+    })
   }
 }
 
@@ -460,12 +470,6 @@ const cancelClick = async (done?: () => void) => {
   if (!taskDetailFormRef.value) return
   await taskDetailFormRef.value.validate(async (valid, fields) => {
     if (valid) {
-      deviceList.value[0].jarList = jarList.value.map(item => {
-        return {
-          jarName: item.name,
-          jarPath: item.url
-        }
-      })
       const forms = deviceFormRef.value
       const forms2 = deviceFormRef2.value
       const forms3 = forms.concat(forms2)
@@ -647,7 +651,7 @@ const getProductInfo = async (val, index, type?) => {
       deviceList.value[index].packageID = it.id
     }
     if (val.pendingVersion.includes('.zip')) {
-      deviceList.value[index].jarList = undefined
+      deviceList.value[index].jarList = []
     }
   })
   if (type === 'version') {
@@ -964,6 +968,7 @@ const onCodeChange = val => {
 
 <style lang="scss" scoped>
 .upload-demo {
+  min-width: 11vw;
   .el-upload__tip {
     color: #f56c6c !important;
   }
