@@ -313,8 +313,10 @@
                 style="width: 100%"
                 @expand-change="getMethods2"
                 stripe
-                :row-key="row => row.class_name"
+                :row-key="row => row.class_key"
                 :expand-row-keys="defaultExpandedKeys"
+                @row-click="getMethods2"
+                highlight-current-row
               >
                 <el-table-column type="expand">
                   <template #default="props">
@@ -330,7 +332,7 @@
                   </template>
                 </el-table-column>
                 <el-table-column label="项目名称" prop="project_name" />
-                <el-table-column label="class_name" prop="class_name" />
+                <el-table-column label="测试类名称" prop="class_name" />
               </el-table>
             </div>
           </el-collapse-item>
@@ -562,7 +564,8 @@ const handleClassNameApi = async (item, id) => {
       item.class_data = item.class_data.flatMap(({ project_name, class_name }) =>
         class_name.map(classItem => ({
           project_name: project_name,
-          class_name: classItem
+          class_name: classItem,
+          class_key: `${project_name}-${classItem}`
         }))
       )
       console.log(`output->item.class_name`, item.class_data)
@@ -571,10 +574,10 @@ const handleClassNameApi = async (item, id) => {
 }
 
 const getMethods2 = async (row, val) => {
-  if (defaultExpandedKeys.value.includes(row.class_name)) {
+  if (defaultExpandedKeys.value.includes(row.class_key)) {
     defaultExpandedKeys.value = []
   } else {
-    defaultExpandedKeys.value = [row.class_name]
+    defaultExpandedKeys.value = [row.class_key]
   }
   console.log(`output->defaultExpandedKeys`, row, defaultExpandedKeys.value)
   let res = await getMethodsApi({

@@ -61,12 +61,22 @@
                   @change="getDeviceInfo(item, index)"
                 >
                   <el-option
-                    :label="item.ip"
-                    :value="item.ip"
-                    :disabled="item.disabled"
-                    v-for="(item, index) in selectDeviceList"
+                    :label="it.ip"
+                    :value="it.ip"
+                    :disabled="it.disabled"
+                    v-for="(it, index) in selectDeviceList"
                     :key="'selectDeviceList' + index"
-                  />
+                  >
+                    <div style="display: flex; justify-content: space-between">
+                      <span class="main-fileName"> {{ it.ip }}</span>
+                      <div>
+                        <span class="main-type" :style="{ color: it.using ? '#F56C6C' : '#409EFF' }">
+                          {{ it.using ? '占用中' : '未占用' }}
+                        </span>
+                        <span class="main-create_user">{{ it.operate_user }} </span>
+                      </div>
+                    </div>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="" v-if="item.serverName">

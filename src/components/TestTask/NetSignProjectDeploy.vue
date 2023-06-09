@@ -68,7 +68,17 @@
                   />
                 </el-select> -->
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="getDeviceInfo(item, index)">
-                  <el-option :label="item.ip" :value="item.ip" v-for="(item, index) in hasDeviceList" :key="'hasDeviceList' + index" />
+                  <el-option :label="it.ip" :value="it.ip" v-for="(it, index) in hasDeviceList" :key="'hasDeviceList' + index">
+                    <div style="display: flex; justify-content: space-between">
+                      <span class="main-fileName"> {{ it.ip }}</span>
+                      <!-- <div>
+                        <span class="main-type" :style="{ color: it.using ? '#67C23A' : '#e6a23c' }">
+                          {{ it.using ? '占用中' : '未占用' }}
+                        </span>
+                        <span class="main-create_user">{{ it.operate_user }} </span>
+                      </div> -->
+                    </div>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="" v-if="item.serverName">

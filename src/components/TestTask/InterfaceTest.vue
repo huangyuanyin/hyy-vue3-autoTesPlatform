@@ -55,12 +55,22 @@
               <el-form-item label="可选设备" prop="serverName" :required="true">
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="getDeviceInfo(item, index)">
                   <el-option
-                    :label="item.ip"
-                    :value="item.ip"
-                    v-for="(item, index) in hasDeviceList"
+                    :label="it.ip"
+                    :value="it.ip"
+                    v-for="(it, index) in hasDeviceList"
                     :key="'hasDeviceList' + index"
                     :disabled="item.disabled"
-                  />
+                  >
+                    <div style="display: flex; justify-content: space-between">
+                      <span class="main-fileName"> {{ it.ip }}</span>
+                      <div v-if="it.create_user">
+                        <span class="main-type" :style="{ color: it.using ? '#F56C6C' : '#409EFF' }">
+                          {{ it.using ? '占用中' : '未占用' }}
+                        </span>
+                        <span class="main-create_user">{{ it.operate_user }} </span>
+                      </div>
+                    </div>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="" v-if="item.serverName">
@@ -400,6 +410,8 @@ watch(
         })
       })
     }
+
+    console.log('output->hasDeviceList', hasDeviceList.value)
   }
 )
 
