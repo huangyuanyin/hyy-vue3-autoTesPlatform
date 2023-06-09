@@ -52,6 +52,17 @@
               label-position="top"
               status-icon
             >
+              <el-form-item label="可选设备" prop="number" :required="true">
+                <el-select v-model="item.serverName" placeholder="请选择设备" :key="index">
+                  <el-option
+                    :label="item.ip"
+                    :value="item.ip"
+                    v-for="(item, index) in hasDeviceList"
+                    :key="'hasDeviceList' + index"
+                    :disabled="item.disabled"
+                  />
+                </el-select>
+              </el-form-item>
               <el-form-item label="容器数量" prop="number" :required="true">
                 <el-input v-model="item.number" placeholder="请输入容器数量" />
               </el-form-item>
@@ -75,7 +86,7 @@
                 </el-upload>
               </el-form-item>
               <el-form-item label="shell脚本" prop="shell" class="executeCommand-item" :required="true">
-                <CodeMirror :code="item.shell" :codeStyle="{ height: '30vh', width: '30vw' }" @onCodeChange="onShellChange" />
+                <CodeMirror :code="item.shell" :codeStyle="{ height: '30vh', width: '29vw' }" @onCodeChange="onShellChange" />
               </el-form-item>
             </el-form>
           </div>
@@ -436,6 +447,9 @@ const onShellChange = val => {
   }
 
   .netSignProjectDeploy-ruleForm {
+    :deep(.el-input) {
+      width: 30vw !important;
+    }
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -503,11 +517,14 @@ const onShellChange = val => {
         .el-select {
           width: 400px;
         }
+        .el-input {
+          width: 400px;
+        }
         .input-width {
           width: 400px;
         }
         .uploadFile-demo {
-          width: 30vw;
+          width: 29vw;
           .el-upload-dragger {
             background: #f5f5f5;
           }

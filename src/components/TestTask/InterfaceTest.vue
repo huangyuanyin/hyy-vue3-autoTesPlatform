@@ -825,6 +825,7 @@ const onCodeChange = val => {
       justify-content: space-between;
       display: flex;
       padding: 20px;
+      padding-bottom: 0px;
       margin-left: 20px;
       margin-bottom: 20px;
       position: relative;

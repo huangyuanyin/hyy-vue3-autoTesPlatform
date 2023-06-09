@@ -7,6 +7,9 @@
       <el-tab-pane label="Windows设备" disabled>
         <WindowsStystem />
       </el-tab-pane>
+      <el-tab-pane label="Docker设备" disabled>
+        <WindowsStystem />
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>

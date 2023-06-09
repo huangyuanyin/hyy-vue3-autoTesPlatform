@@ -104,19 +104,19 @@
                             <div class="card-num" v-if="it.plugin === 'interfaceTest'">
                               <div class="stat-info">
                                 <div class="stat-info-item" v-for="(item, index) in it.total_statistics" :key="'total_statistics' + index">
-                                  <el-popover
+                                  <!-- <el-popover
                                     placement="top"
                                     :width="500"
                                     trigger="click"
                                     @show="getClassName(item, it.id)"
                                     :disabled="statList[item.name] === '总数'"
-                                  >
-                                    <template #reference>
-                                      <div class="stat-info-item-value" :class="[statColor[item.name]]">
-                                        {{ item.value }}
-                                      </div>
-                                    </template>
-                                    <el-table
+                                  > -->
+                                  <!-- <template #reference> -->
+                                  <div class="stat-info-item-value" :class="[statColor[item.name]]" @click="getClassName(item, it)">
+                                    {{ item.value }}
+                                  </div>
+                                  <!-- </template> -->
+                                  <!-- <el-table
                                       :data="tableData"
                                       v-loading="tableDataLoading"
                                       max-height="30vh"
@@ -141,8 +141,8 @@
                                       :total="tableDataTotal"
                                       @size-change="handleTableDataSizeChange"
                                       @current-change="handleTableDataCurrentChange"
-                                    />
-                                  </el-popover>
+                                    /> -->
+                                  <!-- </el-popover> -->
                                   <div class="stat-info-item-desc">{{ statList[item.name] }}</div>
                                 </div>
                               </div>
@@ -266,12 +266,83 @@
         @current-change="handleMethodsDataCurrentChange"
       />
     </el-dialog>
+    <el-dialog
+      v-model="caseDialog"
+      custom-class="caseDialog"
+      width="60%"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
+      <template #header="{ close, titleId, titleClass }">
+        <div class="my-header">
+          <div class="left">
+            <h4 :id="titleId" :class="titleClass">{{ interfaceTitle }}</h4>
+            <span :class="[statColor[classNameTitle]]">
+              【 <span>{{ statList[classNameTitle] }}用例</span> 】
+            </span>
+          </div>
+          <div>
+            <el-button type="success" v-show="!fullcen" @click="handleDialogFullcen">
+              <el-icon class="el-icon--left"><FullScreen /></el-icon>
+              全屏
+            </el-button>
+            <el-button type="info" v-show="fullcen" @click="handleDialogFullcen">
+              <el-icon class="el-icon--left"><FullScreen /></el-icon>
+              还原
+            </el-button>
+            <el-button type="danger" @click="close2">
+              <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
+              关闭
+            </el-button>
+          </div>
+        </div>
+      </template>
+      <div class="demo-collapse">
+        <el-collapse accordion>
+          <el-collapse-item :name="item.provider_name" v-for="(item, index) in caseList" :key="'caseList' + index">
+            <template #title>
+              <div>
+                <span style="color: #409eff">{{ item.provider_name }}</span>
+                <el-tag style="margin-left: 1vw">{{ item.provider_count }}</el-tag>
+              </div>
+            </template>
+            <div>
+              <el-table
+                :data="item.class_data"
+                style="width: 100%"
+                @expand-change="getMethods2"
+                stripe
+                :row-key="row => row.class_name"
+                :expand-row-keys="defaultExpandedKeys"
+              >
+                <el-table-column type="expand">
+                  <template #default="props">
+                    <div m="4">
+                      <h3 style="color: #e6a23c">Methods：</h3>
+                      <el-table :data="methodsData" max-height="70vh" :border="true" style="width: 100%">
+                        <el-table-column label="方法名称" prop="method_name" width="200px" />
+                        <el-table-column label="参数" prop="case_param" />
+                        <el-table-column label="错误说明" prop="exception_details" />
+                        <el-table-column label="描述" prop="case_description" width="250px" />
+                      </el-table>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="项目名称" prop="project_name" />
+                <el-table-column label="class_name" prop="class_name" />
+              </el-table>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
-import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document } from '@element-plus/icons-vue'
+import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document, FullScreen } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 // @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
@@ -293,6 +364,8 @@ const logDialog = ref(false)
 const logTitle = ref('')
 const methodsDialog = ref(false)
 const methodsTitle = ref('')
+const interfaceTitle = ref('')
+const caseDialog = ref(false)
 const classNameTitle = ref('')
 const tableDataCurrentPage = ref(1)
 const tableDataPageSize = ref(5)
@@ -302,6 +375,7 @@ const methodsDataCurrentPage = ref(1)
 const methodsDataPageSize = ref(20)
 const methodsDataTotal = ref(0)
 const methodsDataLoading = ref(false)
+const fullcen = ref(false)
 const log = ref('暂无日志...')
 const cardTyp = {
   success: 'success-card',
@@ -353,6 +427,8 @@ const currentMethodsItem = ref(null)
 const currentMethodsId = ref(null)
 const currentMethodsType = ref(null)
 const currentLogVal = ref(null)
+const caseList = ref([])
+const defaultExpandedKeys = ref([])
 
 watch(
   () => props.runResult,
@@ -413,6 +489,7 @@ const handleLog = (item: any) => {
 }
 
 const objectSpanMethod = ({ row, column, rowIndex, columnIndex }) => {
+  console.log(`output->2323`, row, column, rowIndex, columnIndex)
   if (columnIndex === 0) {
     const _row = getRowCount(tableData.value).one[rowIndex]
     const _col = _row > 0 ? 1 : 0
@@ -453,32 +530,61 @@ const toLookTestTaskConfig = () => {
   // })
 }
 
-const getClassName = async (item: any, id) => {
+const getClassName = async (item: any, val) => {
   if (item.name === 'count') return
   currentItem.value = item
-  currentId.value = id
+  currentId.value = val.id
   handleClassNameApi(currentItem.value, currentId.value)
+  interfaceTitle.value = val.name
 }
 
 const handleClassNameApi = async (item, id) => {
-  tableDataLoading.value = true
+  // tableDataLoading.value = true
+  caseDialog.value = true
   let res = await getClassNameApi({
     task_details_history_id: id,
     status: statName[item.name],
     page: tableDataCurrentPage.value,
     page_size: tableDataPageSize.value
   })
-  tableDataLoading.value = false
   if (res.code === 1000) {
     classNameTitle.value = item.name
     // @ts-ignore
-    tableDataTotal.value = res.total
-    tableData.value = res.data.flatMap(({ project_name, class_name }) =>
-      class_name.map(classItem => ({
-        project_name: project_name,
-        class_name: classItem
-      }))
-    )
+    // tableDataTotal.value = res.total
+    // tableData.value = res.data.flatMap(({ project_name, class_name }) =>
+    //   class_name.map(classItem => ({
+    //     project_name: project_name,
+    //     class_name: classItem
+    //   }))
+    // )
+    caseList.value = res.data
+    caseList.value.map(item => {
+      item.class_data = item.class_data.flatMap(({ project_name, class_name }) =>
+        class_name.map(classItem => ({
+          project_name: project_name,
+          class_name: classItem
+        }))
+      )
+      console.log(`output->item.class_name`, item.class_data)
+    })
+  }
+}
+
+const getMethods2 = async (row, val) => {
+  if (defaultExpandedKeys.value.includes(row.class_name)) {
+    defaultExpandedKeys.value = []
+  } else {
+    defaultExpandedKeys.value = [row.class_name]
+  }
+  console.log(`output->defaultExpandedKeys`, row, defaultExpandedKeys.value)
+  let res = await getMethodsApi({
+    project_name: row.project_name,
+    class_name: row.class_name,
+    status: statName[currentItem.value.name],
+    task_details_history_id: currentId.value
+  })
+  if (res.code === 1000) {
+    methodsData.value = res.data
   }
 }
 
@@ -507,6 +613,30 @@ const handleMethods = async (item: any, type, val) => {
     methodsDataTotal.value = res.total
     methodsTitle.value = `${val.name} - ${item.project_name} - ${item.class_name}`
   }
+}
+
+const handleDialogFullcen = () => {
+  // 获取对话框 DOM 元素
+  const dialogEl = document.querySelector('.caseDialog')
+
+  // 切换全屏样式
+  if (dialogEl) {
+    fullcen.value = !fullcen.value
+    if (fullcen.value) {
+      dialogEl.classList.add('fullscreen')
+    } else {
+      dialogEl.classList.remove('fullscreen')
+    }
+  }
+}
+
+const close2 = () => {
+  fullcen.value = false
+  const dialogEl = document.querySelector('.caseDialog')
+  if (dialogEl) {
+    dialogEl.classList.remove('fullscreen')
+  }
+  caseDialog.value = false
 }
 
 const handleRun = (item: any) => {
@@ -1087,5 +1217,22 @@ const handleMethodsDataCurrentChange = (val: number) => {
 .box-item .el-popper__arrow::before {
   background: linear-gradient(45deg, #626f6f, #626f6f) !important;
   right: 0 !important;
+}
+
+.caseDialog {
+  .el-dialog__body {
+    padding-top: 0px !important;
+  }
+}
+
+.caseDialog.fullscreen {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  left: 0;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  z-index: 9999;
 }
 </style>
