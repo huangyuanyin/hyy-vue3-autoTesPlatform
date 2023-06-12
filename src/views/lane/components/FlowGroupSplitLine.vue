@@ -33,10 +33,10 @@ watch(
 const changeDrawer = (value: any) => {
   const disposeList2 = JSON.parse(JSON.stringify(disposeList))
   if (!value) return (drawer.value = value)
-  if (laneData.value.length === 0 && value[1] === 'NetSign项目部署') {
-    ElMessage.warning('NetSign项目部署阶段需在NetSign环境准备阶段之后')
-    return false
-  }
+  // if (laneData.value.length === 0 && value[1] === 'NetSign项目部署') {
+  //   ElMessage.warning('NetSign项目部署阶段需在NetSign环境准备阶段之后')
+  //   return false
+  // }
   drawer.value = value[0]
   if (!drawer.value) {
     let name = ''

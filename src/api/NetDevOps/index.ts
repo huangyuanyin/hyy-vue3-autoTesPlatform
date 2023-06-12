@@ -375,3 +375,13 @@ export function getHistoryReportApi(params) {
     params
   })
 }
+
+/* ---------------------------- /devops/task_detail_history/ ---------------------------- */
+export function getTaskDetailHistorytApi(params) {
+  return request({
+    url: `/devops/task_detail_history/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}

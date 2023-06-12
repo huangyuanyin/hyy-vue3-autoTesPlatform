@@ -419,22 +419,23 @@ const confirmClick = async (formEl: FormInstance | undefined) => {
 }
 
 const deleteTask = () => {
-  let isHasCount = 0
-  JSON.parse(localStorage.getItem('flows')).map(item => {
-    item.task_stages.map(it => {
-      it.task_details.map(i => {
-        if (i.plugin === 'netSignArrange') {
-          isHasCount++
-        }
-      })
-    })
-  })
-  if (isHasCount !== 0) {
-    ElMessage.error('环境部署必须在环境准备之后，请先删除环境部署任务！')
-    return
-  } else {
-    emit('deleteTask')
-  }
+  // let isHasCount = 0
+  // JSON.parse(localStorage.getItem('flows')).map(item => {
+  //   item.task_stages.map(it => {
+  //     it.task_details.map(i => {
+  //       if (i.plugin === 'netSignArrange') {
+  //         isHasCount++
+  //       }
+  //     })
+  //   })
+  // })
+  // if (isHasCount !== 0) {
+  //   ElMessage.error('环境部署必须在环境准备之后，请先删除环境部署任务！')
+  //   return
+  // } else {
+  //   emit('deleteTask')
+  // }
+  emit('deleteTask')
 }
 
 const cloneObj = obj => {

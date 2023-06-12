@@ -68,15 +68,21 @@
                   />
                 </el-select> -->
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="getDeviceInfo(item, index)">
-                  <el-option :label="it.ip" :value="it.ip" v-for="(it, index) in hasDeviceList" :key="'hasDeviceList' + index">
+                  <el-option
+                    :label="it.ip"
+                    :value="it.ip"
+                    v-for="(it, index) in hasDeviceList"
+                    :key="'hasDeviceList' + index"
+                    :disabled="it.disabled"
+                  >
                     <div style="display: flex; justify-content: space-between">
                       <span class="main-fileName"> {{ it.ip }}</span>
-                      <!-- <div>
-                        <span class="main-type" :style="{ color: it.using ? '#67C23A' : '#e6a23c' }">
+                      <div>
+                        <span class="main-type" :style="{ color: it.using ? '#F56C6C' : '#409EFF' }">
                           {{ it.using ? '占用中' : '未占用' }}
                         </span>
                         <span class="main-create_user">{{ it.operate_user }} </span>
-                      </div> -->
+                      </div>
                     </div>
                   </el-option>
                 </el-select>
@@ -231,17 +237,65 @@ watch(
 watch(
   () => props.taskDetailInfo,
   () => {
-    // @ts-ignore
-    deviceList.value = props.taskDetailInfo
-    hasDeviceList.value = []
-    JSON.parse(localStorage.getItem('flows')).map(item => {
-      item.task_stages.map(it => {
-        it.task_details.map(i => {
-          if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
-            hasDeviceList.value.push({ ip: i.dispose[0].serverName })
-          }
+    nextTick(async () => {
+      let currentDevice = []
+      currentFlows.value.map(item => {
+        item.task_stages.map(it => {
+          it.task_details.map(i => {
+            if (i.plugin === 'netSignArrange') {
+              currentDevice.push(i.dispose[0].serverName)
+            }
+          })
         })
       })
+      // @ts-ignore
+      deviceList.value = props.taskDetailInfo
+      hasDeviceList.value = []
+      let isHasNetSignPrepare = ref(false)
+      JSON.parse(localStorage.getItem('flows')).map(item => {
+        item.task_stages.map(it => {
+          it.task_details.map(i => {
+            if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
+              isHasNetSignPrepare.value = true
+              hasDeviceList.value.push({ ip: i.dispose[0].serverName })
+            }
+          })
+        })
+      })
+      if (hasDeviceList.value.length === 0 && !isHasNetSignPrepare.value) {
+        const params = {
+          page: 1,
+          page_size: 100
+        }
+        let res = await getDeviceApi(params)
+        if (res.code === 1000) {
+          hasDeviceList.value = res.data.filter(
+            item =>
+              item.using === false ||
+              item.operate_user === null ||
+              item.operate_user === JSON.parse(localStorage.getItem('userInfo')).username
+          )
+          currentDevice.map(item => {
+            hasDeviceList.value.map(it => {
+              if (item === it.ip) {
+                hasDeviceList.value.map(i => {
+                  if (i.ip === item) {
+                    i.disabled = true
+                  }
+                })
+              }
+            })
+          })
+        }
+      } else {
+        hasDeviceList.value.map(item => {
+          currentDevice.map(it => {
+            if (item.ip === it) {
+              item.disabled = true
+            }
+          })
+        })
+      }
     })
   }
 )

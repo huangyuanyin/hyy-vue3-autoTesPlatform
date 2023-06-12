@@ -96,8 +96,9 @@
                                 <div class="report">
                                   <!-- <el-icon><Document /></el-icon> <span>扫描报告</span> -->
                                 </div>
+                                <ConfigDetail :id="it.id" />
                                 <div class="log" @click.stop="handleLog(it)">
-                                  <el-icon><Document /></el-icon> <span>日志</span>
+                                  <el-icon><Document /></el-icon><span>日志</span>
                                 </div>
                               </div>
                             </div>
@@ -152,6 +153,7 @@
                             <div class="card-info">
                               <span>{{ it.duration_time }}</span>
                               <div class="operate">
+                                <ConfigDetail :id="it.id" />
                                 <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon><span>日志</span>
                                 </div>
@@ -168,6 +170,7 @@
                             <div class="card-info">
                               <span>{{ it.duration_time }}</span>
                               <div class="operate">
+                                <ConfigDetail :id="it.id" />
                                 <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon> <span>日志</span>
                                 </div>
@@ -184,6 +187,7 @@
                             <div class="card-info">
                               <span>{{ it.duration_time }}</span>
                               <div class="operate">
+                                <ConfigDetail :id="it.id" />
                                 <div class="log" @click.stop="handleLog(it)">
                                   <el-icon><Document /></el-icon> <span>日志</span>
                                 </div>
@@ -299,7 +303,7 @@
         </div>
       </template>
       <div class="demo-collapse">
-        <el-collapse accordion>
+        <el-collapse accordion @change="changeCollapse">
           <el-collapse-item :name="item.provider_name" v-for="(item, index) in caseList" :key="'caseList' + index">
             <template #title>
               <div>
@@ -348,6 +352,7 @@ import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document, FullScreen 
 import { ElMessage } from 'element-plus'
 // @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
+import ConfigDetail from './ConfigDetail.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getClassNameApi, getMethodsApi } from '@/api/NetDevOps'
 
@@ -423,6 +428,7 @@ const statName = {
   skipped_count: 'SKIPPED'
 }
 const groups = ref([])
+const currentCollpose = ref(null)
 const currentItem = ref(null)
 const currentId = ref(null)
 const currentMethodsItem = ref(null)
@@ -532,6 +538,10 @@ const toLookTestTaskConfig = () => {
   // })
 }
 
+const changeCollapse = val => {
+  currentCollpose.value = val
+}
+
 const getClassName = async (item: any, val) => {
   if (item.name === 'count') return
   currentItem.value = item
@@ -584,7 +594,8 @@ const getMethods2 = async (row, val) => {
     project_name: row.project_name,
     class_name: row.class_name,
     status: statName[currentItem.value.name],
-    task_details_history_id: currentId.value
+    task_details_history_id: currentId.value,
+    provider_name: currentCollpose.value
   })
   if (res.code === 1000) {
     methodsData.value = res.data
@@ -941,6 +952,14 @@ const handleMethodsDataCurrentChange = (val: number) => {
                         align-items: center;
                         .report,
                         .log {
+                          display: flex;
+                          align-items: center;
+                          .el-icon {
+                            margin-right: 5px;
+                            color: #8b8b8b;
+                          }
+                        }
+                        .config {
                           display: flex;
                           align-items: center;
                           .el-icon {
