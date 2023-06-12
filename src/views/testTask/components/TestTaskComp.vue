@@ -615,7 +615,8 @@ const tableData = [
   }
 ]
 let intervalId = ref(null)
-let socket = new WebSocket(`ws://10.4.150.55:8023/ws/get_task_result/`)
+let wsLink = import.meta.env.MODE === 'development' ? 'ws://10.4.150.27:8023' : 'ws://10.4.150.55:8023'
+let socket = new WebSocket(`${wsLink}/ws/get_task_result/`)
 
 watch(
   () => props.keywords,
