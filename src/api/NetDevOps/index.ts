@@ -385,3 +385,39 @@ export function getTaskDetailHistorytApi(params) {
     params
   })
 }
+
+/* ---------------------------- /devops/docker_device_manage/ ---------------------------- */
+export function getDockerDeviceManageApi(params) {
+  return request({
+    url: `/devops/docker_device_manage/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+export function addDockerDeviceManageApi(params) {
+  return request({
+    url: `/devops/docker_device_manage/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function editDockerDeviceManageApi(params) {
+  return request({
+    url: `/devops/docker_device_manage/`,
+    method: 'put',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function deleteDockerDeviceManageApi(id) {
+  return request({
+    url: `/devops/docker_device_manage/${id}`,
+    method: 'delete',
+    urlType: 'NetDevOps'
+  })
+}

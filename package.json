@@ -8,7 +8,7 @@
     "build:stage": "vite build --mode staging",
     "prod": "vite serve --mode production",
     "build:prod": "vite build --mode production",
-    "build:53":"vite build --mode 53",
+    "build:53": "vite build --mode 53",
     "preview": "vite preview",
     "format": "prettier --write src/* src/*/* src/*/*/* src/*/*/*/*"
   },
@@ -43,7 +43,7 @@
     "@vitejs/plugin-vue": "^2.3.3",
     "postcss-px-to-viewport": "^1.1.1",
     "prettier": "^2.8.0",
-    "unplugin-auto-import": "^0.8.8",
+    "unplugin-auto-import": "^0.16.4",
     "unplugin-vue-components": "^0.19.6",
     "vite": "^2.9.9"
   },

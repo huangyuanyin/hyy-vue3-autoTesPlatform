@@ -7,8 +7,8 @@
       <el-tab-pane label="Windows设备" disabled>
         <WindowsStystem />
       </el-tab-pane>
-      <el-tab-pane label="Docker设备" disabled>
-        <WindowsStystem />
+      <el-tab-pane label="Docker设备">
+        <DockerStystem />
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -18,6 +18,7 @@
 import { ref } from 'vue'
 import LinuxSystem from './components/LinuxSystem.vue'
 import WindowsStystem from './components/WindowsStystem.vue'
+import DockerStystem from './components/DockerStystem.vue'
 </script>
 
 <style lang="scss" scoped></style>

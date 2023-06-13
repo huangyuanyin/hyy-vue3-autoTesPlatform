@@ -40,7 +40,14 @@ export default defineConfig(({ mode }) => {
       vue(),
       ElementPlus(),
       AutoImport({
-        resolvers: [ElementPlusResolver()]
+        resolvers: [ElementPlusResolver()],
+        include: [
+          /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
+          /\.vue$/,
+          /\.vue\?vue/, // .vue
+          /\.md$/ // .md
+        ],
+        imports: ['vue'] // auto import packages
       }),
       Components({
         resolvers: [ElementPlusResolver()]
