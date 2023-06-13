@@ -39,6 +39,44 @@ const getTaskInfo = async () => {
   if (res.code === 1000) {
     taskTableData.value = res.data || []
     taskTotal.value = res.total
+    taskTableData.value.map(item => {
+      item.device_list = item.device_list.map(it => {
+        return [
+          {
+            label: '设备IP',
+            value: it.ip
+          },
+          {
+            label: '主板类型：',
+            value: it.main_board_type
+          },
+          {
+            label: '设备型号：',
+            value: it.machine_type
+          },
+          {
+            label: '设备编码：',
+            value: it.config_code
+          },
+          {
+            label: 'cavium卡：',
+            value: it.cavium_card_type
+          },
+          {
+            label: '国密卡：',
+            value: it.gm_card_type
+          },
+          {
+            label: '设备序列号：',
+            value: it.machine_sn
+          },
+          {
+            label: '产品ID：',
+            value: it.product_id
+          }
+        ]
+      })
+    })
   }
 }
 

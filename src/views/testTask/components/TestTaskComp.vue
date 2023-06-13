@@ -42,6 +42,33 @@
           <el-tag v-else>是</el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="device_list" label="占用设备状态" align="center">
+        <template #default="item">
+          <span v-if="item.row.device_list.length === 0"> - </span>
+          <el-popover placement="bottom" trigger="click" popper-class="devicePopper">
+            <template #reference>
+              <el-tag v-if="item.row.device_list.length !== 0">占用：{{ item.row.device_list.length }}</el-tag>
+            </template>
+            <el-card class="box-card" shadow="never">
+              <el-descriptions
+                class="showServerConfig"
+                :title="'设备信息' + (index + 1) + '：'"
+                :column="3"
+                border
+                v-for="(device_list_item, index) in item.row.device_list"
+                :key="'device_list' + index"
+              >
+                <el-descriptions-item v-for="(it, index) in device_list_item" :key="'device_list_item' + index">
+                  <template #label>
+                    <div class="cell-item">{{ it.label }}</div>
+                  </template>
+                  {{ it.value }}
+                </el-descriptions-item>
+              </el-descriptions>
+            </el-card>
+          </el-popover>
+        </template>
+      </el-table-column>
       <!-- <el-table-column prop="status" label="任务状态" align="center" width="200">
         <template #default="item">
           <el-tag v-if="item.row.status === 'not_start'" type="warning">未运行</el-tag>
@@ -1345,6 +1372,12 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+}
+.devicePopper {
+  width: auto !important;
+  .showServerConfig {
+    margin-bottom: 20px;
   }
 }
 </style>

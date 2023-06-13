@@ -72,7 +72,7 @@
           <el-input v-model="form.port" autocomplete="off" :disabled="disabled" :maxlength="5" @input="limitNumericInput" />
         </el-form-item>
         <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
-          <el-input v-model="form.remark" autocomplete="off" type="textarea" :rows="1" :disabled="disabled" />
+          <el-input v-model="form.remark" autocomplete="off" type="textarea" :rows="3" :disabled="disabled" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -283,10 +283,13 @@ onMounted(() => {
     }
   }
   .el-select {
-    width: 300px;
+    width: 400px;
   }
   .el-input {
-    width: 300px;
+    width: 400px;
+  }
+  .el-textarea {
+    width: 600px;
   }
   .el-pagination {
     display: flex;
@@ -297,19 +300,5 @@ onMounted(() => {
     cursor: pointer;
     color: #409eff;
   }
-}
-.moreButton {
-  display: flex;
-  flex-direction: column;
-  .el-button {
-    margin-bottom: 5px;
-    margin-left: 0;
-  }
-}
-</style>
-
-<style lang="scss">
-.moreGroupPopover {
-  min-width: 60px !important;
 }
 </style>
