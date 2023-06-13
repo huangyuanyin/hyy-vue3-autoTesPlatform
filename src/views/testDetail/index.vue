@@ -47,6 +47,23 @@
     </div>
   </div>
   <el-dialog v-model="reportDialogVisible" :title="reportTitle" width="50%" draggable custom-class="report-dialog">
+    <el-descriptions title="一、流水线基本信息：" :column="2" :size="size" border>
+      <el-descriptions-item label="任务名称：">{{ recentlyRunLog.name }}</el-descriptions-item>
+      <el-descriptions-item label="执行人：">{{ recentlyRunLog.create_user }}</el-descriptions-item>
+      <el-descriptions-item label="执行时间：">{{ recentlyRunLog.duration_time }}</el-descriptions-item>
+      <el-descriptions-item label="运行结果：">
+        <span
+          :style="{
+            color: statusColorMap[recentlyRunLog.status]
+          }"
+        >
+          {{ statusMap[recentlyRunLog.status] }}
+        </span>
+      </el-descriptions-item>
+    </el-descriptions>
+    <el-descriptions title="二、流水线配置信息：" :column="2" :size="size" border class="descriptions-config">
+      <el-descriptions-item label="流水线名称：">{{ recentlyRunLog.name }}</el-descriptions-item>
+    </el-descriptions>
     <pre>{{ reportData }}</pre>
     <template #footer>
       <span class="dialog-footer">
@@ -83,6 +100,23 @@ const reportTitle = ref('')
 const reportData = ref('')
 const reportUrl = ref('')
 const tabId = ref(null)
+const size = ref('')
+const statusMap = {
+  wait_execute: '待执行',
+  not_start: '未运行',
+  in_progress: '运行中',
+  success: '运行成功',
+  fail: '运行失败',
+  channel: '已取消'
+}
+const statusColorMap = {
+  wait_execute: '#909399',
+  not_start: '#909399',
+  in_progress: '#409EFF',
+  success: '#67C23A',
+  fail: '#F56C6C',
+  channel: '#F56C6C'
+}
 let wsLink = import.meta.env.MODE === 'development' ? 'ws://10.4.150.27:8023' : 'ws://10.4.150.55:8023'
 let socket = new WebSocket(`${wsLink}/ws/get_task_history/${route.query.id}`)
 let additionalSocket = null // 新的 WebSocket 实例
@@ -126,6 +160,7 @@ const toRun = () => {
 }
 
 const toReport = (type?) => {
+  console.log(`output->recentlyRunLog`, recentlyRunLog.value)
   reportData.value = ''
   reportDialogVisible.value = true
   if (type && type === 'recent') {
@@ -367,7 +402,10 @@ onUnmounted(() => {
 <style lang="scss">
 .report-dialog {
   .el-dialog__body {
-    padding-top: 0px !important;
+    padding-top: 30px !important;
+  }
+  .descriptions-config {
+    margin-top: 30px;
   }
 }
 </style>

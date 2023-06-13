@@ -52,7 +52,7 @@
               label-position="top"
               status-icon
             >
-              <el-form-item label="可选设备" prop="number" :required="true">
+              <el-form-item label="可选设备" prop="serverName" :required="true">
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index">
                   <el-option
                     :label="item.ip"
@@ -64,19 +64,19 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="容器数量" prop="number" :required="true">
-                <el-input v-model="item.number" placeholder="请输入容器数量" />
+                <el-input v-model="item.number" placeholder="请输入容器数量" :maxlength="5" @input="limitNumericInput" />
               </el-form-item>
               <el-form-item label="文件上传" prop="file" :required="true">
                 <el-upload
                   ref="uploadFile"
                   class="uploadFile-demo"
+                  v-model="item.file"
                   drag
                   action=""
                   accept=""
                   :limit="1"
                   :auto-upload="false"
-                  :on-exceed="handleExceed"
-                  :on-change="handleUpload"
+                  :on-change="handleChange"
                 >
                   <el-icon class="el-icon--upload"><upload-filled /></el-icon>
                   <div class="el-upload__text">拖拽文件至此处或<em>点击上传</em></div>
@@ -111,10 +111,9 @@
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules, UploadProps, UploadRawFile, genFileId, UploadInstance } from 'element-plus'
 import { Delete, FullScreen, UploadFilled } from '@element-plus/icons-vue'
-import { getDeviceApi, getProductPackageApi, getNetsignVersionApi, getNetsignBranchApi } from '@/api/NetDevOps/index'
+import { getDockerDeviceManageApi, getProductPackageApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
-import { getInterfaceTestConfigurationFile } from '@/data/InterfaceTestConfigurationFile'
 
 const props = defineProps({
   taskDetailDrawer: {
@@ -136,7 +135,6 @@ const configFileDialog = ref(false)
 const configFileDialogTitle = ref('')
 const configFileDialogLog = ref('')
 const configId = ref(null)
-const netsign_code_version_id = ref(null)
 const ishowDrawer = ref(false)
 const taskDetailFormRef = ref<FormInstance>()
 const taskDetailForm = reactive({
@@ -149,26 +147,18 @@ const taskDetailFormRules = reactive<FormRules>({
   ifrs: [{ required: true, message: '是否重启服务为必填项', trigger: 'change' }]
 })
 const deviceList = ref(JSON.parse(JSON.stringify(disposeList['dockerDeployment'])))
-const cloneDeviceObj = ref(JSON.parse(JSON.stringify(disposeList['dockerDeployment'][0])))
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   number: [{ required: true, message: '容器数量不能为空', trigger: 'blur' }],
   shell: [{ required: true, message: 'shell脚本不能为空', trigger: 'blur' }],
+  file: [{ required: true, message: '文件不能为空', trigger: 'blur' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
-  pendingVersion: [{ required: true, message: '待测版本不能为空', trigger: 'blur' }],
-  log: [{ required: true, message: '配置文件不能为空', trigger: 'change' }],
-  branch: [{ required: true, message: '代码分支不能为空', trigger: 'change' }],
-  netsignVersion: [{ required: true, message: '适用版本不能为空', trigger: 'change' }]
+  pendingVersion: [{ required: true, message: '待测版本不能为空', trigger: 'blur' }]
 })
-const selectDeviceList = ref([])
-const selectProductList = ref([])
 let currentFlows = ref(JSON.parse(localStorage.getItem('flows')))
 const isPassVerification = ref(false)
 const hasDeviceList = ref([])
-const branchList = ref([])
-const netsignVersionList = ref([])
 const uploadFile = ref<UploadInstance>()
-const uploadFileList = ref([]) //文件列表
 
 watch(
   () => props.taskDetailDrawer,
@@ -201,27 +191,27 @@ watch(
     // @ts-ignore
     deviceList.value = props.taskDetailInfo
     hasDeviceList.value = []
-    let isHasNetSignPrepare = false
-    JSON.parse(localStorage.getItem('flows')).map(item => {
-      item.task_stages.map(it => {
-        it.task_details.map(i => {
-          if (i.plugin === 'netSignPrepare') {
-            isHasNetSignPrepare = true
-          }
-          if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
-            hasDeviceList.value.push({ ip: i.dispose[0].serverName })
-          }
-        })
-      })
-    })
-    if (hasDeviceList.value.length === 0 && !isHasNetSignPrepare) {
+    // let isHasNetSignPrepare = false
+    // JSON.parse(localStorage.getItem('flows')).map(item => {
+    //   item.task_stages.map(it => {
+    //     it.task_details.map(i => {
+    //       if (i.plugin === 'netSignPrepare') {
+    //         isHasNetSignPrepare = true
+    //       }
+    //       if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
+    //         hasDeviceList.value.push({ ip: i.dispose[0].serverName })
+    //       }
+    //     })
+    //   })
+    // })
+    if (hasDeviceList.value.length === 0) {
       const params = {
         page: 1,
         page_size: 100
       }
-      let res = await getDeviceApi(params)
+      let res = await getDockerDeviceManageApi(params)
       if (res.code === 1000) {
-        hasDeviceList.value = res.data.filter(item => item.using === false)
+        hasDeviceList.value = res.data
         // 遍历currentDevice和hasDeviceList，如果currentDevice中的设备在hasDeviceList中，则将其置为不可选
         currentDevice.map(item => {
           hasDeviceList.value.map(it => {
@@ -247,27 +237,14 @@ watch(
   }
 )
 
-const handleExceed: UploadProps['onExceed'] = files => {
-  uploadFile.value!.clearFiles()
-  const file = files[0] as UploadRawFile
-  file.uid = genFileId()
-  uploadFile.value!.handleStart(file)
+const limitNumericInput = val => {
+  deviceList.value[0].number = val.replace(/\D/g, '')
 }
 
 // 文件上传
-const handleUpload = async (file, fileList) => {
-  uploadFileList.value = fileList[0].raw
-  console.log(`output->uploadFileList.value`, uploadFileList.value)
-}
-
-const getNetsignBranch = async id => {
-  const params = {
-    netsign_code_version_id: id
-  }
-  let res = await getNetsignBranchApi(params)
-  if (res.code === 1000) {
-    branchList.value = res.data || []
-  }
+const handleChange = async (file, fileList) => {
+  console.log(`output->file`, file.raw.name)
+  deviceList.value[0].file = file.raw.name
 }
 
 const closeDrawer = (value?: any) => {
@@ -279,7 +256,6 @@ const cancelClick = async (done?: () => void) => {
   if (!taskDetailFormRef.value) return
   await taskDetailFormRef.value.validate(async (valid, fields) => {
     if (valid) {
-      deviceList.value[0].file = uploadFileList.value
       const forms = deviceFormRef.value
       let isAllFormsValid = true
       if (forms) {
@@ -310,45 +286,6 @@ const cancelClick = async (done?: () => void) => {
 
 const deleteTask = () => {
   emit('deleteTask')
-}
-
-const getDeviceInfo = async (val, index) => {
-  let res = await getDeviceApi({ device_manage_ip: val.serverName })
-  if (res.code === 1000) {
-    deviceList.value[index].showServerConfig[0].value = res.data.ip
-    deviceList.value[index].showServerConfig[1].value = res.data.main_board_type
-    deviceList.value[index].showServerConfig[2].value = res.data.machine_type
-    deviceList.value[index].showServerConfig[3].value = res.data.mode_code
-    deviceList.value[index].showServerConfig[4].value = res.data.cavium_card_type
-    deviceList.value[index].showServerConfig[5].value = res.data.gm_card_type
-
-    deviceList.value[index].serverConfig.serverIP = res.data.ip
-    deviceList.value[index].serverConfig.serverPasswd = res.data.password
-    deviceList.value[index].serverConfig.userName = res.data.username
-    deviceList.value[index].serverConfig.machineType = res.data.machine_type
-    deviceList.value[index].serverConfig.modelCode = res.data.mode_code
-    deviceList.value[index].serverConfig.configCode = res.data.config_code
-
-    deviceList.value[index].packagePath = ''
-    deviceList.value[index].packageID = null
-    console.log(`output->deviceList.value[index]`, deviceList.value[index].log)
-  }
-}
-
-const removeDuplicateObj = arr => {
-  let obj = {}
-  arr = arr.reduce((newArr, next) => {
-    obj[next.file_name] ? '' : (obj[next.file_name] = true && newArr.push(next))
-    return newArr
-  }, [])
-  return arr
-}
-
-const handleFullscreen = (val, id) => {
-  configFileDialog.value = true
-  configFileDialogTitle.value = `【${val.serverName}】的配置文件`
-  configFileDialogLog.value = val.log
-  configId.value = id
 }
 
 const onCodeChange = val => {

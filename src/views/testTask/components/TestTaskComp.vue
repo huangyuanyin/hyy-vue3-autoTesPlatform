@@ -33,16 +33,17 @@
     >
       <el-table-column prop="name" label="任务名称" width="250" align="center">
         <template #default="scope">
-          <span class="item-ip" @click="toDetail('detail', scope.row)">{{ scope.row.name }}</span>
+          <span class="item-ip" v-if="scope.row.draft === false" @click="toDetail('detail', scope.row)">{{ scope.row.name }}</span>
+          <span class="item-ip" style="color: #909399" v-else @click="toDetail('detail', scope.row)">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="draft" label="是否草稿" align="center" width="180">
+      <!-- <el-table-column prop="draft" label="是否草稿" align="center" width="180">
         <template #default="item">
           <el-tag v-if="item.row.draft === false" type="info">否</el-tag>
           <el-tag v-else>是</el-tag>
         </template>
-      </el-table-column>
-      <el-table-column prop="device_list" label="占用设备状态" align="center">
+      </el-table-column> -->
+      <el-table-column prop="device_list" label="占用设备详情" align="center" width="200">
         <template #default="item">
           <span v-if="item.row.device_list.length === 0"> - </span>
           <el-popover placement="bottom" trigger="click" popper-class="devicePopper">
@@ -65,6 +66,9 @@
                   {{ it.value }}
                 </el-descriptions-item>
               </el-descriptions>
+              <el-button v-if="item.row.status !== 'in_progress'" type="warning" class="shifang" @click="handleRelease(item.row)">
+                释 放
+              </el-button>
             </el-card>
           </el-popover>
         </template>
@@ -123,6 +127,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="create_user" label="创建人" width="150" align="center" />
+      <el-table-column prop="created_time" label="创建时间" width="200" align="center" />
       <el-table-column fixed="right" label="操作" align="center" width="180">
         <template #default="item">
           <div>
@@ -1378,6 +1383,10 @@ onUnmounted(() => {
   width: auto !important;
   .showServerConfig {
     margin-bottom: 20px;
+  }
+  .shifang {
+    float: right;
+    margin-bottom: 15px;
   }
 }
 </style>
