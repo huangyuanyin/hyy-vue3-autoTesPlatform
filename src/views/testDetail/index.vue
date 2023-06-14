@@ -52,21 +52,21 @@
     </template>
     <template #default>
       <el-descriptions title="一、流水线基本信息：" :column="2" :size="size" class="baseInfo-config">
-        <el-descriptions-item label="任务名称：">{{ recentlyRunLog.name }}</el-descriptions-item>
-        <el-descriptions-item label="执行人：">{{ recentlyRunLog.create_user }}</el-descriptions-item>
-        <el-descriptions-item label="执行时间：">{{ recentlyRunLog.duration_time }}</el-descriptions-item>
+        <el-descriptions-item label="任务名称：">{{ reportData.name }}</el-descriptions-item>
+        <el-descriptions-item label="执行人：">{{ reportData.create_user }}</el-descriptions-item>
+        <el-descriptions-item label="执行时间：">{{ reportData.duration_time }}</el-descriptions-item>
         <el-descriptions-item label="运行结果：">
           <span
             :style="{
-              color: statusColorMap[recentlyRunLog.status]
+              color: statusColorMap[reportData.status]
             }"
           >
-            {{ statusMap[recentlyRunLog.status] }}
+            {{ statusMap[reportData.status] }}
           </span>
         </el-descriptions-item>
       </el-descriptions>
       <div class="lane_config" style="font-size: 16px">二、流水线配置信息：</div>
-      <div class="lane_config_items" v-for="(it, index) in recentlyRunLog.task_swim_lanes_history" :key="'task_swim_lanes_history' + index">
+      <div class="lane_config_items" v-for="(it, index) in reportData.task_swim_lanes_history" :key="'task_swim_lanes_history' + index">
         <el-collapse v-model="activeNames" @change="handleChange">
           <el-collapse-item :title="'阶段' + (index + 1) + '： ' + it.name" :name="it.name">
             <el-card class="box-card" v-for="(i, index) in it.task_stages_history" :key="'task_stages_history' + index" shadow="never">
@@ -268,7 +268,7 @@ let intervalId = ref(null)
 const isUpdateHistory = ref(false)
 const reportDialogVisible = ref(false)
 const reportTitle = ref('')
-const reportData = ref('')
+const reportData = ref({})
 const reportUrl = ref('')
 const tabId = ref(null)
 const size = ref('')
@@ -337,13 +337,16 @@ const toRun = () => {
 
 const toReport = async (type?) => {
   console.log(`output->recentlyRunLog`, recentlyRunLog.value)
-  reportData.value = ''
+  activeNames.value = []
+  reportData.value = {}
   reportDialogVisible.value = true
   if (type && type === 'recent') {
-    // getHistoryReport('get', recentlyRunLog.value.id)
+    getHistoryReport('get', recentlyRunLog.value.id)
+    reportData.value = recentlyRunLog.value
     reportTitle.value = `最近运行 报告`
   } else {
-    // getHistoryReport('get', tabId.value)
+    getHistoryReport('get', tabId.value)
+    reportData.value = runDetailLog.value
     reportTitle.value = `#${tabName.value} 运行报告`
   }
 }
@@ -357,7 +360,7 @@ const getHistoryReport = async (type, id) => {
   type === 'get' ? (params['task_history_id'] = id) : (params['download_id'] = id)
   let res = await getHistoryReportApi(params)
   if (res.code === 1000) {
-    reportData.value = res.data.report_data
+    // reportData.value = res.data.report_data
     reportUrl.value = res.data.download_url
   }
 }
