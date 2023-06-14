@@ -74,18 +74,11 @@ export const disposeList = {
   dockerDeployment: [
     {
       serverName: '',
-      showServerConfig: [
-        { label: '设备IP：', value: '' },
-        { label: '主板类型：', value: '' },
-        { label: '设备型号：', value: '' },
-        { label: '设备编码：', value: '' },
-        { label: 'cavium卡：', value: '' },
-        { label: '国密卡：', value: '' }
-      ],
       serverConfig: {},
       number: null,
-      file: null,
-      shell: '# input your command  here \necho hello,world!'
+      file_name: null,
+      file_path: null,
+      shell: '# 此处输入shell命令 \necho hello,world!'
     }
   ],
   executeCommand: [{}]

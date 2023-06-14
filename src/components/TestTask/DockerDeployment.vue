@@ -53,7 +53,7 @@
               status-icon
             >
               <el-form-item label="可选设备" prop="serverName" :required="true">
-                <el-select v-model="item.serverName" placeholder="请选择设备" :key="index">
+                <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="selectDevice">
                   <el-option
                     :label="item.ip"
                     :value="item.ip"
@@ -66,22 +66,27 @@
               <el-form-item label="容器数量" prop="number" :required="true">
                 <el-input v-model="item.number" placeholder="请输入容器数量" :maxlength="5" @input="limitNumericInput" />
               </el-form-item>
-              <el-form-item label="文件上传" prop="file" :required="true">
+              <el-form-item label="文件上传" prop="file_name" :required="true">
                 <el-upload
                   ref="uploadFile"
                   class="uploadFile-demo"
-                  v-model="item.file"
+                  v-model="item.file_name"
                   drag
                   action=""
                   accept=""
                   :limit="1"
-                  :auto-upload="false"
+                  with-credentials
+                  :show-file-list="false"
                   :on-change="handleChange"
                 >
                   <el-icon class="el-icon--upload"><upload-filled /></el-icon>
                   <div class="el-upload__text">拖拽文件至此处或<em>点击上传</em></div>
                   <template #tip>
-                    <div class="el-upload__tip text-red">Tips：一次只能上传一个文件,新文件将会覆盖旧文件</div>
+                    <div class="el-upload__tip" style="color: red">Tips：一次只能上传一个文件,新文件将会覆盖旧文件</div>
+                    <div v-if="item.file_name" style="display: flex; align-items: center; justify-content: space-between">
+                      <div>{{ item.file_name }}</div>
+                      <el-icon class="clearFile" @click="clearFile"><CloseBold /></el-icon>
+                    </div>
                   </template>
                 </el-upload>
               </el-form-item>
@@ -110,8 +115,8 @@
 <script lang="ts" setup>
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules, UploadProps, UploadRawFile, genFileId, UploadInstance } from 'element-plus'
-import { Delete, FullScreen, UploadFilled } from '@element-plus/icons-vue'
-import { getDockerDeviceManageApi, getProductPackageApi } from '@/api/NetDevOps/index'
+import { CloseBold, FullScreen, UploadFilled } from '@element-plus/icons-vue'
+import { getDockerDeviceManageApi, getProductPackageApi, uploadSupplyJarApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
 
@@ -151,7 +156,7 @@ const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   number: [{ required: true, message: '容器数量不能为空', trigger: 'blur' }],
   shell: [{ required: true, message: 'shell脚本不能为空', trigger: 'blur' }],
-  file: [{ required: true, message: '文件不能为空', trigger: 'blur' }],
+  file_name: [{ required: true, message: '文件不能为空', trigger: 'change' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
   pendingVersion: [{ required: true, message: '待测版本不能为空', trigger: 'blur' }]
 })
@@ -191,19 +196,6 @@ watch(
     // @ts-ignore
     deviceList.value = props.taskDetailInfo
     hasDeviceList.value = []
-    // let isHasNetSignPrepare = false
-    // JSON.parse(localStorage.getItem('flows')).map(item => {
-    //   item.task_stages.map(it => {
-    //     it.task_details.map(i => {
-    //       if (i.plugin === 'netSignPrepare') {
-    //         isHasNetSignPrepare = true
-    //       }
-    //       if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
-    //         hasDeviceList.value.push({ ip: i.dispose[0].serverName })
-    //       }
-    //     })
-    //   })
-    // })
     if (hasDeviceList.value.length === 0) {
       const params = {
         page: 1,
@@ -237,14 +229,50 @@ watch(
   }
 )
 
+const selectDevice = val => {
+  hasDeviceList.value.map(item => {
+    if (item.ip === val) {
+      deviceList.value[0].serverConfig = {
+        ip: item.ip,
+        port: item.port,
+        username: item.username,
+        password: item.password
+      }
+    }
+  })
+}
+
 const limitNumericInput = val => {
   deviceList.value[0].number = val.replace(/\D/g, '')
 }
 
+const clearFile = () => {
+  deviceList.value[0].file_name = ''
+  deviceList.value[0].file_path = ''
+}
+
 // 文件上传
+let handleChangeTriggered = false // 标志变量
 const handleChange = async (file, fileList) => {
-  console.log(`output->file`, file.raw.name)
-  deviceList.value[0].file = file.raw.name
+  if (handleChangeTriggered) {
+    return
+  }
+  handleChangeTriggered = true
+  const formData = new FormData()
+  formData.append('upload_file', file.raw)
+  let res = await uploadSupplyJarApi(formData)
+  if (res.code === 1000) {
+    ElMessage.success({
+      message: '上传成功',
+      type: 'success',
+      grouping: true
+    })
+    nextTick(() => {
+      deviceList.value[0].file_name = res.data.file_name
+      deviceList.value[0].file_path = res.data.file_path
+      handleChangeTriggered = false
+    })
+  }
 }
 
 const closeDrawer = (value?: any) => {
@@ -464,6 +492,10 @@ const onShellChange = val => {
           width: 29vw;
           .el-upload-dragger {
             background: #f5f5f5;
+          }
+          .clearFile:hover {
+            cursor: pointer;
+            color: red;
           }
         }
       }

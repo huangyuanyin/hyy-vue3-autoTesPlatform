@@ -718,6 +718,10 @@ const toSetLabel = item => {
 
 const toDetail = (type, item) => {
   if (type === 'detail') {
+    if (item.draft) {
+      ElMessage.warning('草稿状态无法查看详情！')
+      return
+    }
     if (item.run_count === 0) {
       ElMessage.warning('该任务还未执行过，无法查看详情！')
     } else {
