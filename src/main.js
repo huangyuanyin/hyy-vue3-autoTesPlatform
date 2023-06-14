@@ -8,7 +8,7 @@ import 'element-plus/theme-chalk/el-message-box.css'
 
 import 'xterm/dist/xterm.css'
 
-// import echarts from './utils/echarts'
+import echarts from './utils/echarts'
 
 import JsonViewer from 'vue3-json-viewer'
 import 'vue3-json-viewer/dist/index.css'
@@ -24,7 +24,7 @@ const app = createApp(App)
 import copys from './directives/v-copy.js'
 app.directive('copy', copys)
 
-// app.config.globalProperties.$echarts = echarts
+app.config.globalProperties.$echarts = echarts
 
 app.component('SvgIcon', SvgIcon)
 

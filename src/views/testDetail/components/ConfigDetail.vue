@@ -109,7 +109,7 @@ const handleConfigDetail = async () => {
           },
           {
             label: '基线版本：',
-            value: dispose.value.deployVersion
+            value: dispose.value.deployType === 'full' ? dispose.value.deployVersion : dispose.value.packageName
           }
         ]
         break

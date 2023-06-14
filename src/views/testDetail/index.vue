@@ -46,35 +46,205 @@
       </el-row>
     </div>
   </div>
-  <el-dialog v-model="reportDialogVisible" :title="reportTitle" width="50%" draggable custom-class="report-dialog">
-    <el-descriptions title="一、流水线基本信息：" :column="2" :size="size" border>
-      <el-descriptions-item label="任务名称：">{{ recentlyRunLog.name }}</el-descriptions-item>
-      <el-descriptions-item label="执行人：">{{ recentlyRunLog.create_user }}</el-descriptions-item>
-      <el-descriptions-item label="执行时间：">{{ recentlyRunLog.duration_time }}</el-descriptions-item>
-      <el-descriptions-item label="运行结果：">
-        <span
-          :style="{
-            color: statusColorMap[recentlyRunLog.status]
-          }"
-        >
-          {{ statusMap[recentlyRunLog.status] }}
-        </span>
-      </el-descriptions-item>
-    </el-descriptions>
-    <el-descriptions title="二、流水线配置信息：" :column="2" :size="size" border class="descriptions-config">
-      <el-descriptions-item label="流水线名称：">{{ recentlyRunLog.name }}</el-descriptions-item>
-    </el-descriptions>
-    <pre>{{ reportData }}</pre>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button type="primary" @click="dowaloadReport"> 下载报告 </el-button>
-      </span>
+  <el-drawer v-model="reportDialogVisible" direction="rtl" size="80%" custom-class="reportDialogVisible">
+    <template #header>
+      <h4>{{ reportTitle }}</h4>
     </template>
-  </el-dialog>
+    <template #default>
+      <el-descriptions title="一、流水线基本信息：" :column="2" :size="size" class="baseInfo-config">
+        <el-descriptions-item label="任务名称：">{{ recentlyRunLog.name }}</el-descriptions-item>
+        <el-descriptions-item label="执行人：">{{ recentlyRunLog.create_user }}</el-descriptions-item>
+        <el-descriptions-item label="执行时间：">{{ recentlyRunLog.duration_time }}</el-descriptions-item>
+        <el-descriptions-item label="运行结果：">
+          <span
+            :style="{
+              color: statusColorMap[recentlyRunLog.status]
+            }"
+          >
+            {{ statusMap[recentlyRunLog.status] }}
+          </span>
+        </el-descriptions-item>
+      </el-descriptions>
+      <div class="lane_config" style="font-size: 16px">二、流水线配置信息：</div>
+      <div class="lane_config_items" v-for="(it, index) in recentlyRunLog.task_swim_lanes_history" :key="'task_swim_lanes_history' + index">
+        <el-collapse v-model="activeNames" @change="handleChange">
+          <el-collapse-item :title="'阶段' + (index + 1) + '： ' + it.name" :name="it.name">
+            <el-card class="box-card" v-for="(i, index) in it.task_stages_history" :key="'task_stages_history' + index" shadow="never">
+              <template #header>
+                <div class="card-header">
+                  <span
+                    :style="{
+                      color: statusColorMap[i.task_details_history[0].status]
+                    }"
+                    >节点{{ index + 1 }}：{{ i.task_details_history[0].name }}</span
+                  >
+                  <el-button class="button" text type="primary">日志</el-button>
+                </div>
+              </template>
+              <el-descriptions class="margin-top" title="一、执行结果" :column="2" :size="size" border>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">执行时长</div>
+                  </template>
+                  {{ i.task_details_history[0].duration_time }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">执行结果</div>
+                  </template>
+                  {{ i.task_details_history[0].status }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <el-descriptions class="margin-top" title="二、设备配置" :column="4" :size="size" border>
+                <el-descriptions-item v-for="(a, index) in JSON.parse(i.task_details_history[0].dispose)[0].showServerConfig">
+                  <template #label>
+                    <div class="cell-item">{{ a.label }}</div>
+                  </template>
+                  {{ a.value }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <el-descriptions
+                class="margin-top"
+                title="三、其他配置："
+                :column="4"
+                :size="size"
+                border
+                v-if="i.task_details_history[0].plugin === 'netSignPrepare'"
+              >
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">部署类型：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].deployType == 'full' ? '全量基线' : '项目基线' }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">部署包名称：</div>
+                  </template>
+                  {{
+                    JSON.parse(i.task_details_history[0].dispose)[0].deployType === 'full'
+                      ? 'netsign_x10_x11'
+                      : JSON.parse(i.task_details_history[0].dispose)[0].packageName
+                  }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">是否需要进行系统还原：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].sysRest === 'y' ? '是' : '否' }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">是否需要进行设备重启：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].reboot === 'y' ? '是' : '否' }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">是否安装HA：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].ifha === 'y' ? '是' : '否' }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">是否安装人行模块：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].ispbc === 'y' ? '是' : '否' }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">是否安装农信银模块：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].isrbc === 'y' ? '是' : '否' }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">WatchDog是否使用新数据类型：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].useNewDataType === 'y' ? '是' : '否' }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <el-descriptions
+                class="margin-top"
+                title="三、其他配置："
+                :column="2"
+                :size="size"
+                border
+                v-if="i.task_details_history[0].plugin === 'netSignArrange'"
+              >
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">是否生产部门安装：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].ifback === 'y' ? '是' : '否' }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">是否重启服务：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].ifrs === 'y' ? '是' : '否' }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">部署包名称：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].packageName }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <el-descriptions
+                class="margin-top"
+                title="三、其他配置："
+                :column="2"
+                :size="size"
+                border
+                v-if="i.task_details_history[0].plugin === 'interfaceTest'"
+              >
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">NetSign接口自动化版本：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].netsignVersion }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">NetSign接口自动化分支：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].branch }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">数据包版本：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].pendingVersion }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <div
+                class="lane_config"
+                style="font-size: 16px"
+                v-if="i.task_details_history[0].plugin === 'interfaceTest' && i.task_details_history[0].status === 'success'"
+              >
+                四、测试结果：
+              </div>
+              <div v-if="i.task_details_history[0].plugin === 'interfaceTest' && i.task_details_history[0].status === 'success'">
+                <Piechart :data="i.task_details_history[0].total_statistics" :height="400" :width="400" />
+              </div>
+            </el-card>
+          </el-collapse-item>
+        </el-collapse>
+      </div>
+    </template>
+    <template #footer>
+      <div style="flex: auto">
+        <span class="dialog-footer">
+          <el-button type="primary" @click="dowaloadReport"> 下载报告 </el-button>
+        </span>
+      </div>
+    </template>
+  </el-drawer>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, markRaw, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, onMounted, markRaw, onUnmounted, nextTick, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Action } from 'element-plus'
@@ -83,6 +253,7 @@ import bus from '@/utils/bus.js'
 import RecentlyRun from './components/RecentlyRun.vue'
 import RunHistory from './components/RunHistory.vue'
 import { downloadFile } from '@/utils/util.js'
+import Piechart from './components/piechart.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -120,6 +291,11 @@ const statusColorMap = {
 let wsLink = import.meta.env.MODE === 'development' ? 'ws://10.4.150.27:8023' : 'ws://10.4.150.55:8023'
 let socket = new WebSocket(`${wsLink}/ws/get_task_history/${route.query.id}`)
 let additionalSocket = null // 新的 WebSocket 实例
+
+const activeNames = ref([])
+const handleChange = (val: string[]) => {
+  console.log(val)
+}
 
 const changeTab = (e: any) => {
   tabName.value = e
@@ -159,15 +335,15 @@ const toRun = () => {
     })
 }
 
-const toReport = (type?) => {
+const toReport = async (type?) => {
   console.log(`output->recentlyRunLog`, recentlyRunLog.value)
   reportData.value = ''
   reportDialogVisible.value = true
   if (type && type === 'recent') {
-    getHistoryReport('get', recentlyRunLog.value.id)
+    // getHistoryReport('get', recentlyRunLog.value.id)
     reportTitle.value = `最近运行 报告`
   } else {
-    getHistoryReport('get', tabId.value)
+    // getHistoryReport('get', tabId.value)
     reportTitle.value = `#${tabName.value} 运行报告`
   }
 }
@@ -398,14 +574,55 @@ onUnmounted(() => {
     }
   }
 }
+.lane_config {
+  color: #303133;
+
+  font-weight: 700;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
 </style>
 <style lang="scss">
+.lane_config_items {
+  .el-collapse-item__header {
+    font-size: 16px;
+  }
+  margin-left: 40px;
+  .box-card {
+    margin: 10px 10px;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .el-descriptions {
+      margin-bottom: 20px;
+    }
+  }
+}
 .report-dialog {
   .el-dialog__body {
     padding-top: 30px !important;
   }
+}
+.reportDialogVisible {
+  .el-drawer__header {
+    margin-bottom: 0px !important;
+    padding-top: 0px;
+  }
+  .el-drawer__body {
+    margin-left: 20px;
+  }
+  .baseInfo-config {
+    .el-descriptions__body {
+      margin-left: 40px;
+    }
+  }
   .descriptions-config {
-    margin-top: 30px;
+    margin-top: 20px;
+  }
+  .el-collapse {
+    border-bottom: none;
   }
 }
 </style>

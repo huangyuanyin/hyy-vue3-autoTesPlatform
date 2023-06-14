@@ -555,9 +555,7 @@ const handleClassNameApi = async (item, id) => {
   caseDialog.value = true
   let res = await getClassNameApi({
     task_details_history_id: id,
-    status: statName[item.name],
-    page: tableDataCurrentPage.value,
-    page_size: tableDataPageSize.value
+    status: statName[item.name]
   })
   if (res.code === 1000) {
     classNameTitle.value = item.name
