@@ -585,8 +585,11 @@ const getDeviceInfo = async (val, index) => {
     deviceList.value[index].showServerConfig[1].value = res.data.main_board_type
     deviceList.value[index].showServerConfig[2].value = res.data.machine_type
     deviceList.value[index].showServerConfig[3].value = res.data.mode_code
-    deviceList.value[index].showServerConfig[4].value = res.data.cavium_card_type
-    deviceList.value[index].showServerConfig[5].value = res.data.gm_card_type
+    deviceList.value[index].showServerConfig[4].value = res.data.config_code
+    deviceList.value[index].showServerConfig[5].value = res.data.cavium_card_type
+    deviceList.value[index].showServerConfig[6].value = res.data.gm_card_type
+    deviceList.value[index].showServerConfig[7].value = res.data.machine_sn
+    deviceList.value[index].showServerConfig[8].value = res.data.product_id
 
     deviceList.value[index].serverConfig.serverIP = res.data.ip
     deviceList.value[index].serverConfig.serverPasswd = res.data.password

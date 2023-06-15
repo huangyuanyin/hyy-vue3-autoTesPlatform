@@ -769,10 +769,10 @@ const handleDelete = async val => {
       }
     })
     .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: '取消删除'
-      })
+      // ElMessage({
+      //   type: 'info',
+      //   message: '取消删除'
+      // })
     })
 }
 

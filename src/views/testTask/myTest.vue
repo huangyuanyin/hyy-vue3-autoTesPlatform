@@ -76,7 +76,11 @@ const getTaskInfo = async () => {
             value: it.machine_type
           },
           {
-            label: '设备编码：',
+            label: '型号编码：',
+            value: it.mode_code
+          },
+          {
+            label: '配置编码：',
             value: it.config_code
           },
           {
@@ -132,7 +136,11 @@ const getFavoriteTask = async () => {
             value: it.machine_type
           },
           {
-            label: '设备编码：',
+            label: '型号编码：',
+            value: it.mode_code
+          },
+          {
+            label: '配置编码：',
             value: it.config_code
           },
           {

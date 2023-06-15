@@ -28,17 +28,17 @@ watchEffect(() => {
         }
       },
       {
-        name: '失败',
+        name: '跳过',
         value: Number(props.data[2].value),
         itemStyle: {
-          color: 'rgb(248, 88, 125)'
+          color: '#FA8c16'
         }
       },
       {
-        name: '跳过',
+        name: '失败',
         value: Number(props.data[3].value),
         itemStyle: {
-          color: '#FA8c16'
+          color: 'rgb(248, 88, 125)'
         }
       }
     ]

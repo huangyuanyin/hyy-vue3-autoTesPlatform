@@ -21,7 +21,8 @@ export const disposeList = {
         { label: '设备IP：', value: '' },
         { label: '主板类型：', value: '' },
         { label: '设备型号：', value: '' },
-        { label: '设备编码：', value: '' },
+        { label: '型号编码：', value: '' },
+        { label: '配置编码：', value: '' },
         { label: 'cavium卡：', value: '' },
         { label: '国密卡：', value: '' },
         { label: '设备序列号：', value: '' },
@@ -41,9 +42,12 @@ export const disposeList = {
         { label: '设备IP：', value: '' },
         { label: '主板类型：', value: '' },
         { label: '设备型号：', value: '' },
-        { label: '设备编码：', value: '' },
+        { label: '型号编码：', value: '' },
+        { label: '配置编码：', value: '' },
         { label: 'cavium卡：', value: '' },
-        { label: '国密卡：', value: '' }
+        { label: '国密卡：', value: '' },
+        { label: '设备序列号：', value: '' },
+        { label: '产品ID：', value: '' }
       ],
       serverConfig: {},
       deviceConfig: {},
@@ -59,9 +63,12 @@ export const disposeList = {
         { label: '设备IP：', value: '' },
         { label: '主板类型：', value: '' },
         { label: '设备型号：', value: '' },
-        { label: '设备编码：', value: '' },
+        { label: '型号编码：', value: '' },
+        { label: '配置编码：', value: '' },
         { label: 'cavium卡：', value: '' },
-        { label: '国密卡：', value: '' }
+        { label: '国密卡：', value: '' },
+        { label: '设备序列号：', value: '' },
+        { label: '产品ID：', value: '' }
       ],
       serverConfig: {},
       // log: ''

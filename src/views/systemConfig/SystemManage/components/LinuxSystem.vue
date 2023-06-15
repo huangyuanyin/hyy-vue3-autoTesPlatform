@@ -287,8 +287,16 @@ const rules = reactive<FormRules>({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   port: [{ required: true, message: '请输入设备端口', trigger: 'blur' }],
-  machine_sn: [{ required: true, message: '请输入设备序列号', trigger: 'blur' }],
-  product_id: [{ required: true, message: '请输入产品ID', trigger: 'blur' }],
+  machine_sn: [
+    { required: true, message: '请输入设备序列号', trigger: 'blur' },
+    { min: 9, max: 9, message: '设备序列号长度为9位', trigger: 'blur' },
+    { pattern: /^[A-Za-z0-9]+$/, message: '设备序列号只能输入数字和字母', trigger: 'blur' }
+  ],
+  product_id: [
+    { required: true, message: '请输入产品ID', trigger: 'blur' },
+    { min: 6, max: 6, message: '产品ID长度为6位', trigger: 'blur' },
+    { pattern: /^[A-Za-z0-9]+$/, message: '产品ID只能输入数字和字母', trigger: 'blur' }
+  ],
   mode_code: [{ required: true, message: '请输入型号编码', trigger: 'blur' }],
   config_code: [{ required: true, message: '请输入配置编码', trigger: 'blur' }],
   main_board_type: [{ required: true, message: '请输入CPU类型', trigger: 'blur' }],
