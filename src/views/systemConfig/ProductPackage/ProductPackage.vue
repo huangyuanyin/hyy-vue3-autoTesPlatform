@@ -16,7 +16,7 @@
           <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
               <el-button link type="primary" size="small" @click="handleEdit('editMain', scope.row.id)">编辑</el-button>
-              <el-button link type="warning" size="small" @click="handleDownload(scope.row.id)">下载</el-button>
+              <el-button link type="warning" size="small" @click="handleDownload('downloadMain', scope.row.download_url)">下载</el-button>
               <el-popconfirm
                 title="确定删除这个文件?"
                 trigger="click"
@@ -65,7 +65,7 @@
           <el-table-column fixed="right" label="操作" align="center">
             <template #default="scope">
               <el-button link type="primary" size="small" @click="handleEdit('editBuild', scope.row.id)">编辑</el-button>
-              <el-button link type="warning" size="small" @click="handleDownload(scope.row.id)">下载</el-button>
+              <el-button link type="warning" size="small" @click="handleDownload('downloadBuild', scope.row.download_url)">下载</el-button>
               <el-popconfirm
                 title="确定删除这个文件?"
                 trigger="click"
@@ -103,6 +103,7 @@ import UploadPackage from './components/UploadPackage.vue'
 import { getProductPackageApi, deleteProductPackageApi, getMainProductPackageApi, deleteMainProductPackageApi } from '@/api/NetDevOps/index'
 import { ElMessage } from 'element-plus'
 import { CirclePlus, Search } from '@element-plus/icons-vue'
+import { downloadFile } from '@/utils/util'
 
 const openDownloadDialog = ref(false)
 const openUploadDialog = ref(false)
@@ -141,13 +142,8 @@ const handleEdit = (type: String, id?: number) => {
   }
 }
 
-const handleDownload = async id => {
-  return ElMessage.warning('暂不支持')
-  isLoading.value = true
-  let res = await getProductPackageApi({ download_id: id })
-  isLoading.value = false
-  if (res.code === 1000) {
-  }
+const handleDownload = async (type, url) => {
+  downloadFile(url)
 }
 
 const handleDelete = async (type, id) => {

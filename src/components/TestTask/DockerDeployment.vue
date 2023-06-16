@@ -238,6 +238,9 @@ const selectDevice = val => {
         username: item.username,
         password: item.password
       }
+      deviceList.value[0].showServerConfig[0].value = item.ip
+      deviceList.value[0].showServerConfig[1].value = item.username
+      deviceList.value[0].showServerConfig[2].value = item.port
     }
   })
 }

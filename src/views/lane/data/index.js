@@ -82,6 +82,11 @@ export const disposeList = {
     {
       serverName: '',
       serverConfig: {},
+      showServerConfig: [
+        { label: '设备IP：', value: '' },
+        { label: '用户名：', value: '' },
+        { label: '端口：', value: '' }
+      ],
       number: null,
       file_name: null,
       file_path: null,

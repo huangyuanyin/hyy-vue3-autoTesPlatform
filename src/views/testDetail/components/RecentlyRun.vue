@@ -302,7 +302,7 @@
           </div>
         </div>
       </template>
-      <div class="demo-collapse">
+      <div class="demo-collapse" v-if="caseList.length !== 0">
         <el-collapse accordion @change="changeCollapse">
           <el-collapse-item :name="item.provider_name" v-for="(item, index) in caseList" :key="'caseList' + index">
             <template #title>
@@ -321,16 +321,27 @@
                 :expand-row-keys="defaultExpandedKeys"
                 @row-click="getMethods2"
                 highlight-current-row
+                max-height="80vh"
               >
                 <el-table-column type="expand">
                   <template #default="props">
-                    <div m="4">
-                      <h3 style="color: #e6a23c">Methods：</h3>
-                      <el-table :data="methodsData" max-height="70vh" :border="true" style="width: 100%">
-                        <el-table-column label="方法名称" prop="method_name" width="200px" />
-                        <el-table-column label="参数" prop="case_param" />
-                        <el-table-column label="错误说明" prop="exception_details" />
+                    <div m="4" class="classData">
+                      <h3 :class="[statColor[classNameTitle]]">Methods：{{ methodsData.length }}</h3>
+                      <el-table
+                        :data="methodsData"
+                        max-height="70vh"
+                        :border="true"
+                        style="width: 100%"
+                        v-if="classNameTitle !== 'success_count'"
+                      >
+                        <el-table-column label="方法名称" prop="method_name" width="220px" />
+                        <el-table-column label="参数" prop="case_param" min-width="220px" />
+                        <el-table-column label="错误说明" prop="exception_details" min-width="220px" />
                         <el-table-column label="描述" prop="case_description" width="250px" />
+                      </el-table>
+                      <el-table :data="methodsData" max-height="70vh" :border="true" style="width: 100%" v-else>
+                        <el-table-column label="方法名称" prop="method_name" min-width="200px" />
+                        <el-table-column label="总数" prop="count" />
                       </el-table>
                     </div>
                   </template>
@@ -342,6 +353,7 @@
           </el-collapse-item>
         </el-collapse>
       </div>
+      <el-empty class="empty" description="数据加载中，请稍后......" v-else />
     </el-dialog>
   </div>
 </template>
@@ -587,7 +599,6 @@ const getMethods2 = async (row, val) => {
   } else {
     defaultExpandedKeys.value = [row.class_key]
   }
-  console.log(`output->defaultExpandedKeys`, row, defaultExpandedKeys.value)
   let res = await getMethodsApi({
     project_name: row.project_name,
     class_name: row.class_name,
@@ -1000,7 +1011,7 @@ const handleMethodsDataCurrentChange = (val: number) => {
                         justify-content: space-around;
                         width: 100%;
                         .stat-info-item {
-                          min-width: 25%;
+                          // min-width: 25%;
                           height: 58px;
                           padding: 4px 0;
                           .stat-info-item-value {
@@ -1181,6 +1192,26 @@ const handleMethodsDataCurrentChange = (val: number) => {
   }
 }
 
+.classData {
+  .success {
+    color: #22b066;
+  }
+  .serious {
+    color: #e62412;
+  }
+  .yiban {
+    color: #8b8b8b;
+  }
+}
+
+.empty {
+  padding-top: 0px;
+  height: 30vh;
+  :deep(.el-empty__description) p {
+    color: #fa8c15;
+    font-size: 16px;
+  }
+}
 .my-header {
   display: flex;
   align-items: center;

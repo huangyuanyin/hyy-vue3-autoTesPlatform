@@ -455,6 +455,7 @@ const handlesystemSizeChange = (val: number) => {
 }
 const handlesystemCurrentChange = (val: number) => {
   systemCurrentPage.value = val
+  getDevice()
 }
 
 onMounted(() => {

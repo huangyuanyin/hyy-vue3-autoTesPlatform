@@ -3,7 +3,7 @@
     <el-popover placement="bottom" :width="auto" trigger="click">
       <template #reference>
         <div class="config" @click.stop="handleConfigDetail">
-          <el-icon><Document /></el-icon><span>配置</span>
+          <el-icon><Cellphone /></el-icon><span>配置</span>
         </div>
       </template>
       <el-card class="box-card" shadow="never">
@@ -54,6 +54,18 @@
             {{ it.value }}
           </el-descriptions-item>
         </el-descriptions>
+        <el-descriptions
+          class="dockerDeployment—config"
+          title="其他配置："
+          :column="1"
+          :size="size"
+          :style="blockMargin"
+          v-if="disposeType === 'dockerDeployment'"
+        >
+          <el-descriptions-item :label="it.label" v-for="(it, index) in dockerDeploymentConfig" :key="'dockerDeploymentConfig' + index">
+            {{ it.value }}
+          </el-descriptions-item>
+        </el-descriptions>
       </el-card>
     </el-popover>
   </div>
@@ -61,7 +73,7 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { Document } from '@element-plus/icons-vue'
+import { Cellphone } from '@element-plus/icons-vue'
 import { getTaskDetailHistorytApi } from '@/api/NetDevOps'
 import { auto } from '@popperjs/core'
 
@@ -71,6 +83,7 @@ const environmentPrepareConfig = ref([])
 const netSignArrangeConfig = ref([])
 const interfaceTestConfig = ref([])
 const jarListConfig = ref([])
+const dockerDeploymentConfig = ref([])
 const disposeType = ref('')
 const isShow = ref(false)
 const size = ref('')
@@ -98,7 +111,6 @@ const handleConfigDetail = async () => {
     isShow.value = true
     dispose.value = JSON.parse(res.data.dispose)[0]
     showServerConfig.value = JSON.parse(res.data.dispose)[0].showServerConfig
-    console.log(`output->`, res.data, dispose.value, showServerConfig.value)
     disposeType.value = res.data.plugin
     switch (disposeType.value) {
       case 'netSignPrepare':
@@ -137,6 +149,18 @@ const handleConfigDetail = async () => {
           }
         ]
         jarListConfig.value = dispose.value.jarList
+        break
+      case 'dockerDeployment':
+        dockerDeploymentConfig.value = [
+          {
+            label: 'docker文件：',
+            value: dispose.value.file_name
+          },
+          {
+            label: 'shell脚本：',
+            value: dispose.value.shell
+          }
+        ]
         break
       default:
         break

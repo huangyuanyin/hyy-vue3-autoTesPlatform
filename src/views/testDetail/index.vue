@@ -68,20 +68,37 @@
       <div class="lane_config" style="font-size: 16px">二、流水线配置信息：</div>
       <div class="lane_config_items" v-for="(it, index) in reportData.task_swim_lanes_history" :key="'task_swim_lanes_history' + index">
         <el-collapse v-model="activeNames" @change="handleChange">
-          <el-collapse-item :title="'阶段' + (index + 1) + '： ' + it.name" :name="it.name">
+          <el-collapse-item :name="it.name">
+            <template #title>
+              <el-icon v-if="it.status === 'wait_execute'" style="color: #000"><InfoFilled /></el-icon>
+              <el-icon v-if="it.status === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
+              <el-icon v-if="it.status === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
+              <el-icon v-if="it.status === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
+              <svg-icon v-if="it.status === 'in_progress'" class="run-icon" iconName="icon-shuaxin"></svg-icon>
+              <el-icon v-if="it.status === 'channel'" style="color: #909399"><RemoveFilled /></el-icon>
+              <span
+                class="collapse_title"
+                style="font-size: 16px"
+                :style="{
+                  color: statusColorMap[it.status]
+                }"
+              >
+                {{ `阶段${index + 1}： ${it.name}` }}
+              </span>
+            </template>
             <el-card class="box-card" v-for="(i, index) in it.task_stages_history" :key="'task_stages_history' + index" shadow="never">
               <template #header>
-                <div class="card-header">
+                <div class="card-header" style="font-size: 15px">
                   <span
                     :style="{
                       color: statusColorMap[i.task_details_history[0].status]
                     }"
                     >节点{{ index + 1 }}：{{ i.task_details_history[0].name }}</span
                   >
-                  <el-button class="button" text type="primary">日志</el-button>
+                  <el-button class="button" text type="primary" @click="handleLog(i)">日志</el-button>
                 </div>
               </template>
-              <el-descriptions class="margin-top" title="一、执行结果" :column="2" :size="size" border>
+              <el-descriptions class="ignore-descript-title" title="一、执行结果" :column="2" :size="size" border>
                 <el-descriptions-item>
                   <template #label>
                     <div class="cell-item">执行时长</div>
@@ -92,10 +109,16 @@
                   <template #label>
                     <div class="cell-item">执行结果</div>
                   </template>
-                  {{ i.task_details_history[0].status }}
+                  <span
+                    :style="{
+                      color: statusColorMap[i.task_details_history[0].status],
+                      fontWeight: 'bold'
+                    }"
+                    >{{ statusMap[i.task_details_history[0].status] }}</span
+                  >
                 </el-descriptions-item>
               </el-descriptions>
-              <el-descriptions class="margin-top" title="二、设备配置" :column="4" :size="size" border>
+              <el-descriptions class="ignore-descript-title" title="二、设备配置" :column="4" :size="size" border>
                 <el-descriptions-item v-for="(a, index) in JSON.parse(i.task_details_history[0].dispose)[0].showServerConfig">
                   <template #label>
                     <div class="cell-item">{{ a.label }}</div>
@@ -104,7 +127,7 @@
                 </el-descriptions-item>
               </el-descriptions>
               <el-descriptions
-                class="margin-top"
+                class="ignore-descript-title"
                 title="三、其他配置："
                 :column="4"
                 :size="size"
@@ -131,13 +154,13 @@
                   <template #label>
                     <div class="cell-item">是否需要进行系统还原：</div>
                   </template>
-                  {{ JSON.parse(i.task_details_history[0].dispose)[0].sysRest === 'y' ? '是' : '否' }}
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].sysRest ? '是' : '否' }}
                 </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
                     <div class="cell-item">是否需要进行设备重启：</div>
                   </template>
-                  {{ JSON.parse(i.task_details_history[0].dispose)[0].reboot === 'y' ? '是' : '否' }}
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].reboot ? '是' : '否' }}
                 </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
@@ -165,7 +188,7 @@
                 </el-descriptions-item>
               </el-descriptions>
               <el-descriptions
-                class="margin-top"
+                class="ignore-descript-title"
                 title="三、其他配置："
                 :column="2"
                 :size="size"
@@ -192,7 +215,7 @@
                 </el-descriptions-item>
               </el-descriptions>
               <el-descriptions
-                class="margin-top"
+                class="ignore-descript-title"
                 title="三、其他配置："
                 :column="2"
                 :size="size"
@@ -218,6 +241,27 @@
                   {{ JSON.parse(i.task_details_history[0].dispose)[0].pendingVersion }}
                 </el-descriptions-item>
               </el-descriptions>
+              <el-descriptions
+                class="ignore-descript-title"
+                title="三、其他配置："
+                :column="1"
+                :size="size"
+                border
+                v-if="i.task_details_history[0].plugin === 'dockerDeployment'"
+              >
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">docker文件：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].file_name }}
+                </el-descriptions-item>
+                <el-descriptions-item>
+                  <template #label>
+                    <div class="cell-item">shell脚本：</div>
+                  </template>
+                  {{ JSON.parse(i.task_details_history[0].dispose)[0].shell }}
+                </el-descriptions-item>
+              </el-descriptions>
               <div
                 class="lane_config"
                 style="font-size: 16px"
@@ -241,6 +285,17 @@
       </div>
     </template>
   </el-drawer>
+  <el-dialog
+    v-model="logDialog"
+    :title="logTitle"
+    custom-class="logDialog"
+    width="50%"
+    :before-close="handleClose"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+  >
+    <CodeMirror :code="log" :codeStyle="{ height: '60vh' }" />
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -248,6 +303,7 @@ import { ref, reactive, onMounted, markRaw, onUnmounted, nextTick, inject } from
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Action } from 'element-plus'
+import { CircleCloseFilled, CircleCheckFilled, InfoFilled, RemoveFilled } from '@element-plus/icons-vue'
 import { getTaskHistoryApi, getTaskInfoApi, runTaskInfoApi, getHistoryReportApi } from '@/api/NetDevOps/index'
 import bus from '@/utils/bus.js'
 import RecentlyRun from './components/RecentlyRun.vue'
@@ -272,6 +328,9 @@ const reportData = ref({})
 const reportUrl = ref('')
 const tabId = ref(null)
 const size = ref('')
+const logDialog = ref(false)
+const logTitle = ref('')
+const log = ref('')
 const statusMap = {
   wait_execute: '待执行',
   not_start: '未运行',
@@ -333,6 +392,13 @@ const toRun = () => {
         message: '取消执行'
       })
     })
+}
+
+const handleLog = val => {
+  // console.log(`output->val`, val)
+  // log.value = '暂无日志...'
+  // logDialog.value = true
+  // logTitle.value = val.task_details_history[0].name
 }
 
 const toReport = async (type?) => {
@@ -592,7 +658,7 @@ onUnmounted(() => {
   }
   margin-left: 40px;
   .box-card {
-    margin: 10px 10px;
+    margin: 10px 0px 10px 20px;
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -626,6 +692,14 @@ onUnmounted(() => {
   }
   .el-collapse {
     border-bottom: none;
+  }
+  .collapse_title {
+    margin-left: 10px;
+  }
+}
+.ignore-descript-title {
+  .el-descriptions__title {
+    font-size: 15px;
   }
 }
 </style>
