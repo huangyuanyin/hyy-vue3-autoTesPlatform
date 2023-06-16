@@ -395,10 +395,11 @@ const toRun = () => {
 }
 
 const handleLog = val => {
-  // console.log(`output->val`, val)
-  // log.value = '暂无日志...'
-  // logDialog.value = true
-  // logTitle.value = val.task_details_history[0].name
+  console.log(`output->val`, val)
+  log.value = '暂无日志...'
+  logDialog.value = true
+  logTitle.value = val.task_details_history[0].name
+  log.value = val.task_details_history[0].task_execute_record[0].execute_record
 }
 
 const toReport = async (type?) => {

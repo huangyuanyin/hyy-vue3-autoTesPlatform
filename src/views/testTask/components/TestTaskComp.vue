@@ -45,12 +45,13 @@
       </el-table-column> -->
       <el-table-column prop="device_list" label="占用设备详情" align="center" width="200">
         <template #default="item">
-          <span v-if="item.row.device_list.length === 0"> - </span>
+          <span v-if="item.row.device_list.length === 0 && item.row.docker_device_list.length === 0"> - </span>
           <el-popover placement="bottom" trigger="click" popper-class="devicePopper">
             <template #reference>
               <el-tag v-if="item.row.device_list.length !== 0">占用：{{ item.row.device_list.length }}</el-tag>
+              <el-tag v-if="item.row.docker_device_list.length !== 0">占用：{{ item.row.docker_device_list.length }}</el-tag>
             </template>
-            <el-card class="box-card" shadow="never">
+            <el-card class="box-card" shadow="never" v-if="item.row.device_list.length !== 0">
               <el-descriptions
                 class="showServerConfig"
                 :title="'设备信息' + (index + 1) + '：'"
@@ -58,6 +59,26 @@
                 border
                 v-for="(device_list_item, index) in item.row.device_list"
                 :key="'device_list' + index"
+              >
+                <el-descriptions-item v-for="(it, index) in device_list_item" :key="'device_list_item' + index">
+                  <template #label>
+                    <div class="cell-item">{{ it.label }}</div>
+                  </template>
+                  {{ it.value }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <el-button v-if="item.row.status !== 'in_progress'" type="warning" class="shifang" @click="handleRelease(item.row)">
+                释 放
+              </el-button>
+            </el-card>
+            <el-card class="box-card" shadow="never" v-if="item.row.docker_device_list.length !== 0">
+              <el-descriptions
+                class="showServerConfig"
+                :title="'设备信息' + (index + 1) + '：'"
+                :column="3"
+                border
+                v-for="(device_list_item, index) in item.row.docker_device_list"
+                :key="'docker_device_list' + index"
               >
                 <el-descriptions-item v-for="(it, index) in device_list_item" :key="'device_list_item' + index">
                   <template #label>

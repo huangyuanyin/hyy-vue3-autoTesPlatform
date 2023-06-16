@@ -101,6 +101,22 @@ const getTaskInfo = async () => {
           }
         ]
       })
+      item.docker_device_list = item.docker_device_list.map(it => {
+        return [
+          {
+            label: '设备IP',
+            value: it.ip
+          },
+          {
+            label: '用户名',
+            value: it.username
+          },
+          {
+            label: '端口号',
+            value: it.port
+          }
+        ]
+      })
     })
   }
 }
@@ -158,6 +174,22 @@ const getFavoriteTask = async () => {
           {
             label: '产品ID：',
             value: it.product_id
+          }
+        ]
+      })
+      item.docker_device_list = item.docker_device_list.map(it => {
+        return [
+          {
+            label: '设备IP',
+            value: it.ip
+          },
+          {
+            label: '用户名',
+            value: it.username
+          },
+          {
+            label: '端口号',
+            value: it.port
           }
         ]
       })
