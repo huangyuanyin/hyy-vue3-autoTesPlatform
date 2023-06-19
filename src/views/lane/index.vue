@@ -28,8 +28,10 @@
       <basicInformation
         v-show="tabName === 'basicInformation'"
         @submitName="submitName"
+        @submitTagList="submitTagList"
         @submitGroup="submitGroup"
         :taskName="taskName"
+        :taskTagList="taskTagList"
         :taskGroup="taskGroup"
       />
       <Lane v-show="tabName === 'processConfig'" :flows="data.task_swim_lanes" />
@@ -53,12 +55,14 @@ const route = useRoute()
 const tabName = ref('processConfig')
 const isDetail = ref(true)
 const taskName = ref('')
+const taskTagList = ref([])
 const taskGroup = ref('')
 const laneTime = ref(new Date().toLocaleString().replace(/\//g, '-'))
 const oldFlows = ref('')
 
 const data = reactive({
   name: '',
+  tag_list: [],
   group_id: '',
   draft: '',
   task_swim_lanes: [
@@ -201,6 +205,7 @@ const editTaskInfo = async () => {
     }
   })
   // @ts-ignore
+  params.tag_list = data.tag_list
   params.group_id = data.group_id
   console.log(`output->修改流水线data`, data)
   console.log(`output->修改流水线params`, params)
@@ -225,6 +230,10 @@ const submitGroup = (e: any) => {
   data.group_id = e
 }
 
+const submitTagList = (e: any) => {
+  data.tag_list = e
+}
+
 const formLabelAlign = (e: any) => {
   // 循环e中的每一个值，循环data，将值赋给data
   for (const key in e) {
@@ -240,6 +249,7 @@ const getTaskInfo = async () => {
   const res = await getTaskInfoApi(params)
   if (res.code === 1000) {
     taskName.value = res.data[0].name
+    taskTagList.value = res.data[0].tag
     taskGroup.value = res.data[0].group.name
     laneTime.value = res.data[0].created_time
     bus.emit('TriggerSettingData', res.data[0])

@@ -24,9 +24,33 @@
             />
           </el-form-item>
           <el-form-item label="标签" prop="region">
-            <el-select v-model="basicInformationForm.tag_list" placeholder="待联调" :disabled="true">
-              <el-option label="Zone one" value="shanghai" />
-              <el-option label="Zone two" value="beijing" />
+            <el-select
+              v-model="basicInformationForm.tag_list"
+              placeholder="请选择标签"
+              multiple
+              clearable
+              @change="submitForm(basicInformationFormRef)"
+            >
+              <el-option :key="0" :value="0" disabled>
+                <div class="custom-option">
+                  <el-button
+                    :icon="CirclePlus"
+                    text
+                    type="primary"
+                    size="large"
+                    class="new-label-button"
+                    @click="labelDialogVisible = true"
+                  >
+                    新建标签
+                  </el-button>
+                </div>
+              </el-option>
+              <el-option :label="item.name" :value="item.id" v-for="(item, index) in labelList" :key="'labelList' + index">
+                <div class="tagStyle">
+                  <div class="circle" :style="{ 'background-color': item.color }"></div>
+                  <span>{{ item.name }}</span>
+                </div>
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="分组" prop="region">
@@ -55,35 +79,45 @@
         </span>
       </template>
     </el-dialog>
+    <LabelDialog :labelDialogVisible="labelDialogVisible" @closeTagDialog="closeTagDialog" @updatePipelineTag="updatePipelineTag" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { reactive, ref, watch, toRefs, onMounted } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
+import { CirclePlus } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { deleteTaskInfoApi, getPipelineGroupApi } from '@/api/NetDevOps'
+import { deleteTaskInfoApi, getPipelineGroupApi, getPipelineTagApi } from '@/api/NetDevOps'
+import LabelDialog from '@/components/LabelDialog.vue'
 
-const emit = defineEmits(['submitName', 'submitGroup'])
+const emit = defineEmits(['submitName', 'submitGroup', 'submitTagList'])
 const props = defineProps({
   taskName: {
     type: String,
     default: ''
+  },
+  taskTagList: {
+    type: Array,
+    default: []
   },
   taskGroup: {
     type: String,
     default: ''
   }
 })
-const { taskName, taskGroup } = toRefs(props)
+const { taskName, taskTagList, taskGroup } = toRefs(props)
 
 const route = useRoute()
 const router = useRouter()
 const isDisabled = route.query.type === 'detail' ? true : false
 const dialogVisible = ref(false)
+const labelDialogVisible = ref(false)
+const labelList = ref([])
 const groupList = ref([])
 const basicInformationForm = reactive({
   name: '',
+  tag_list: [],
   group_id: ''
 })
 const basicInformationFormRef = ref<FormInstance>()
@@ -97,6 +131,18 @@ watch(
     if (taskName) {
       basicInformationForm.name = val
       emit('submitName', basicInformationForm.name)
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  taskTagList,
+  val => {
+    if (taskTagList) {
+      basicInformationForm.tag_list = val
+      basicInformationForm.tag_list = val.map(it => it.id)
+      emit('submitTagList', basicInformationForm.tag_list)
     }
   },
   { immediate: true }
@@ -121,6 +167,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     emit('submitName', basicInformationForm.name)
+    emit('submitTagList', basicInformationForm.tag_list)
   })
 }
 
@@ -130,6 +177,21 @@ const selectGroup = val => {
       emit('submitGroup', item.id)
     }
   })
+}
+
+const updatePipelineTag = res => {
+  labelList.value = res
+}
+
+const closeTagDialog = val => {
+  labelDialogVisible.value = val
+}
+
+const getPipelineTag = async () => {
+  let res = await getPipelineTagApi({})
+  if (res.code === 1000) {
+    labelList.value = res.data
+  }
 }
 
 const handleClose = (done: any) => {
@@ -171,6 +233,7 @@ const getPipelineGroup = async () => {
 
 onMounted(async () => {
   await getPipelineGroup()
+  await getPipelineTag()
   if (route.path === '/testTask/addTestTask') {
     if (route.query.groupId) {
       groupList.value.forEach(item => {
@@ -205,6 +268,7 @@ onMounted(async () => {
       margin-top: 10px;
     }
   }
+
   .el-card {
     width: 80%;
     margin: 0 auto;
@@ -223,6 +287,79 @@ onMounted(async () => {
   }
   .content {
     padding: 30px 40px 0 20px;
+  }
+}
+
+.colorSvgList {
+  display: flex;
+  .colorSvgList0,
+  .colorSvgList1,
+  .colorSvgList2,
+  .colorSvgList3,
+  .colorSvgList4,
+  .colorSvgList5,
+  .colorSvgList6 {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 20px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .tick {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #000;
+    transform: rotate(-45deg);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  .activeColorSvg:before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .activeColorSvg:hover:before,
+  .activeColorSvg:hover .tick {
+    opacity: 1;
+  }
+}
+
+.custom-option {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  .new-label-button {
+    padding-left: 0px;
+    padding-top: 0px;
+    font-size: 14px;
+    .el-icon {
+      font-size: 16px;
+    }
+  }
+}
+.tagStyle {
+  display: flex;
+  align-items: center;
+  .circle {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin-right: 20px;
   }
 }
 </style>
