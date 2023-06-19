@@ -141,6 +141,26 @@ const testList = ref([
     plugin: 'netsignUITest',
     name: 'NetSign UI测试',
     desc: '这是一段NetSign UI测试'
+  },
+  {
+    plugin: 'netcngUITest',
+    name: 'NetCNG UI测试',
+    desc: '这是一段NetCNG UI测试'
+  },
+  {
+    plugin: 'netcerUITest',
+    name: 'NetCert UI测试',
+    desc: '这是一段NetCert UI测试'
+  },
+  {
+    plugin: 'mauthUITest',
+    name: 'MAuth UI测试',
+    desc: '这是一段MAuth UI测试'
+  },
+  {
+    plugin: 'netedsUITest',
+    name: 'NetEDS UI测试',
+    desc: '这是一段NetEDS UI测试'
   }
 ])
 const deployList = ref([

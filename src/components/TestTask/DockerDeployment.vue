@@ -66,7 +66,7 @@
               <el-form-item label="容器数量" prop="number" :required="true">
                 <el-input v-model="item.number" placeholder="请输入容器数量" :maxlength="5" @input="limitNumericInput" />
               </el-form-item>
-              <el-form-item label="文件上传" prop="file_name" :required="true">
+              <el-form-item label="文件上传">
                 <el-upload
                   ref="uploadFile"
                   class="uploadFile-demo"
@@ -90,7 +90,7 @@
                   </template>
                 </el-upload>
               </el-form-item>
-              <el-form-item label="shell脚本" prop="shell" class="executeCommand-item" :required="true">
+              <el-form-item label="shell脚本" class="executeCommand-item">
                 <CodeMirror :code="item.shell" :codeStyle="{ height: '30vh', width: '29vw' }" @onCodeChange="onShellChange" />
               </el-form-item>
             </el-form>

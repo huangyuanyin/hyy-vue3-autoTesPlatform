@@ -90,7 +90,7 @@ export const disposeList = {
       number: null,
       file_name: null,
       file_path: null,
-      shell: '# 此处输入shell命令 \necho hello,world!'
+      shell: '# 此处输入shell命令（非必填） \n'
     }
   ],
   executeCommand: [{}]
