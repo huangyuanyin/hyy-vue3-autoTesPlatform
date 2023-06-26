@@ -89,6 +89,7 @@ onUnmounted(() => {
   height: 77vh;
   overflow-y: auto;
   background-color: #f2f5f7;
+  // background-color: #f0eff4;
 }
 .flow-groups-container::-webkit-scrollbar {
   width: 8px;

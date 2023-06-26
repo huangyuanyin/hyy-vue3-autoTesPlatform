@@ -32,7 +32,12 @@
             popper-class="contextmenu"
             placement="top-end"
           >
-            <div class="ignore-jon3-width" :class="[parallel.is_pass ? '' : 'isNoPass']" @click="openTaskDetailDrawer(parallel, index)">
+            <div
+              class="ignore-jon3-width"
+              :class="[parallel.is_pass ? '' : 'isNoPass']"
+              :style="{ background: backgroundCard[parallel.plugin], 'border-color': backgroundCard[parallel.plugin] }"
+              @click="openTaskDetailDrawer(parallel, index)"
+            >
               {{ parallel.name }}
               <el-tooltip class="item" content="有信息未配置" placement="top" :offset="18">
                 <el-icon v-if="!parallel.is_pass"><WarningFilled /></el-icon>
@@ -109,6 +114,7 @@ import DockerDeployment from '@/components/TestTask/DockerDeployment.vue'
 import { ElMessage } from 'element-plus'
 import { RemoveFilled, WarningFilled } from '@element-plus/icons-vue'
 import { disposeList } from '../data'
+import { color } from 'echarts'
 
 const props = defineProps({
   stage: {
@@ -135,6 +141,12 @@ const dockerDeployment = ref(false)
 const taskDetailName = ref('')
 const taskId = ref('')
 const stageID = ref(null)
+const backgroundCard = {
+  netSignPrepare: '#eBC999',
+  netSignArrange: '#cdcbd6',
+  dockerDeployment: '#8CA9D3',
+  interfaceTest: '#DD8EA4'
+}
 
 const handleAddParallel = (position: any, index: any) => {
   // 判断props.stage中每个对象的plugin是否含有netSignPrepare，如果有则不允许添加串行任务
@@ -324,7 +336,8 @@ const changeDrawer = (value: any) => {
       border: 1px solid red !important;
       min-width: 140px !important;
       .el-icon {
-        color: #f56c6c !important;
+        // color: #f56c6c !important;
+        color: red !important;
         margin-left: 5px;
         font-size: 18px;
       }
@@ -339,7 +352,7 @@ const changeDrawer = (value: any) => {
 
     &:hover {
       .ignore-jon3-width {
-        border: 1px solid #1b9aee;
+        border: 1px solid #1b9aee !important;
       }
 
       .job2,

@@ -77,7 +77,7 @@
                   >
                     <div style="display: flex; justify-content: space-between">
                       <span class="main-fileName"> {{ it.ip }}</span>
-                      <div>
+                      <div v-if="it.create_user">
                         <span class="main-type" :style="{ color: it.using ? '#F56C6C' : '#409EFF' }">
                           {{ it.using ? '占用中' : '未占用' }}
                         </span>

@@ -59,7 +59,7 @@
                     :value="it.ip"
                     v-for="(it, index) in hasDeviceList"
                     :key="'hasDeviceList' + index"
-                    :disabled="item.disabled"
+                    :disabled="it.disabled"
                   >
                     <div style="display: flex; justify-content: space-between">
                       <span class="main-fileName"> {{ it.ip }}</span>
@@ -348,70 +348,67 @@ watch(
 watch(
   () => props.taskDetailInfo,
   async () => {
-    let currentDevice = []
-    currentFlows.value.map(item => {
-      item.task_stages.map(it => {
-        it.task_details.map(i => {
-          if (i.plugin === 'interfaceTest') {
-            currentDevice.push(i.dispose[0].serverName)
-          }
+    nextTick(async () => {
+      let currentDevice = []
+      currentFlows.value.map(item => {
+        item.task_stages.map(it => {
+          it.task_details.map(i => {
+            if (i.plugin === 'interfaceTest') {
+              currentDevice.push(i.dispose[0].serverName)
+            }
+          })
         })
       })
-    })
 
-    // @ts-ignore
-    deviceList.value = props.taskDetailInfo
-    hasDeviceList.value = []
-    let isHasNetSignPrepare = false
-    JSON.parse(localStorage.getItem('flows')).map(item => {
-      item.task_stages.map(it => {
-        it.task_details.map(i => {
-          if (i.plugin === 'netSignPrepare') {
-            isHasNetSignPrepare = true
-          }
-          if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
-            hasDeviceList.value.push({ ip: i.dispose[0].serverName })
-          }
+      // @ts-ignore
+      deviceList.value = props.taskDetailInfo
+      hasDeviceList.value = []
+      let isHasNetSignPrepare = ref(false)
+      JSON.parse(localStorage.getItem('flows')).map(item => {
+        item.task_stages.map(it => {
+          it.task_details.map(i => {
+            if (i.plugin === 'netSignPrepare' && i.dispose[0].serverName) {
+              isHasNetSignPrepare.value = true
+              hasDeviceList.value.push({ ip: i.dispose[0].serverName })
+            }
+          })
         })
       })
-    })
-    if (hasDeviceList.value.length === 0 && !isHasNetSignPrepare) {
-      const params = {
-        page: 1,
-        page_size: 100
-      }
-      let res = await getDeviceApi(params)
-      if (res.code === 1000) {
-        hasDeviceList.value = res.data.filter(
-          item =>
-            item.using === false ||
-            item.operate_user === null ||
-            item.operate_user === JSON.parse(localStorage.getItem('userInfo')).username
-        )
-        // 遍历currentDevice和hasDeviceList，如果currentDevice中的设备在hasDeviceList中，则将其置为不可选
-        currentDevice.map(item => {
-          hasDeviceList.value.map(it => {
-            if (item === it.ip) {
-              hasDeviceList.value.map(i => {
-                if (i.ip === item) {
-                  i.disabled = true
-                }
-              })
+      if (hasDeviceList.value.length === 0 && !isHasNetSignPrepare) {
+        const params = {
+          page: 1,
+          page_size: 100
+        }
+        let res = await getDeviceApi(params)
+        if (res.code === 1000) {
+          hasDeviceList.value = res.data.filter(
+            item =>
+              item.using === false ||
+              item.operate_user === null ||
+              item.operate_user === JSON.parse(localStorage.getItem('userInfo')).username
+          )
+          currentDevice.map(item => {
+            hasDeviceList.value.map(it => {
+              if (item === it.ip) {
+                hasDeviceList.value.map(i => {
+                  if (i.ip === item) {
+                    i.disabled = true
+                  }
+                })
+              }
+            })
+          })
+        }
+      } else {
+        hasDeviceList.value.map(item => {
+          currentDevice.map(it => {
+            if (item.ip == it) {
+              item.disabled = true
             }
           })
         })
       }
-    } else {
-      hasDeviceList.value.map(item => {
-        currentDevice.map(it => {
-          if (item.ip === it) {
-            item.disabled = true
-          }
-        })
-      })
-    }
-
-    console.log('output->hasDeviceList', hasDeviceList.value)
+    })
   }
 )
 
