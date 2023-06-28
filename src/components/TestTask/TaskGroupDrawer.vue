@@ -89,15 +89,21 @@
               </el-card>
             </div>
           </el-tab-pane>
-          <el-tab-pane label="代码扫描" :disabled="true">
+          <el-tab-pane label="代码扫描">
             <span class="group-name">代码扫描</span>
             <div class="group-name-list">
-              <el-card class="group-name-item" shadow="hover" @click="addStage(data)">
+              <el-card
+                class="group-name-item"
+                shadow="hover"
+                v-for="(item, index) in codeList"
+                :key="'codeList' + index"
+                @click="addStage(item)"
+              >
                 <div class="group-name-item-detail">
                   <img src="https://img.alicdn.com/tfs/TB17eM4wFT7gK0jSZFpXXaTkpXa-88-88.png" alt="" />
                   <div class="group-name-item-detail-right">
-                    <span class="detail-name">{{ data.name }}</span>
-                    <p>{{ data.desc }}</p>
+                    <span class="detail-name">{{ item.name }}</span>
+                    <p>{{ item.desc }}</p>
                   </div>
                 </div>
               </el-card>
@@ -127,10 +133,20 @@ const props = defineProps({
 const emit = defineEmits(['changeDrawer'])
 const ishowDrawer = ref(false)
 const input = ref('')
-const data = reactive({
-  name: '代码扫描',
-  desc: '这是一段代码扫描代码扫描'
-})
+const codeList = ref([
+  {
+    name: 'Java代码扫描',
+    desc: '这是一段Java代码扫描'
+  },
+  {
+    name: 'Java安全扫描',
+    desc: '这是一段Java安全扫描'
+  },
+  {
+    name: 'Android代码扫描',
+    desc: '这是一段Android代码扫描'
+  }
+])
 const testList = ref([
   {
     plugin: 'interfaceTest',
