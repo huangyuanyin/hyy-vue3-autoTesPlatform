@@ -421,3 +421,13 @@ export function deleteDockerDeviceManageApi(id) {
     urlType: 'NetDevOps'
   })
 }
+
+/* ---------------------------- /devops/docker_arrange/supply_package/ ---------------------------- */
+export function uploadSupplyPackageApi(params) {
+  return request({
+    url: `/devops/docker_arrange/supply_package/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}

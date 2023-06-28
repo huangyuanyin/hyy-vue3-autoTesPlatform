@@ -70,18 +70,20 @@
                 <el-upload
                   ref="uploadFile"
                   class="uploadFile-demo"
-                  v-model="item.file_name"
                   drag
-                  action=""
+                  multiple
+                  action="http://10.4.150.55:8021/devops/docker_arrange/supply_package/"
+                  name="upload_file"
                   accept=""
                   with-credentials
                   :show-file-list="false"
-                  :on-change="handleChange"
+                  :auto-upload="false"
+                  @change="handleUploadFileChange"
                 >
                   <el-icon class="el-icon--upload"><upload-filled /></el-icon>
                   <div class="el-upload__text">拖拽文件至此处或<em>点击上传</em></div>
                   <template #tip>
-                    <div class="el-upload__tip" style="color: red">Tips：可上传多个文件</div>
+                    <div class="el-upload__tip" style="color: red">Tips：可同时上传多个文件</div>
                     <!-- <div v-if="item.file_name" style="display: flex; align-items: center; justify-content: space-between">
                       <div>{{ item.file_name }}</div>
                       <el-icon class="clearFile" @click="clearFile"><CloseBold /></el-icon>
@@ -89,13 +91,13 @@
                   </template>
                 </el-upload>
               </el-form-item>
-              <el-form-item label="已上传文件列表" v-if="item.fileList.length > 0">
+              <el-form-item label="已上传文件列表" v-if="item.fileList && item.fileList.length > 0">
                 <el-table :data="item.fileList" border style="width: 100%" stripe>
                   <el-table-column prop="file_name" label="文件名" max-width="200" />
-                  <el-table-column prop="file_path" label="存放路径" max-width="250" />
+                  <el-table-column prop="docker_path" label="存放路径" max-width="250" />
                   <el-table-column fixed="right" label="操作" align="center" width="120" max-width="120">
                     <template #default="scope">
-                      <el-button type="primary" size="small" :icon="Edit" @click="handleEdit(scope.row.file_path)"></el-button>
+                      <el-button type="primary" size="small" :icon="Edit" @click="handleEdit(scope.row)"></el-button>
                       <el-popconfirm title="确认删除这个文件?" @confirm="handleDelete(scope.row.file_path)">
                         <template #reference>
                           <el-button type="danger" size="small" :icon="Delete"></el-button>
@@ -127,8 +129,8 @@
   </el-drawer>
   <el-dialog v-model="pathFormVisible" title="文件存放路径设置" width="50%">
     <el-form :model="pathForm" ref="pathFormRef" :rules="pathFormRules">
-      <el-form-item label="文件存放路径：" label-width="120" prop="file_path">
-        <el-input v-model="pathForm.file_path" autocomplete="off" />
+      <el-form-item label="文件存放路径：" label-width="120" prop="docker_path">
+        <el-input v-model="pathForm.docker_path" autocomplete="off" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -144,7 +146,7 @@
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules, UploadProps, UploadRawFile, genFileId, UploadInstance } from 'element-plus'
 import { CloseBold, FullScreen, UploadFilled, Edit, Delete } from '@element-plus/icons-vue'
-import { getDockerDeviceManageApi, getProductPackageApi, uploadSupplyJarApi } from '@/api/NetDevOps/index'
+import { getDockerDeviceManageApi, getProductPackageApi, uploadSupplyPackageApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
 
@@ -165,7 +167,7 @@ const props = defineProps({
 const emit = defineEmits(['closeDrawer', 'deleteTask'])
 
 interface RuleForm {
-  file_path: string
+  docker_path: string
 }
 
 const configFileDialog = ref(false)
@@ -174,11 +176,11 @@ const configFileDialogLog = ref('')
 const configId = ref(null)
 const pathFormVisible = ref(false)
 const pathForm = reactive<RuleForm>({
-  file_path: ''
+  docker_path: ''
 })
 const pathFormRef = ref<FormInstance>()
 const pathFormRules = reactive<FormRules>({
-  file_path: [{ required: true, message: '请输入文件存放路径', trigger: 'blur' }]
+  docker_path: [{ required: true, message: '请输入文件存放路径', trigger: 'blur' }]
 })
 
 const ishowDrawer = ref(false)
@@ -290,21 +292,19 @@ const limitNumericInput = val => {
   deviceList.value[0].number = val.replace(/\D/g, '')
 }
 
-const clearFile = () => {
-  deviceList.value[0].file_name = ''
-  deviceList.value[0].file_path = ''
-}
-
 // 文件上传
-let handleChangeTriggered = false // 标志变量
-const handleChange = async (file, fileList) => {
-  if (handleChangeTriggered) {
-    return
-  }
-  handleChangeTriggered = true
+// let handleChangeTriggered = false // 标志变量
+const handleUploadFileChange = async fileList => {
+  // if (handleChangeTriggered) {
+  //   return
+  // }
+  // handleChangeTriggered = true
   const formData = new FormData()
-  formData.append('upload_file', file.raw)
-  let res = await uploadSupplyJarApi(formData)
+  fileList = [fileList]
+  for (let i = 0; i < fileList.length; i++) {
+    formData.append('upload_file', fileList[i].raw)
+  }
+  let res = await uploadSupplyPackageApi(formData)
   if (res.code === 1000) {
     ElMessage.success({
       message: '上传成功',
@@ -315,10 +315,11 @@ const handleChange = async (file, fileList) => {
       // deviceList.value[0].file_name = res.data.file_name
       // deviceList.value[0].file_path = res.data.file_path
       deviceList.value[0].fileList = deviceList.value[0].fileList.concat({
-        file_name: res.data.file_name,
-        file_path: res.data.file_path
+        file_name: res.data[0].file_name,
+        file_path: res.data[0].file_path,
+        docker_path: res.data[0].docker_path
       })
-      handleChangeTriggered = false
+      // handleChangeTriggered = false
     })
   }
 }
@@ -326,9 +327,9 @@ const handleChange = async (file, fileList) => {
 const currentPathIndex = ref(null)
 const handleEdit = val => {
   pathFormVisible.value = true
-  let index = deviceList.value[0].fileList.findIndex(item => item.file_path === val)
+  let index = deviceList.value[0].fileList.findIndex(item => item.file_path === val.file_path)
   currentPathIndex.value = index
-  pathForm.file_path = val
+  pathForm.docker_path = val.docker_path
 }
 
 const handleDelete = val => {
@@ -340,7 +341,7 @@ const submitFileForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      deviceList.value[0].fileList[currentPathIndex.value].file_path = pathForm.file_path
+      deviceList.value[0].fileList[currentPathIndex.value].docker_path = pathForm.docker_path
       closePathForm(formEl)
     } else {
       console.log('error submit!', fields)
