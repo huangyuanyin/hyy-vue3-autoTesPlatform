@@ -102,6 +102,12 @@
                                 </div>
                               </div>
                             </div>
+                            <div class="docker-message" v-if="it.plugin === 'dockerDeployment'">
+                              <div>docker容器数：未知</div>
+                              <div class="view" @click="viewDocker(it)">
+                                <el-icon><View /></el-icon>查看
+                              </div>
+                            </div>
                             <div class="card-num" v-if="it.plugin === 'interfaceTest'">
                               <div class="stat-info">
                                 <div class="stat-info-item" v-for="(item, index) in it.total_statistics" :key="'total_statistics' + index">
@@ -355,12 +361,34 @@
       </div>
       <el-empty class="empty" description="数据加载中，请稍后......" v-else />
     </el-dialog>
+    <el-drawer v-model="dockerDrawer" :title="dockerDrawerTitle" direction="rtl" size="50%">
+      <el-table :data="dockerNumDeatil">
+        <el-table-column property="IP" label="容器IP" width="200" />
+        <el-table-column property="name" label="Name" width="200" />
+        <el-table-column property="address" label="Address" />
+        <el-table-column fixed="right" label="操作" align="center">
+          <template #default="scope">
+            <el-button link type="primary" size="small"> 在线终端 </el-button>
+            <el-button link type="success" size="small"> 文件上传 </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        v-model:currentPage="dockerCurrentPage"
+        v-model:page-size="dockerPageSize"
+        :page-sizes="[10, 20, 30, 40]"
+        layout="total, prev, pager, next, jumper"
+        :total="dockerTotal"
+        @size-change="handleDockerSizeChange"
+        @current-change="handleDockerCurrentChange"
+      />
+    </el-drawer>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
-import { CircleCloseFilled, QuestionFilled, SuccessFilled, Document, FullScreen } from '@element-plus/icons-vue'
+import { CircleCloseFilled, QuestionFilled, View, Document, FullScreen } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 // @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
@@ -379,6 +407,11 @@ const route = useRoute()
 const router = useRouter()
 const tableData = ref([])
 const tableDataLoading = ref(false)
+const dockerDrawer = ref(false)
+const dockerDrawerTitle = ref('')
+const dockerCurrentPage = ref(1)
+const dockerPageSize = ref(10)
+const dockerTotal = ref(0)
 const logDialog = ref(false)
 const logTitle = ref('')
 const methodsDialog = ref(false)
@@ -449,6 +482,28 @@ const currentMethodsType = ref(null)
 const currentLogVal = ref(null)
 const caseList = ref([])
 const defaultExpandedKeys = ref([])
+const dockerNumDeatil = [
+  {
+    date: '2016-05-02',
+    IP: '111.111.111.111',
+    address: 'Queens, New York City'
+  },
+  {
+    date: '2016-05-04',
+    IP: '111.111.111.111',
+    address: 'Queens, New York City'
+  },
+  {
+    date: '2016-05-01',
+    IP: '111.111.111.111',
+    address: 'Queens, New York City'
+  },
+  {
+    date: '2016-05-03',
+    IP: '111.111.111.111',
+    address: 'Queens, New York City'
+  }
+]
 
 watch(
   () => props.runResult,
@@ -611,6 +666,11 @@ const getMethods2 = async (row, val) => {
   }
 }
 
+const viewDocker = val => {
+  dockerDrawer.value = true
+  dockerDrawerTitle.value = val.name
+}
+
 const getMethods = async (item: any, type, val) => {
   currentMethodsItem.value = item
   currentMethodsId.value = val
@@ -678,6 +738,12 @@ const handleTableDataCurrentChange = (val: number) => {
 const handleMethodsDataCurrentChange = (val: number) => {
   methodsDataCurrentPage.value = val
   handleMethods(currentMethodsItem.value, currentMethodsType.value, currentMethodsId.value)
+}
+const handleDockerSizeChange = (val: number) => {
+  dockerCurrentPage.value = val
+}
+const handleDockerCurrentChange = (val: number) => {
+  dockerCurrentPage.value = val
 }
 </script>
 
@@ -929,6 +995,33 @@ const handleMethodsDataCurrentChange = (val: number) => {
                       color: #292929;
                       font-size: 14px;
                     }
+
+                    .docker-message {
+                      background-color: #f0f9ff;
+                      padding: 12px 20px 12px 16px;
+                      border-top: 1px solid #e8e8e8;
+                      color: #22b066;
+                      font-size: 12px;
+                      line-height: 18px;
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      .view {
+                        display: flex;
+                        align-items: center;
+                        .el-icon {
+                          margin-right: 5px;
+                          color: #22b066;
+                          font-size: 16px;
+                        }
+                      }
+                      .view:hover {
+                        color: #1b9aee;
+                        .el-icon {
+                          color: #1b9aee;
+                        }
+                      }
+                    }
                     .wait-comp {
                       .time {
                         background-color: #fff;
@@ -1090,7 +1183,7 @@ const handleMethodsDataCurrentChange = (val: number) => {
                 display: flex !important;
                 flex-direction: column !important;
                 border-left-color: #90deb5 !important;
-                height: 75px !important;
+                height: 100% !important;
                 .card-content {
                   height: 75px !important;
                 }
@@ -1156,7 +1249,7 @@ const handleMethodsDataCurrentChange = (val: number) => {
     display: flex !important;
     flex-direction: column !important;
     .success-card {
-      height: 165px !important;
+      height: 100% !important;
       border-left-color: #90deb5 !important;
     }
     .card-content {

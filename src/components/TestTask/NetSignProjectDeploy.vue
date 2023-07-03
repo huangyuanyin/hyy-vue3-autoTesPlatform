@@ -291,7 +291,7 @@ watch(
         hasDeviceList.value.map(item => {
           currentDevice.map(it => {
             if (item.ip === it) {
-              item.disabled = true
+              // item.disabled = true
             }
           })
         })

@@ -22,10 +22,21 @@
       <el-table-column prop="username" label="用户名" align="center" width="150" />
       <el-table-column prop="port" label="端口" align="center" width="120" />
       <el-table-column prop="container_num" label="容器总数" align="center" width="120" />
-      <el-table-column prop="bridge_names" label="网口名称列表" align="center" width="200" />
-      <el-table-column prop="start_ipaddress" label="起始ip" align="center" width="150" />
-      <el-table-column prop="netmask" label="子网掩码" align="center" width="120" />
-      <el-table-column prop="gateway" label="网关" align="center" width="150" />
+      <el-table-column prop="docker_network_config" label="网口名称列表" align="center" width="200">
+        <template #default="scope">
+          <el-popover placement="right" :width="600" trigger="click">
+            <template #reference>
+              <el-button link type="primary">查看</el-button>
+            </template>
+            <el-table :data="scope.row.docker_network_config">
+              <el-table-column width="150" property="start_ipaddress" label="起始IP" />
+              <el-table-column width="150" property="netmask" label="子网掩码" />
+              <el-table-column width="150" property="bridge_name" label="网口名称" />
+              <el-table-column width="150" property="gateway" label="网口IP" />
+            </el-table>
+          </el-popover>
+        </template>
+      </el-table-column>
       <el-table-column prop="remark" label="备注" width="200">
         <template #default="scope">
           <span v-if="scope.row.remark !== null">{{ scope.row.operate_user }}</span>
@@ -33,7 +44,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="last_mod_time" label="更新时间" width="180" />
-      <el-table-column fixed="right" label="操作" align="center" width="150">
+      <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" :disabled="scope.row.using" @click="openDockerDialog('edit', scope.row.id)">
             编辑
@@ -46,7 +57,7 @@
             @confirm="deletetDevice(scope.row.id)"
           >
             <template #reference>
-              <el-button link type="danger" size="small">删除</el-button>
+              <el-button link type="danger" size="small" :disabled="scope.row.using">删除</el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -62,7 +73,7 @@
       @current-change="handlesystemCurrentChange"
     />
 
-    <el-dialog v-model="dialogFormVisible" :title="DockerTitle" width="70%" :before-close="closeDialog">
+    <el-dialog v-model="dialogFormVisible" :title="DockerTitle" width="75%" :before-close="closeDialog">
       <el-form :model="form" ref="ruleFormRef" :rules="rules">
         <el-row>
           <el-col :span="12">
@@ -82,16 +93,17 @@
               <el-input v-model="form.container_num" autocomplete="off" :disabled="disabled" maxlength="6" @input="limitNumericInput" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="11">
             <el-form-item label="网口名称列表" :label-width="formLabelWidth">
               <el-button type="primary" :icon="CirclePlus" @click="openNetworkConfigDialog('add')">新增</el-button>
             </el-form-item>
             <el-form-item label="" :label-width="formLabelWidth" prop="docker_network_config">
               <el-table :data="form.docker_network_config" border style="width: 100%">
                 <el-table-column prop="start_ipaddress" label="起始ip" width="140" />
-                <el-table-column prop="netmask" label="子网掩码" width="120" />
-                <el-table-column prop="gateway" label="网关" width="120" />
-                <el-table-column fixed="right" label="操作" align="center">
+                <el-table-column prop="netmask" label="子网掩码" width="90" />
+                <el-table-column prop="bridge_name" label="网关名称" width="120" />
+                <el-table-column prop="gateway" label="网关IP" width="120" />
+                <el-table-column fixed="right" label="操作" align="center" width="90">
                   <template #default="scope">
                     <el-button link type="primary" size="small" :disabled="disabled" @click="openNetworkConfigDialog('edit', scope.row)">
                       编辑
@@ -147,7 +159,10 @@
         <el-form-item label="子网掩码" :label-width="formLabelWidth" prop="netmask">
           <el-input v-model="networkForm.netmask" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="网关" :label-width="formLabelWidth" prop="gateway">
+        <el-form-item label="网关名" :label-width="formLabelWidth" prop="bridge_name">
+          <el-input v-model="networkForm.bridge_name" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="网关IP" :label-width="formLabelWidth" prop="gateway">
           <el-input v-model="networkForm.gateway" autocomplete="off" />
         </el-form-item>
       </el-form>
@@ -198,6 +213,7 @@ const ruleFormRef = ref<FormInstance>()
 const networkForm = reactive({
   start_ipaddress: '',
   netmask: '',
+  bridge_name: '',
   gateway: ''
 })
 const networkRuleFormRef = ref<FormInstance>()
@@ -216,7 +232,20 @@ const networkFormRules = reactive<FormRules>({
     }
   ],
   netmask: [{ required: true, message: '请输入子网掩码', trigger: 'blur' }],
-  gateway: [{ required: true, message: '请输入网关', trigger: 'blur' }]
+  bridge_name: [{ required: true, message: '请输入网关名', trigger: 'blur' }],
+  gateway: [
+    { required: true, message: '请输入网关IP', trigger: 'blur' },
+    {
+      validator: (rule, value, callback) => {
+        if (value && !iplist.test(value)) {
+          callback(new Error('请输入正确的ip地址'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
 })
 const keywords_ip = ref('')
 
@@ -270,6 +299,7 @@ const openNetworkConfigDialog = (type, val?) => {
       networkConfigDialogTitle.value = '编辑网口'
       networkForm.start_ipaddress = val.start_ipaddress
       networkForm.netmask = val.netmask
+      networkForm.bridge_name = val.bridge_name
       networkForm.gateway = val.gateway
       editNetworkIndex.value = form.docker_network_config.indexOf(val)
       break
@@ -297,11 +327,13 @@ const submitNetworkConfigForm = async (formEl: FormInstance | undefined) => {
         ? form.docker_network_config.push({
             start_ipaddress: networkForm.start_ipaddress,
             netmask: networkForm.netmask,
+            bridge_name: networkForm.bridge_name,
             gateway: networkForm.gateway
           })
         : (form.docker_network_config[editNetworkIndex.value] = {
             start_ipaddress: networkForm.start_ipaddress,
             netmask: networkForm.netmask,
+            bridge_name: networkForm.bridge_name,
             gateway: networkForm.gateway
           })
       resetNetworkConfigForm(networkRuleFormRef.value)
