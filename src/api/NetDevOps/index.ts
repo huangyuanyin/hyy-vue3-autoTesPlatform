@@ -431,3 +431,43 @@ export function uploadSupplyPackageApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/docker_arrange/get_docker_names/ ---------------------------- */
+export function getDockerNameseApi(params) {
+  return request({
+    url: `/devops/docker_arrange/get_docker_names/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+/* ---------------------------- /devops/docker_arrange/get_docker_logs/ ---------------------------- */
+export function getDockerLogsApi(params) {
+  return request({
+    url: `/devops/docker_arrange/get_docker_logs/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+/* ---------------------------- /devops/docker_arrange/run_shell/ ---------------------------- */
+export function runDockerShellApi(params) {
+  return request({
+    url: `/devops/docker_arrange/run_shell/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+/* ---------------------------- /devops/docker_arrange/supply_package_to_docker/---------------------------- */
+export function supplyDockerPackageApi(params) {
+  return request({
+    url: `/devops/docker_arrange/supply_package_to_docker/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}

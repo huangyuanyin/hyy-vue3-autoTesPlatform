@@ -103,7 +103,7 @@
                               </div>
                             </div>
                             <div class="docker-message" v-if="it.plugin === 'dockerDeployment'">
-                              <div>docker容器数：未知</div>
+                              <div>docker容器数：{{ JSON.parse(it.dispose)[0].number }}</div>
                               <div class="view" @click="viewDocker(it)">
                                 <el-icon><View /></el-icon>查看
                               </div>
@@ -361,15 +361,18 @@
       </div>
       <el-empty class="empty" description="数据加载中，请稍后......" v-else />
     </el-dialog>
-    <el-drawer v-model="dockerDrawer" :title="dockerDrawerTitle" direction="rtl" size="50%">
-      <el-table :data="dockerNumDeatil">
-        <el-table-column property="IP" label="容器IP" width="200" />
-        <el-table-column property="name" label="Name" width="200" />
-        <el-table-column property="address" label="Address" />
+    <el-drawer custom-class="dockerDrawer" v-model="dockerDrawer" :title="dockerDrawerTitle" direction="rtl" size="55%">
+      <el-table :data="dockerNumDeatil" stripe>
+        <el-table-column property="docker_name" label="容器名" width="200" />
+        <el-table-column property="bridge_name" label="网口名" width="150" />
+        <el-table-column property="ipaddress" label="网口IP" width="200" />
+        <el-table-column property="gateway" label="子网掩码" width="200" />
         <el-table-column fixed="right" label="操作" align="center">
           <template #default="scope">
             <el-button link type="primary" size="small"> 在线终端 </el-button>
-            <el-button link type="success" size="small"> 文件上传 </el-button>
+            <el-button link type="success" size="small" @click="uploadFile(scope.row)"> 文件上传 </el-button>
+            <el-button link type="warning" size="small" @click="getLog(scope.row)"> 日志列表 </el-button>
+            <el-button link type="" size="small" @click="runShell(scope.row)"> 脚本执行 </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -382,19 +385,69 @@
         @size-change="handleDockerSizeChange"
         @current-change="handleDockerCurrentChange"
       />
+      <el-drawer v-model="logDrawer" :title="logDrawerTitle" :append-to-body="true" :before-close="handleCloseLogDrawer">
+        <el-table :data="logDrawerList" stripe>
+          <el-table-column property="id" label="id" width="80" />
+          <el-table-column property="created_time" label="创建时间" width="170" />
+          <el-table-column property="last_mod_time" label="修改时间" width="170" />
+          <el-table-column fixed="right" label="操作" align="center">
+            <template #default="scope">
+              <el-button link type="primary" size="small" @click="viewLog(scope.row)"> 日志 </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-drawer>
     </el-drawer>
+    <el-dialog v-model="dockerFileDialog" :title="dockerFileDialogTitle" width="40%">
+      <el-form :model="dockerFileForm" ref="dockerFileFormRef" :rules="dockerFileFormRules">
+        <el-form-item label="docker地址" label-width="120px" prop="docker_path">
+          <el-input v-model="dockerFileForm.docker_path" placeholder="/home/" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="文件上传" label-width="120px" prop="upload_file">
+          <el-upload
+            class="upload-docker-file"
+            drag
+            action=""
+            :auto-upload="false"
+            v-model:file-list="dockerFileList"
+            multiple
+            :on-change="handleChange"
+          >
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text">拖拽文件至此处或<em>点击上传</em></div>
+            <template #tip>
+              <div class="el-upload__tip">* 可上传多个文件</div>
+            </template>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancelDockerFile(dockerFileFormRef)">取消</el-button>
+          <el-button type="primary" @click="submitDockerFile(dockerFileFormRef)"> 确定 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
-import { CircleCloseFilled, QuestionFilled, View, Document, FullScreen } from '@element-plus/icons-vue'
+import { CircleCloseFilled, QuestionFilled, View, Document, FullScreen, UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import type { UploadProps, UploadUserFile } from 'element-plus'
 // @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
 import ConfigDetail from './ConfigDetail.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getClassNameApi, getMethodsApi } from '@/api/NetDevOps'
+import {
+  getClassNameApi,
+  getMethodsApi,
+  getDockerNameseApi,
+  getDockerLogsApi,
+  runDockerShellApi,
+  supplyDockerPackageApi
+} from '@/api/NetDevOps'
 
 const props = defineProps({
   runResult: {
@@ -412,6 +465,23 @@ const dockerDrawerTitle = ref('')
 const dockerCurrentPage = ref(1)
 const dockerPageSize = ref(10)
 const dockerTotal = ref(0)
+const dockerFileDialog = ref(false)
+const dockerFileDialogTitle = ref('')
+const dockerFileForm = reactive({
+  task_detail_history_id: null,
+  docker_path: '/home/',
+  docker_name: '',
+  upload_file: ''
+})
+const dockerFileFormRef = ref<FormInstance>()
+const dockerFileFormRules = reactive<FormRules>({
+  docker_path: [{ required: true, message: '请输入docker地址', trigger: 'blur' }],
+  upload_file: [{ required: true, message: '请至少选择一个文件上传', trigger: 'blur' }]
+})
+const dockerFileList = ref<UploadUserFile[]>([])
+const logDrawer = ref(false)
+const logDrawerTitle = ref('')
+const logDrawerList = ref([])
 const logDialog = ref(false)
 const logTitle = ref('')
 const methodsDialog = ref(false)
@@ -482,28 +552,8 @@ const currentMethodsType = ref(null)
 const currentLogVal = ref(null)
 const caseList = ref([])
 const defaultExpandedKeys = ref([])
-const dockerNumDeatil = [
-  {
-    date: '2016-05-02',
-    IP: '111.111.111.111',
-    address: 'Queens, New York City'
-  },
-  {
-    date: '2016-05-04',
-    IP: '111.111.111.111',
-    address: 'Queens, New York City'
-  },
-  {
-    date: '2016-05-01',
-    IP: '111.111.111.111',
-    address: 'Queens, New York City'
-  },
-  {
-    date: '2016-05-03',
-    IP: '111.111.111.111',
-    address: 'Queens, New York City'
-  }
-]
+const dockerNumDeatil = ref([])
+const dockerDrawerId = ref(null)
 
 watch(
   () => props.runResult,
@@ -609,6 +659,88 @@ const changeCollapse = val => {
   currentCollpose.value = val
 }
 
+const uploadFile = val => {
+  dockerFileDialog.value = true
+  dockerFileDialogTitle.value = `【${val.docker_name}】上传文件`
+  dockerFileForm.docker_name = val.docker_name
+  dockerFileForm.task_detail_history_id = dockerDrawerId.value
+}
+
+const handleChange: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
+  dockerFileForm.upload_file = uploadFiles
+}
+
+const submitDockerFile = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      let res = await supplyDockerPackageApi(dockerFileForm)
+      if (res.code === 1000) {
+        ElMessage.success('上传成功！')
+        dockerFileDialog.value = false
+      }
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
+const cancelDockerFile = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  dockerFileList.value = []
+  dockerFileDialog.value = false
+}
+
+const getLog = val => {
+  logDrawer.value = true
+  logDrawerTitle.value = `【${val.docker_name}】容器日志列表`
+  getDockerLogs(val.docker_name)
+}
+
+const getDockerLogs = async docker_name => {
+  const params = {
+    task_detail_history_id: dockerDrawerId.value,
+    page: 1,
+    page_size: 10,
+    docker_name
+  }
+  let res = await getDockerLogsApi(params)
+  if (res.code === 1000) {
+    logDrawerList.value = res.data
+  }
+}
+
+const runShell = async val => {
+  ElMessageBox.confirm(`确定执行【${val.docker_name}】脚本?`, '执行脚本', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      const params = {
+        task_detail_history_id: dockerDrawerId.value,
+        docker_name: val.docker_name
+      }
+      let res = await runDockerShellApi(params)
+      if (res.code === 1000) {
+        ElMessage.success('脚本执行执行成功！')
+      }
+    })
+    .catch(() => {})
+}
+
+const handleCloseLogDrawer = (done: () => void) => {
+  logDrawerTitle.value = ''
+  done()
+}
+
+const viewLog = val => {
+  logDialog.value = true
+  log.value = val.execute_record
+  logTitle.value = `${val.docker_name}容器日志 - ${val.id}`
+}
+
 const getClassName = async (item: any, val) => {
   if (item.name === 'count') return
   currentItem.value = item
@@ -666,9 +798,25 @@ const getMethods2 = async (row, val) => {
   }
 }
 
-const viewDocker = val => {
+const viewDocker = async val => {
   dockerDrawer.value = true
   dockerDrawerTitle.value = val.name
+  dockerDrawerId.value = val.id
+  dockerCurrentPage.value = 1
+  getDockerNamese(dockerDrawerId.value)
+}
+
+const getDockerNamese = async (id?) => {
+  const params = {
+    task_detail_history_id: id,
+    page: dockerCurrentPage.value,
+    page_size: dockerPageSize.value
+  }
+  let res = await getDockerNameseApi(params)
+  if (res.code === 1000) {
+    dockerNumDeatil.value = res.data
+    dockerTotal.value = res.total
+  }
 }
 
 const getMethods = async (item: any, type, val) => {
@@ -740,10 +888,11 @@ const handleMethodsDataCurrentChange = (val: number) => {
   handleMethods(currentMethodsItem.value, currentMethodsType.value, currentMethodsId.value)
 }
 const handleDockerSizeChange = (val: number) => {
-  dockerCurrentPage.value = val
+  // dockerCurrentPage.value = val
 }
 const handleDockerCurrentChange = (val: number) => {
   dockerCurrentPage.value = val
+  getDockerNamese(dockerDrawerId.value)
 }
 </script>
 
@@ -1283,6 +1432,16 @@ const handleDockerCurrentChange = (val: number) => {
       transform: rotate(360deg);
     }
   }
+}
+.dockerDrawer {
+  .el-pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+}
+.upload-docker-file {
+  width: 100%;
 }
 
 .classData {
