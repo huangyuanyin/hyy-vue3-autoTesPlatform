@@ -19,6 +19,13 @@
           <span class="item-ip" @click="openDockerDialog('detail', scope.row.id)">{{ scope.row.ip }}</span>
         </template>
       </el-table-column>
+      <el-table-column prop="using" label="占用状态" width="160" align="center">
+        <template #default="scope">
+          <el-tag :type="scope.row.using === true ? 'danger' : ''" disable-transitions>
+            {{ scope.row.using === true ? '占用中' : '未占用' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="username" label="用户名" align="center" width="150" />
       <el-table-column prop="port" label="端口" align="center" width="120" />
       <el-table-column prop="container_num" label="容器总数" align="center" width="120" />

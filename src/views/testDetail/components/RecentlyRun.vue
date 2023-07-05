@@ -424,7 +424,14 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="cancelDockerFile(dockerFileFormRef)">取消</el-button>
-          <el-button type="primary" @click="submitDockerFile(dockerFileFormRef)"> 确定 </el-button>
+          <el-button
+            type="primary"
+            @click="submitDockerFile(dockerFileFormRef)"
+            v-loading.fullscreen.lock="fullscreenLoading"
+            element-loading-text="文件上传中..."
+          >
+            确定
+          </el-button>
         </span>
       </template>
     </el-dialog>
@@ -434,7 +441,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import { CircleCloseFilled, QuestionFilled, View, Document, FullScreen, UploadFilled } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElLoading } from 'element-plus'
 import type { UploadProps, UploadUserFile } from 'element-plus'
 // @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
@@ -471,7 +478,7 @@ const dockerFileForm = reactive({
   task_detail_history_id: null,
   docker_path: '/home/',
   docker_name: '',
-  upload_file: ''
+  upload_file: []
 })
 const dockerFileFormRef = ref<FormInstance>()
 const dockerFileFormRules = reactive<FormRules>({
@@ -479,6 +486,7 @@ const dockerFileFormRules = reactive<FormRules>({
   upload_file: [{ required: true, message: '请至少选择一个文件上传', trigger: 'blur' }]
 })
 const dockerFileList = ref<UploadUserFile[]>([])
+const fullscreenLoading = ref(false)
 const logDrawer = ref(false)
 const logDrawerTitle = ref('')
 const logDrawerList = ref([])
@@ -674,9 +682,20 @@ const submitDockerFile = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      let res = await supplyDockerPackageApi(dockerFileForm)
+      let fd = new FormData()
+      fd.append('docker_name', dockerFileForm.docker_name)
+      fd.append('task_detail_history_id', dockerFileForm.task_detail_history_id)
+      // 循环添加文件
+      dockerFileForm.upload_file.forEach((item: any) => {
+        fd.append('upload_file', item.raw)
+      })
+      fd.append('docker_path', dockerFileForm.docker_path)
+      fullscreenLoading.value = true
+      let res = await supplyDockerPackageApi(fd)
+      fullscreenLoading.value = false
       if (res.code === 1000) {
         ElMessage.success('上传成功！')
+        dockerFileList.value = []
         dockerFileDialog.value = false
       }
     } else {
@@ -1442,6 +1461,9 @@ const handleDockerCurrentChange = (val: number) => {
 }
 .upload-docker-file {
   width: 100%;
+  .el-upload__tip {
+    color: red;
+  }
 }
 
 .classData {
@@ -1503,6 +1525,7 @@ const handleDockerCurrentChange = (val: number) => {
     padding: 0 16px 16px !important;
   }
 }
+
 .logDialog {
   .el-dialog__header {
     padding-bottom: 0 !important;
