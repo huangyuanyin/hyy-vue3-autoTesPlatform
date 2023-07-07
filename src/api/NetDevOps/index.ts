@@ -471,3 +471,13 @@ export function supplyDockerPackageApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/docker_arrange/batch_sync/---------------------------- */
+export function batchSyncApi(params) {
+  return request({
+    url: `/devops/docker_arrange/batch_sync/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}

@@ -370,12 +370,13 @@
         <el-table-column property="bridge_name" label="网口名" width="150" />
         <el-table-column property="ipaddress" label="网口IP" width="200" />
         <el-table-column property="gateway" label="子网掩码" width="200" />
-        <el-table-column fixed="right" label="操作" align="center">
+        <el-table-column fixed="right" label="操作" align="center" width="350">
           <template #default="scope">
             <el-button link type="primary" size="small" @click="openTermail(scope.row)"> 在线终端 </el-button>
             <el-button link type="success" size="small" @click="uploadFile(scope.row)"> 文件上传 </el-button>
+            <el-button link size="small" @click="fileSync(scope.row)"> 文件同步 </el-button>
             <el-button link type="warning" size="small" @click="getLog(scope.row)"> 日志列表 </el-button>
-            <el-button link type="" size="small" @click="runShell(scope.row)"> 脚本执行 </el-button>
+            <el-button link type="info" size="small" @click="runShell(scope.row)"> 脚本执行 </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -438,6 +439,51 @@
         </span>
       </template>
     </el-dialog>
+    <el-dialog v-model="fileSyncDialog" :title="fileSyncDialogTitle" width="40%">
+      <el-form :model="fileSyncForm" ref="fileSyncFormRef" :rules="fileSyncFormRules">
+        <el-form-item label="目标文件/文件夹地址" label-width="160px" prop="all_file_list">
+          <el-input v-model="fileSyncForm.all_file_list" placeholder="目标文件/文件夹地址可多个，各个地址之间以,分隔" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="目标容器" label-width="160px">
+          <el-radio-group v-model="targetContainer">
+            <el-radio label="ALL" />
+            <el-radio label="指定" />
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="" prop="docker_name_list" label-width="160px" v-if="targetContainer === '指定'">
+          <el-select
+            v-model="fileSyncForm.docker_name_list"
+            placeholder="请选择要同步到的容器（可多选）"
+            clearable
+            multiple
+            collapse-tags
+            collapse-tags-tooltip
+            :max-collapse-tags="5"
+            style="width: 40vw"
+          >
+            <el-option
+              :label="item.docker_name"
+              :value="item.docker_name"
+              v-for="(item, index) in targetDockerList"
+              :key="'targetDockerList' + index"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancelFileSync(fileSyncFormRef)">取消</el-button>
+          <el-button
+            type="primary"
+            @click="submitFileSync(fileSyncFormRef)"
+            v-loading.fullscreen.lock="fullscreenLoading"
+            element-loading-text="文件同步中..."
+          >
+            确定
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
     <el-dialog v-model="termailDialog" custom-class="termailDialog" width="60%" style="height: 60vh">
       <template #header="{ close, titleId, titleClass }">
         <div class="my-header2">
@@ -465,7 +511,8 @@ import {
   getDockerNameseApi,
   getDockerLogsApi,
   runDockerShellApi,
-  supplyDockerPackageApi
+  supplyDockerPackageApi,
+  batchSyncApi
 } from '@/api/NetDevOps'
 import Termmail from '@/components/Termail.vue'
 
@@ -499,6 +546,21 @@ const dockerFileFormRules = reactive<FormRules>({
   upload_file: [{ required: true, message: '请至少选择一个文件上传', trigger: 'blur' }]
 })
 const dockerFileList = ref<UploadUserFile[]>([])
+const fileSyncDialog = ref(false)
+const fileSyncDialogTitle = ref('')
+const fileSyncForm = reactive({
+  docker_name: '',
+  task_detail_history_id: null,
+  all_file_list: '',
+  docker_name_list: ''
+})
+const fileSyncFormRef = ref<FormInstance>()
+const fileSyncFormRules = reactive<FormRules>({
+  all_file_list: [{ required: true, message: '请输入同步文件/文件夹地址', trigger: 'blur' }],
+  docker_name_list: [{ required: true, message: '请选择要同步到的目标容器', trigger: 'blur' }]
+})
+const targetContainer = ref('ALL')
+const targetDockerList = ref([])
 const fullscreenLoading = ref(false)
 const logDrawer = ref(false)
 const logDrawerTitle = ref('')
@@ -769,6 +831,46 @@ const getLog = val => {
   logDrawer.value = true
   logDrawerTitle.value = `【${val.docker_name}】容器日志列表`
   getDockerLogs(val.docker_name)
+}
+
+const fileSync = val => {
+  fileSyncDialog.value = true
+  fileSyncDialogTitle.value = `【${val.docker_name}】文件同步`
+  fileSyncForm.docker_name = val.docker_name
+  fileSyncForm.task_detail_history_id = dockerDrawerId.value
+  targetDockerList.value = dockerNumDeatil.value
+}
+
+const submitFileSync = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      let all_file_list = fileSyncForm.all_file_list.replace(/，/g, ',').split(',')
+      targetContainer.value === 'ALL' ? (fileSyncForm.docker_name_list = 'ALL') : ''
+      let docker_name_list = String(fileSyncForm.docker_name_list)
+      const params = {
+        all_file_list,
+        docker_name_list,
+        docker_name: fileSyncForm.docker_name,
+        task_detail_history_id: fileSyncForm.task_detail_history_id
+      }
+      fullscreenLoading.value = true
+      let res = await batchSyncApi(params)
+      fullscreenLoading.value = false
+      if (res.code === 1000) {
+        ElMessage.success('文件同步成功！')
+        cancelFileSync(fileSyncFormRef.value)
+      }
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
+const cancelFileSync = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  fileSyncDialog.value = false
 }
 
 const getDockerLogs = async docker_name => {
