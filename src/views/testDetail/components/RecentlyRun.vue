@@ -207,8 +207,11 @@
                             </div>
                           </div>
                           <div class="wait-comp" v-if="it.status === 'wait_execute'">
-                            <div class="time">
-                              <div>0s</div>
+                            <div class="card-info">
+                              <span>0s</span>
+                              <div class="operate">
+                                <ConfigDetail :id="it.id" />
+                              </div>
                             </div>
                           </div>
                         </div>

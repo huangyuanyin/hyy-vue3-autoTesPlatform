@@ -374,7 +374,8 @@ watch(
           })
         })
       })
-      if (hasDeviceList.value.length === 0 && !isHasNetSignPrepare) {
+      console.log(`output->`, isHasNetSignPrepare, hasDeviceList.value)
+      if (hasDeviceList.value.length === 0 && !isHasNetSignPrepare.value) {
         const params = {
           page: 1,
           page_size: 100
