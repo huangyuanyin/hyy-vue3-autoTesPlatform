@@ -369,7 +369,7 @@
         <el-table-column property="gateway" label="子网掩码" width="200" />
         <el-table-column fixed="right" label="操作" align="center">
           <template #default="scope">
-            <el-button link type="primary" size="small"> 在线终端 </el-button>
+            <el-button link type="primary" size="small" @click="openTermail(scope.row)"> 在线终端 </el-button>
             <el-button link type="success" size="small" @click="uploadFile(scope.row)"> 文件上传 </el-button>
             <el-button link type="warning" size="small" @click="getLog(scope.row)"> 日志列表 </el-button>
             <el-button link type="" size="small" @click="runShell(scope.row)"> 脚本执行 </el-button>
@@ -435,13 +435,22 @@
         </span>
       </template>
     </el-dialog>
+    <el-dialog v-model="termailDialog" custom-class="termailDialog" width="60%" style="height: 60vh">
+      <template #header="{ close, titleId, titleClass }">
+        <div class="my-header2">
+          <h4>{{ termailDialogTitle }}</h4>
+          <!-- <el-icon @click="fullScreen"><FullScreen /></el-icon> -->
+        </div>
+      </template>
+      <Termmail id="Termmail" v-if="isShowTermmail" :termmailInfo="termmailInfo" :isPropFullScreen="isShowFullScreen"></Termmail>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch, watchEffect } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch, watchEffect } from 'vue'
 import { CircleCloseFilled, QuestionFilled, View, Document, FullScreen, UploadFilled } from '@element-plus/icons-vue'
-import { ElMessage, ElLoading } from 'element-plus'
+import { ElMessage, ElLoading, FormInstance, FormRules } from 'element-plus'
 import type { UploadProps, UploadUserFile } from 'element-plus'
 // @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
@@ -455,6 +464,7 @@ import {
   runDockerShellApi,
   supplyDockerPackageApi
 } from '@/api/NetDevOps'
+import Termmail from '@/components/Termail.vue'
 
 const props = defineProps({
   runResult: {
@@ -506,6 +516,14 @@ const methodsDataPageSize = ref(20)
 const methodsDataTotal = ref(0)
 const methodsDataLoading = ref(false)
 const fullcen = ref(false)
+const termailDialog = ref(false)
+const termailDialogTitle = ref('')
+const isShowTermmail = ref(false)
+const termmailInfo = ref({
+  id: '',
+  docker_name: ''
+})
+const isShowFullScreen = ref(false)
 const log = ref('暂无日志...')
 const cardTyp = {
   success: 'success-card',
@@ -607,6 +625,19 @@ watch(
   }
 )
 
+watch(
+  () => termailDialog.value,
+  () => {
+    if (termailDialog.value) {
+      setTimeout(() => {
+        isShowTermmail.value = true
+      }, 300)
+    } else {
+      isShowTermmail.value = false
+    }
+  }
+)
+
 const handleChannel = (item: any) => {
   ElMessage.warning('取消')
 }
@@ -665,6 +696,26 @@ const toLookTestTaskConfig = () => {
 
 const changeCollapse = val => {
   currentCollpose.value = val
+}
+
+const openTermail = val => {
+  termailDialog.value = true
+  termailDialogTitle.value = `【${val.docker_name}】在线终端`
+  termmailInfo.value = {
+    docker_name: val.docker_name,
+    id: dockerDrawerId.value
+  }
+  nextTick(() => {
+    isShowTermmail.value = true
+  })
+}
+
+const fullScreen = () => {
+  const terminalContainer = document.getElementById('Termmail')
+  if (terminalContainer.requestFullscreen) {
+    isShowFullScreen.value = true
+    terminalContainer.requestFullscreen()
+  }
 }
 
 const uploadFile = val => {
@@ -1532,6 +1583,25 @@ const handleDockerCurrentChange = (val: number) => {
   }
   .el-dialog__body {
     padding-top: 16px !important;
+  }
+}
+
+.termailDialog {
+  .el-dialog__body {
+    padding-top: 0px !important;
+  }
+  .my-header2 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    .el-icon {
+      font-size: 18px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .el-icon:hover {
+      color: #75c0f2;
+    }
   }
 }
 .box-item {

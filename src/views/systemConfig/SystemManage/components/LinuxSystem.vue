@@ -154,7 +154,14 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="产品ID" :label-width="formLabelWidth" prop="product_id">
-              <el-input v-model="form.product_id" autocomplete="off" :disabled="disabled" maxlength="6" show-word-limit />
+              <el-input
+                v-model="form.product_id"
+                placeholder="610001"
+                autocomplete="off"
+                :disabled="disabled"
+                maxlength="6"
+                show-word-limit
+              />
             </el-form-item>
             <el-form-item label="CPU类型" :label-width="formLabelWidth" prop="main_board_type">
               <el-select v-model="form.main_board_type" placeholder="请选择CPU类型" :disabled="disabled">
@@ -246,7 +253,7 @@ const form = reactive({
   password: '',
   port: 22,
   machine_sn: '',
-  product_id: '',
+  product_id: '610001',
   mode_code: '',
   config_code: '',
   cavium_card_type: '',

@@ -1,11 +1,11 @@
 <template>
   <div class="console-wrap">
     <div class="console" id="terminal"></div>
-    <el-button type="primary" link @click="closeTermmail">关闭终端</el-button>
+    <!-- <el-button type="primary" link @click="closeTermmail">关闭终端</el-button> -->
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeMount } from 'vue'
+import { ref, onMounted, onBeforeMount, watch, watchEffect } from 'vue'
 import Terminal from '../config/Xterm'
 
 const emit = defineEmits(['closeTermmail'])
@@ -15,18 +15,28 @@ const props = defineProps({
     default: {
       pid: 1,
       name: 'terminal',
-      cols: 400,
-      rows: 400
+      cols: 100,
+      rows: 100
     }
   },
   termmailInfo: {
     type: Object,
     default: () => {}
+  },
+  isPropFullScreen: {
+    type: Boolean,
+    default: false
   }
 })
 
 const term = ref(null)
 const terminalSocket = ref(null)
+
+watchEffect(() => {
+  if (props.isPropFullScreen) {
+    term.value.resize(term.value.cols, 50)
+  }
+})
 
 const runRealTerminal = () => {
   console.log('webSocket is finished')
@@ -43,7 +53,7 @@ const closeTermmail = () => {
 }
 
 onMounted(() => {
-  const { uname, passw, ip } = props.termmailInfo
+  const { docker_name, id } = props.termmailInfo
   console.log('pid : ' + props.terminal.pid + ' is on ready')
   let terminalContainer = document.getElementById('terminal')
   term.value = new Terminal({
@@ -61,9 +71,7 @@ onMounted(() => {
   })
   term.value.open(terminalContainer)
   // open websocket
-  terminalSocket.value = new WebSocket(
-    `ws://${import.meta.env.VITE_XTERM_URL}/terminal/wensock?host_ip=${ip}&host_por=22&user=${uname}&passwd=${passw}`
-  )
+  terminalSocket.value = new WebSocket(`ws://10.4.150.55:8023/ws/docker_online_terminal/${docker_name}/${id}`)
   console.log('dada', terminalSocket.value)
   terminalSocket.value.onopen = runRealTerminal
   terminalSocket.value.onclose = closeRealTerminal
@@ -85,8 +93,9 @@ onBeforeMount(() => {
   flex-direction: column;
   margin-top: 10px;
   .console {
-    margin-top: 40px;
+    // margin-top: 40px;
     // height: 500px;
+    position: relative;
     :deep(.xterm-text-layer) {
       width: 100%;
       height: 100%;
@@ -97,6 +106,11 @@ onBeforeMount(() => {
     ::-webkit-scrollbar {
       display: none; /* Chrome Safari */
     }
+  }
+  .button2 {
+    top: 20% !important;
+    right: 3% !important;
+    position: absolute;
   }
   .el-button {
     right: 15px;
