@@ -931,7 +931,7 @@ socket.addEventListener('message', event => {
                 <div>流水线【${item.name}】<span style='color:#e6a23c;font-weight:600'>执行中<span></div>
                 <div>执行时间：${item.last_mod_time}</div>
               </div>`,
-        duration: 0
+        duration: 180000
       })
     })
   }

@@ -484,7 +484,7 @@
         </span>
       </template>
     </el-dialog>
-    <el-dialog v-model="termailDialog" custom-class="termailDialog" width="60%" style="height: 60vh">
+    <el-dialog v-model="termailDialog" custom-class="termailDialog" width="60%" style="height: 60vh" destroy-on-close>
       <template #header="{ close, titleId, titleClass }">
         <div class="my-header2">
           <h4>{{ termailDialogTitle }}</h4>
