@@ -19,7 +19,7 @@ export const disposeList = {
       serverConfig: {},
       showServerConfig: [
         { label: '设备IP：', value: '' },
-        { label: '主板类型：', value: '' },
+        { label: 'CPU类型：', value: '' },
         { label: '设备型号：', value: '' },
         { label: '型号编码：', value: '' },
         { label: '配置编码：', value: '' },
@@ -40,7 +40,7 @@ export const disposeList = {
       ifrs: 'y',
       showServerConfig: [
         { label: '设备IP：', value: '' },
-        { label: '主板类型：', value: '' },
+        { label: 'CPU类型：', value: '' },
         { label: '设备型号：', value: '' },
         { label: '型号编码：', value: '' },
         { label: '配置编码：', value: '' },
@@ -61,7 +61,7 @@ export const disposeList = {
       serverName: '',
       showServerConfig: [
         { label: '设备IP：', value: '' },
-        { label: '主板类型：', value: '' },
+        { label: 'CPU类型：', value: '' },
         { label: '设备型号：', value: '' },
         { label: '型号编码：', value: '' },
         { label: '配置编码：', value: '' },

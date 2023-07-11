@@ -68,7 +68,7 @@ const getTaskInfo = async () => {
             value: it.ip
           },
           {
-            label: '主板类型：',
+            label: 'CPU类型：',
             value: it.main_board_type
           },
           {
@@ -144,7 +144,7 @@ const getFavoriteTask = async () => {
             value: it.ip
           },
           {
-            label: '主板类型：',
+            label: 'CPU类型：',
             value: it.main_board_type
           },
           {

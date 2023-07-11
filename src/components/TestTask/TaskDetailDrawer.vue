@@ -586,7 +586,7 @@ const getDeployVersion = async (type, val, index) => {
   color: #e6a23c;
   margin-left: 15px;
   display: inline-block;
-  width: 80px;
+  // width: 80px;
 }
 .main-create_user {
   color: #acafb4;

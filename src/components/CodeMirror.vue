@@ -6,7 +6,6 @@
     :tabSize="2"
     :extensions="extensions"
     @input="onCodeChange"
-    @paste="handlePaste"
   />
 </template>
 

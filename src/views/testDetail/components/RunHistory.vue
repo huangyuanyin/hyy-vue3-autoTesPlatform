@@ -65,7 +65,7 @@
           <span v-else>自动触发</span>
         </template>
       </el-table-column>
-      <el-table-column prop="address" label="持续时间" align="center" width="150" />
+      <el-table-column prop="duration_time" label="持续时间" align="center" width="150" />
       <el-table-column prop="last_mod_time" label="最后运行时间" width="230" align="center" />
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">
