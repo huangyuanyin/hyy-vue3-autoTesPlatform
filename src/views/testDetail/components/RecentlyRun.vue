@@ -291,7 +291,7 @@
         <div class="my-header">
           <div class="left">
             <h4 :id="titleId" :class="titleClass">{{ interfaceTitle }}</h4>
-            <span :class="[statColor[classNameTitle]]">
+            <span :class="[statColor[classNameTitle]]" v-if="classNameTitle">
               【 <span>{{ statList[classNameTitle] }}用例</span> 】
             </span>
           </div>
@@ -364,19 +364,39 @@
       </div>
       <el-empty class="empty" description="数据加载中，请稍后......" v-else />
     </el-dialog>
-    <el-drawer custom-class="dockerDrawer" v-model="dockerDrawer" :title="dockerDrawerTitle" direction="rtl" size="55%">
+    <el-drawer
+      custom-class="dockerDrawer"
+      v-model="dockerDrawer"
+      :title="dockerDrawerTitle"
+      direction="rtl"
+      size="70%"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+    >
       <el-table :data="dockerNumDeatil" stripe>
         <el-table-column property="docker_name" label="容器名" width="200" />
         <el-table-column property="bridge_name" label="网口名" width="150" />
         <el-table-column property="ipaddress" label="网口IP" width="200" />
         <el-table-column property="gateway" label="子网掩码" width="200" />
-        <el-table-column fixed="right" label="操作" align="center" width="350">
+        <el-table-column property="username" label="用户名" width="200" />
+        <el-table-column property="password" label="密码" />
+        <el-table-column fixed="right" label="操作" align="center" width="200">
           <template #default="scope">
-            <el-button link type="primary" size="small" @click="openTermail(scope.row)"> 在线终端 </el-button>
-            <el-button link type="success" size="small" @click="uploadFile(scope.row)"> 文件上传 </el-button>
-            <el-button link size="small" @click="fileSync(scope.row)"> 文件同步 </el-button>
-            <el-button link type="warning" size="small" @click="getLog(scope.row)"> 日志列表 </el-button>
-            <el-button link type="info" size="small" @click="runShell(scope.row)"> 脚本执行 </el-button>
+            <el-tooltip class="box-item" effect="dark" content="在线终端" placement="top">
+              <el-button circle type="primary" size="small" @click="openTermail(scope.row)" :icon="Monitor"> </el-button>
+            </el-tooltip>
+            <el-tooltip class="box-item" effect="dark" content="文件上传" placement="top">
+              <el-button circle type="success" size="small" @click="uploadFile(scope.row)" :icon="Upload"> </el-button>
+            </el-tooltip>
+            <el-tooltip class="box-item" effect="dark" content="文件同步" placement="top">
+              <el-button circle size="small" @click="fileSync(scope.row)" :icon="FolderOpened"> </el-button>
+            </el-tooltip>
+            <el-tooltip class="box-item" effect="dark" content="日志列表" placement="top">
+              <el-button circle type="warning" size="small" @click="getLog(scope.row)" :icon="Tickets"> </el-button>
+            </el-tooltip>
+            <el-tooltip class="box-item" effect="dark" content="脚本执行" placement="top">
+              <el-button circle type="info" size="small" @click="runShell(scope.row)" :icon="SwitchButton"> </el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -484,22 +504,43 @@
         </span>
       </template>
     </el-dialog>
-    <el-dialog v-model="termailDialog" custom-class="termailDialog" width="60%" style="height: 60vh" destroy-on-close>
+    <el-dialog
+      v-model="termailDialog"
+      custom-class="termailDialog"
+      width="60%"
+      style="height: 60vh"
+      destroy-on-close
+      @close="handleTermailClose"
+    >
       <template #header="{ close, titleId, titleClass }">
         <div class="my-header2">
           <h4>{{ termailDialogTitle }}</h4>
           <!-- <el-icon @click="fullScreen"><FullScreen /></el-icon> -->
         </div>
       </template>
-      <Termmail id="Termmail" v-if="isShowTermmail" :termmailInfo="termmailInfo" :isPropFullScreen="isShowFullScreen"></Termmail>
+      <template v-if="isShowTermmail">
+        <Termmail id="Termmail" :termmailInfo="termmailInfo" :isPropFullScreen="isShowFullScreen"></Termmail>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, reactive, ref, watch, watchEffect } from 'vue'
-import { CircleCloseFilled, QuestionFilled, View, Document, FullScreen, UploadFilled } from '@element-plus/icons-vue'
-import { ElMessage, ElLoading, FormInstance, FormRules } from 'element-plus'
+import {
+  CircleCloseFilled,
+  QuestionFilled,
+  View,
+  Document,
+  FullScreen,
+  UploadFilled,
+  Monitor,
+  SwitchButton,
+  Tickets,
+  Upload,
+  FolderOpened
+} from '@element-plus/icons-vue'
+import { ElMessage, ElLoading, FormInstance, FormRules, ElMessageBox } from 'element-plus'
 import type { UploadProps, UploadUserFile } from 'element-plus'
 // @ts-ignore
 import CodeMirror from '@/components/CodeMirror.vue'
@@ -775,6 +816,15 @@ const openTermail = val => {
   })
 }
 
+const handleTermailClose = () => {
+  if (termailDialog.value) {
+    nextTick(() => {
+      isShowTermmail.value = false
+    })
+    termailDialog.value = false
+  }
+}
+
 const fullScreen = () => {
   const terminalContainer = document.getElementById('Termmail')
   if (terminalContainer.requestFullscreen) {
@@ -920,7 +970,7 @@ const getClassName = async (item: any, val) => {
   if (item.name === 'count') return
   currentItem.value = item
   currentId.value = val.id
-  handleClassNameApi(currentItem.value, currentId.value)
+  await handleClassNameApi(currentItem.value, currentId.value)
   interfaceTitle.value = val.name
 }
 
@@ -989,6 +1039,10 @@ const getDockerNamese = async (id?) => {
   }
   let res = await getDockerNameseApi(params)
   if (res.code === 1000) {
+    res.data.forEach(item => {
+      item.username = 'root'
+      item.password = '11111111'
+    })
     dockerNumDeatil.value = res.data
     dockerTotal.value = res.total
   }
@@ -1043,6 +1097,11 @@ const close2 = () => {
     dialogEl.classList.remove('fullscreen')
   }
   caseDialog.value = false
+  classNameTitle.value = ''
+  currentId.value = ''
+  currentItem.value = ''
+  interfaceTitle.value = ''
+  caseList.value = []
 }
 
 const handleRun = (item: any) => {

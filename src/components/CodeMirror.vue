@@ -1,12 +1,12 @@
 <template>
   <codemirror
     v-model="code"
-    placeholder="Code gose here..."
+    placeholder="Code goes here..."
     :style="props.codeStyle"
-    :autofocus="true"
     :tabSize="2"
     :extensions="extensions"
     @input="onCodeChange"
+    @paste="handlePaste"
   />
 </template>
 
@@ -15,7 +15,7 @@ import { Codemirror } from 'vue-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 // import { python } from '@codemirror/lang-python'
 // import { oneDark } from '@codemirror/theme-one-dark'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, defineProps, defineEmits } from 'vue'
 import { EditorView } from '@codemirror/view'
 
 const props = defineProps({
@@ -30,12 +30,12 @@ const props = defineProps({
 })
 const emit = defineEmits(['onCodeChange'])
 
-const code = ref('')
+const code = ref(props.code)
 
 watch(
   () => props.code,
-  () => {
-    code.value = props.code
+  newCode => {
+    code.value = newCode
   },
   {
     immediate: true
@@ -73,6 +73,15 @@ const onCodeChange = () => {
   emit('onCodeChange', code.value)
 }
 
+const handlePaste = event => {
+  const text = event.clipboardData.getData('text/plain')
+  const startPosition = event.target.selectionStart
+  const endPosition = event.target.selectionEnd
+  code.value = code.value.slice(0, startPosition) + text + code.value.slice(endPosition)
+  console.log(`output->code.value`, text, event, endPosition, code.value)
+  emit('onCodeChange', code.value)
+}
+
 onMounted(() => {})
 </script>
 
@@ -96,6 +105,19 @@ onMounted(() => {})
 
     &:hover {
       background-color: rgba(95, 95, 95, 0.7);
+    }
+  }
+  .cm-scroller {
+    .cm-line {
+      .cm-gutterElement {
+        color: white !important;
+      }
+      .ͼd,
+      .ͼb,
+      .ͼc,
+      .ͼe {
+        color: white !important;
+      }
     }
   }
 }

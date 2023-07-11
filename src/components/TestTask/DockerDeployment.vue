@@ -78,6 +78,8 @@
                   with-credentials
                   :show-file-list="false"
                   :auto-upload="false"
+                  v-loading.fullscreen.lock="fullscreenLoading"
+                  element-loading-text="文件上传中，请稍后..."
                   @change="handleUploadFileChange"
                 >
                   <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -207,6 +209,7 @@ let currentFlows = ref(JSON.parse(localStorage.getItem('flows')))
 const isPassVerification = ref(false)
 const hasDeviceList = ref([])
 const uploadFile = ref<UploadInstance>()
+const fullscreenLoading = ref(false)
 
 watch(
   () => props.taskDetailDrawer,
@@ -304,7 +307,9 @@ const handleUploadFileChange = async fileList => {
   for (let i = 0; i < fileList.length; i++) {
     formData.append('upload_file', fileList[i].raw)
   }
+  fullscreenLoading.value = true
   let res = await uploadSupplyPackageApi(formData)
+  fullscreenLoading.value = false
   if (res.code === 1000) {
     ElMessage.success({
       message: '上传成功',
