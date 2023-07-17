@@ -66,6 +66,17 @@
               <el-form-item label="容器数量" prop="number" :required="true">
                 <el-input v-model="item.number" placeholder="请输入容器数量" :maxlength="5" @input="limitNumericInput" />
               </el-form-item>
+              <el-form-item label="docker镜像" prop="image_tag" :required="true">
+                <el-select
+                  v-model="item.image_tag_name"
+                  class="m-2"
+                  placeholder="请选择docker镜像"
+                  @visible-change="getImage_tagList"
+                  @change="selectImageTag"
+                >
+                  <el-option v-for="item in image_tagList" :key="item.name" :label="item.name" :value="item.name" />
+                </el-select>
+              </el-form-item>
               <el-form-item label="文件上传">
                 <el-upload
                   ref="uploadFile"
@@ -148,9 +159,10 @@
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules, UploadProps, UploadRawFile, genFileId, UploadInstance } from 'element-plus'
 import { CloseBold, FullScreen, UploadFilled, Edit, Delete } from '@element-plus/icons-vue'
-import { getDockerDeviceManageApi, getProductPackageApi, uploadSupplyPackageApi } from '@/api/NetDevOps/index'
+import { getDockerDeviceManageApi, getProductPackageApi, uploadSupplyPackageApi, getDockerDeviceImagesApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
+import { de } from 'element-plus/lib/locale'
 
 const props = defineProps({
   taskDetailDrawer: {
@@ -200,6 +212,7 @@ const deviceList = ref(JSON.parse(JSON.stringify(disposeList['dockerDeployment']
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   number: [{ required: true, message: '容器数量不能为空', trigger: 'blur' }],
+  image_tag: [{ required: true, message: '镜像不能为空', trigger: 'blur' }],
   shell: [{ required: true, message: 'shell脚本不能为空', trigger: 'blur' }],
   file_name: [{ required: true, message: '文件不能为空', trigger: 'change' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
@@ -208,6 +221,7 @@ const deviceFormRules = reactive<FormRules>({
 let currentFlows = ref(JSON.parse(localStorage.getItem('flows')))
 const isPassVerification = ref(false)
 const hasDeviceList = ref([])
+const image_tagList = ref([])
 const uploadFile = ref<UploadInstance>()
 const fullscreenLoading = ref(false)
 
@@ -287,6 +301,40 @@ const selectDevice = val => {
       deviceList.value[0].showServerConfig[0].value = item.ip
       deviceList.value[0].showServerConfig[1].value = item.username
       deviceList.value[0].showServerConfig[2].value = item.port
+    }
+  })
+}
+
+const getImage_tagList = async val => {
+  console.log(`output->val`, val)
+  if (val) {
+    if (!deviceList.value[0].showServerConfig[0].value) {
+      ElMessage.warning('请先选择设备')
+      return
+    }
+    let docker_device_manage_id = null
+    hasDeviceList.value.map(item => {
+      if (item.ip === deviceList.value[0].showServerConfig[0].value) {
+        docker_device_manage_id = item.id
+      }
+    })
+    const params = {
+      docker_device_manage_id,
+      page: 1,
+      page_size: 1000
+    }
+    let res = await getDockerDeviceImagesApi(params)
+    if (res.code === 1000) {
+      image_tagList.value = res.data
+    }
+  }
+}
+
+const selectImageTag = val => {
+  image_tagList.value.map(item => {
+    if (item.name === val) {
+      deviceList.value[0].image_tag = item.id
+      deviceList.value[0].image_tag_name = item.name
     }
   })
 }

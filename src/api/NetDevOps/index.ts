@@ -481,3 +481,39 @@ export function batchSyncApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/docker_device_images/---------------------------- */
+export function getDockerDeviceImagesApi(params) {
+  return request({
+    url: `/devops/docker_device_images/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+export function addDockerDeviceImagesApi(params) {
+  return request({
+    url: `/devops/docker_device_images/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function editDockerDeviceImagesApi(params) {
+  return request({
+    url: `/devops/docker_device_images/`,
+    method: 'put',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+export function deleteDockerDeviceImagesApi(id) {
+  return request({
+    url: `/devops/docker_device_images/${id}`,
+    method: 'delete',
+    urlType: 'NetDevOps'
+  })
+}

@@ -137,10 +137,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         ElMessage.error('至少上传一个包！')
         return
       }
-      if (
-        props.dialogTitle.includes('新增') &&
-        !['application/x-zip-msdownload', 'application/x-zip-compressed', 'application/x-compressed'].includes(uploadFileList.value.type)
-      ) {
+      if (props.dialogTitle.includes('新增') && !['zip', 'tgz'].includes(uploadFileList.value.name.split('.').pop()!)) {
         ElMessage.error('请上传zip或tgz格式的文件！')
         return
       }

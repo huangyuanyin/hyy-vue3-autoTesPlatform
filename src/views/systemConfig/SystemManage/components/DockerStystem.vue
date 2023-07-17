@@ -56,6 +56,7 @@
           <el-button link type="primary" size="small" :disabled="scope.row.using" @click="openDockerDialog('edit', scope.row.id)">
             编辑
           </el-button>
+          <el-button link type="warning" size="small" :disabled="false" @click="openImageDockerDrawer(scope.row)"> 镜像管理 </el-button>
           <el-popconfirm
             title="确定删除该设备?"
             trigger="click"
@@ -180,6 +181,71 @@
         </span>
       </template>
     </el-dialog>
+
+    <el-drawer
+      v-model="dockerImageDrawer"
+      :title="dockerImageDrawerTitle"
+      direction="rtl"
+      :before-close="handleCloseDockerImageDrawer"
+      size="50%"
+    >
+      <div>
+        <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="openImageDockerDialog('add')"> 添加镜像</el-button>
+      </div>
+      <el-table :data="dockerImageTableData" border style="width: 100%">
+        <el-table-column prop="name" label="镜像名称" width="180" />
+        <el-table-column prop="docker_full_name" label="镜像名称和版本全称" width="180" />
+        <el-table-column prop="tag" label="镜像标签" width="180" />
+        <el-table-column prop="remark" label="备注" />
+        <el-table-column prop="update_user" label="更新人" width="180" />
+        <el-table-column prop="last_mod_time" label="修改时间" width="180" />
+        <el-table-column fixed="right" label="操作" width="120">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="openImageDockerDialog('edit', scope.row.id)">编辑</el-button>
+            <el-popconfirm
+              width="220"
+              confirm-button-text="确定"
+              cancel-button-text="取消"
+              icon-color="#F56C6C"
+              title="确认删除这个镜像?"
+              @confirm="deleteDockerImage(scope.row.id)"
+            >
+              <template #reference>
+                <el-button link type="danger" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        v-model:currentPage="dockerImageCurrentPage"
+        v-model:page-size="dockerImagePageSize"
+        :page-sizes="[10, 20, 30, 40]"
+        layout="total, prev, pager, next, jumper"
+        :total="dockerImageTotal"
+        @size-change="handleDockerImageSizeChange"
+        @current-change="handleDockerImageCurrentChange"
+      />
+    </el-drawer>
+    <el-dialog v-model="addDockerImageDialog" :title="addDockerImageDialogTitle" width="35%" :before-close="closeaAdDockerImageDialog">
+      <el-form :model="dockerImageForm" ref="dockerImageFormRef" :rules="dockerImageFormRules">
+        <el-form-item label="镜像名称" :label-width="formLabelWidth" prop="name">
+          <el-input v-model="dockerImageForm.name" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="镜像标签" :label-width="formLabelWidth" prop="tag">
+          <el-input v-model="dockerImageForm.tag" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
+          <el-input v-model="dockerImageForm.remark" autocomplete="off" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="resetDockerImageForm(dockerImageFormRef)">取消</el-button>
+          <el-button type="primary" @click="submitDockerImageForm(dockerImageFormRef)"> 确定 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -192,13 +258,38 @@ import {
   getDockerDeviceManageApi,
   addDockerDeviceManageApi,
   editDockerDeviceManageApi,
-  deleteDockerDeviceManageApi
+  deleteDockerDeviceManageApi,
+  getDockerDeviceImagesApi,
+  addDockerDeviceImagesApi,
+  editDockerDeviceImagesApi,
+  deleteDockerDeviceImagesApi
 } from '@/api/NetDevOps/index'
 import { useDockerDeviceManage } from '@/hooks/useDockerDeviceManage'
 
 const dialogFormVisible = ref(false)
 const networkConfigDialogFormVisible = ref(false)
 const networkConfigDialogTitle = ref('')
+const dockerImageDrawer = ref(false)
+const dockerImageDrawerTitle = ref('')
+const dockerImageDrawerId = ref('')
+const addDockerImageDialog = ref(false)
+const addDockerImageDialogTitle = ref('')
+const dockerImageForm = reactive({
+  docker_device_manage_id: '',
+  docker_device_images_id: '',
+  name: '',
+  tag: '',
+  remark: ''
+})
+const dockerImageFormRef = ref<FormInstance>()
+const dockerImageFormRules = reactive<FormRules>({
+  name: [{ required: true, message: '请输入镜像名称', trigger: 'blur' }],
+  tag: [{ required: true, message: '请输入镜像标签', trigger: 'blur' }]
+})
+const dockerImageTableData = ref([])
+const dockerImageCurrentPage = ref(1)
+const dockerImagePageSize = ref(10)
+const dockerImageTotal = ref(0)
 const editNetworkIndex = ref(-1)
 const formLabelWidth = '140px'
 const DockerTitle = ref('')
@@ -353,6 +444,50 @@ const deleteNetwork = val => {
   form.docker_network_config.splice(index, 1)
 }
 
+const submitDockerImageForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      if (addDockerImageDialogTitle.value === '添加镜像') {
+        dockerImageForm.docker_device_manage_id = dockerImageDrawerId.value
+        delete dockerImageForm.docker_device_images_id
+        addDockerDeviceImages(dockerImageForm)
+      } else {
+        delete dockerImageForm.docker_device_manage_id
+        editDockerDeviceImages(dockerImageForm)
+      }
+    }
+  })
+}
+
+const addDockerDeviceImages = async params => {
+  const res = await addDockerDeviceImagesApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('添加成功')
+    resetDockerImageForm(dockerImageFormRef.value)
+    dockerImageCurrentPage.value = 1
+    getDockerDeviceImages()
+  }
+}
+
+const editDockerDeviceImages = async params => {
+  const res = await editDockerDeviceImagesApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('编辑成功')
+    resetDockerImageForm(dockerImageFormRef.value)
+    getDockerDeviceImages()
+  }
+}
+
+const deleteDockerImage = async id => {
+  const res = await deleteDockerDeviceImagesApi(id)
+  if (res.code === 1000) {
+    ElMessage.success('删除成功')
+    dockerImageCurrentPage.value = 1
+    getDockerDeviceImages()
+  }
+}
+
 // 添加设备接口
 const addDevice = async () => {
   const res = await addDockerDeviceManageApi(form)
@@ -397,6 +532,12 @@ const resetNetworkConfigForm = (formEl: FormInstance | undefined) => {
   editNetworkIndex.value = -1
 }
 
+const resetDockerImageForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  addDockerImageDialog.value = false
+  formEl.resetFields()
+}
+
 const searchLinux = type => {
   systemCurrentPage.value = 1
   getDevice()
@@ -420,10 +561,42 @@ const openDockerDialog = (...args) => {
   dialogFormVisible.value = true
 }
 
+const openImageDockerDrawer = val => {
+  dockerImageDrawer.value = true
+  dockerImageDrawerTitle.value = `【${val.ip}】 镜像管理`
+  dockerImageDrawerId.value = val.id
+  getDockerDeviceImages()
+}
+
+const openImageDockerDialog = (type, id?) => {
+  addDockerImageDialog.value = true
+  switch (type) {
+    case 'add':
+      addDockerImageDialogTitle.value = '添加镜像'
+      break
+    case 'edit':
+      addDockerImageDialogTitle.value = '编辑镜像'
+      dockerImageForm.docker_device_images_id = JSON.parse(JSON.stringify(id))
+      getOneDockerDeviceImages(id)
+    default:
+      break
+  }
+}
+
+// 关闭弹窗
+const closeaAdDockerImageDialog = () => {
+  addDockerImageDialog.value = false
+  resetDockerImageForm(dockerImageFormRef.value)
+}
+
 // 关闭弹窗
 const closeDialog = () => {
   dialogFormVisible.value = false
   resetForm(ruleFormRef.value)
+}
+
+const handleCloseDockerImageDrawer = () => {
+  dockerImageDrawer.value = false
 }
 
 const closeNetworkConfigDialog = () => {
@@ -458,12 +631,48 @@ const getDevice = async () => {
   }
 }
 
+const getDockerDeviceImages = async () => {
+  const params = {
+    page: dockerImageCurrentPage.value,
+    page_size: dockerImagePageSize.value,
+    docker_device_manage_id: dockerImageDrawerId.value
+  }
+  let res = await getDockerDeviceImagesApi(params)
+  if (res.code === 1000) {
+    dockerImageTableData.value = res.data
+    dockerImageTotal.value = res.total || 0
+  }
+}
+
+const getOneDockerDeviceImages = async id => {
+  const params = {
+    docker_device_images_id: id,
+    docker_device_manage_id: dockerImageDrawerId.value
+  }
+  let res = await getDockerDeviceImagesApi(params)
+  if (res.code === 1000) {
+    for (const key in res.data) {
+      if (dockerImageForm.hasOwnProperty(key)) {
+        dockerImageForm[key] = res.data[key]
+      }
+    }
+  }
+}
+
 const handlesystemSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
 const handlesystemCurrentChange = (val: number) => {
   systemCurrentPage.value = val
   getDevice()
+}
+
+const handleDockerImageSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleDockerImageCurrentChange = (val: number) => {
+  dockerImageCurrentPage.value = val
+  getDockerDeviceImages()
 }
 
 onMounted(() => {

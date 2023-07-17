@@ -87,6 +87,8 @@ export const disposeList = {
         { label: '用户名：', value: '' },
         { label: '端口：', value: '' }
       ],
+      image_tag: '',
+      image_tag_name: '',
       number: null,
       fileList: [],
       shell: '# 此处输入shell命令（非必填） \n'

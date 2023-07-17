@@ -107,7 +107,7 @@ const props = defineProps({
 })
 
 watchEffect(() => {
-  if (props.isUpdateHistory) {
+  if (props.isUpdateHistory && route.path === 'testTask/detailTestTask') {
     getTaskHistory()
   }
 })
