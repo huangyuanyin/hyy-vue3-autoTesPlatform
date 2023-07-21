@@ -187,7 +187,7 @@
       :title="dockerImageDrawerTitle"
       direction="rtl"
       :before-close="handleCloseDockerImageDrawer"
-      size="50%"
+      size="60%"
     >
       <div>
         <el-button type="primary" :icon="CirclePlus" style="margin-bottom: 20px" @click="openImageDockerDialog('add')"> 添加镜像</el-button>
@@ -195,9 +195,9 @@
       <el-table :data="dockerImageTableData" border style="width: 100%">
         <el-table-column prop="name" label="镜像名称" width="180" />
         <el-table-column prop="docker_full_name" label="镜像名称和版本全称" width="180" />
-        <el-table-column prop="tag" label="镜像标签" width="180" />
-        <el-table-column prop="remark" label="备注" />
-        <el-table-column prop="update_user" label="更新人" width="180" />
+        <el-table-column prop="tag" label="镜像标签" width="130" />
+        <el-table-column prop="remark" label="备注" min-width="120" />
+        <el-table-column prop="update_user" label="更新人" width="120" />
         <el-table-column prop="last_mod_time" label="修改时间" width="180" />
         <el-table-column fixed="right" label="操作" width="120">
           <template #default="scope">

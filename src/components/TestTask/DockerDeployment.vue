@@ -66,9 +66,9 @@
               <el-form-item label="容器数量" prop="number" :required="true">
                 <el-input v-model="item.number" placeholder="请输入容器数量" :maxlength="5" @input="limitNumericInput" />
               </el-form-item>
-              <el-form-item label="docker镜像" prop="image_tag" :required="true">
+              <el-form-item label="docker镜像" prop="docker_images_id" :required="true">
                 <el-select
-                  v-model="item.image_tag_name"
+                  v-model="item.docker_images_name"
                   class="m-2"
                   placeholder="请选择docker镜像"
                   @visible-change="getImage_tagList"
@@ -212,7 +212,7 @@ const deviceList = ref(JSON.parse(JSON.stringify(disposeList['dockerDeployment']
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
   number: [{ required: true, message: '容器数量不能为空', trigger: 'blur' }],
-  image_tag: [{ required: true, message: '镜像不能为空', trigger: 'blur' }],
+  docker_images_id: [{ required: true, message: '镜像不能为空', trigger: 'blur' }],
   shell: [{ required: true, message: 'shell脚本不能为空', trigger: 'blur' }],
   file_name: [{ required: true, message: '文件不能为空', trigger: 'change' }],
   serverName: [{ required: true, message: '请选择设备', trigger: 'blur' }],
@@ -333,8 +333,8 @@ const getImage_tagList = async val => {
 const selectImageTag = val => {
   image_tagList.value.map(item => {
     if (item.name === val) {
-      deviceList.value[0].image_tag = item.id
-      deviceList.value[0].image_tag_name = item.name
+      deviceList.value[0].docker_images_id = item.id
+      deviceList.value[0].docker_images_name = item.name
     }
   })
 }

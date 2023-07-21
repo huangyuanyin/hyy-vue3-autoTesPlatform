@@ -52,7 +52,23 @@
               label-position="top"
               status-icon
             >
-              <el-form-item label="可选设备" prop="serverName" :required="true">
+              <el-form-item prop="serverName" :required="true">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">可选设备</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="未占用 — 设备未被任何任务使用，支持配置，支持使用<br />
+                              占用中 — 设备被其他任务占用，但占用任务未执行，在本任务中可支持配置，支持使用<br />
+                              其他任务占用，且该任务处于运行中，该设备支持配置，但配置后该任务无法马上执行"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <!-- <el-select
                   v-model="item.serverName"
                   placeholder="请选择设备"
@@ -106,7 +122,15 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="项目包" prop="packageName" :required="true">
+              <el-form-item prop="packageName" :required="true">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">项目包</span>
+                    <el-tooltip class="box-item" effect="dark" content="项目包-项目版本列表中所有release版本" placement="top" raw-content>
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-select
                   v-model="item.packageName"
                   placeholder="请选择项目包"
@@ -138,13 +162,43 @@
                   <template #title>
                     <el-button text type="primary"> 高级设置 </el-button>
                   </template>
-                  <el-form-item label="是否生产部门安装" prop="ifback">
+                  <el-form-item prop="ifback">
+                    <template #label>
+                      <div style="display: flex; align-items: center">
+                        <span style="margin-right: 4px">是否生产部门安装</span>
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          content="是：安装完成后，会对升级后的环境进行备份，作为出厂环境<br />
+                                  否：安装完成后，不会对升级后的环境进行备份"
+                          placement="top"
+                          raw-content
+                        >
+                          <el-icon><QuestionFilled /></el-icon>
+                        </el-tooltip>
+                      </div>
+                    </template>
                     <el-radio-group v-model="item.ifback" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
                       <el-radio label="n">否</el-radio>
                     </el-radio-group>
                   </el-form-item>
-                  <el-form-item label="是否重启服务" prop="ifrs">
+                  <el-form-item prop="ifrs">
+                    <template #label>
+                      <div style="display: flex; align-items: center">
+                        <span style="margin-right: 4px">是否重启服务</span>
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          content="是：基线安装完成，将会重启服务进程<br />
+                                  否：基线安装完成，不糊重启服务进程"
+                          placement="top"
+                          raw-content
+                        >
+                          <el-icon><QuestionFilled /></el-icon>
+                        </el-tooltip>
+                      </div>
+                    </template>
                     <el-radio-group v-model="item.ifrs" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
                       <el-radio label="n">否</el-radio>
@@ -175,7 +229,7 @@
 <script lang="ts" setup>
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
-import { Delete } from '@element-plus/icons-vue'
+import { Delete, QuestionFilled } from '@element-plus/icons-vue'
 import { getDeviceApi, getProductPackageApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 
@@ -595,6 +649,14 @@ const getProductInfo = async (val, index) => {
       margin-bottom: 20px;
       position: relative;
       background-color: #f5f5f5;
+      .el-form-item__label {
+        display: flex !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        .el-icon {
+          cursor: pointer;
+        }
+      }
 
       .device-ruleForm {
         .el-select {

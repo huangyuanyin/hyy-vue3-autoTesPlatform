@@ -52,7 +52,23 @@
               label-position="top"
               status-icon
             >
-              <el-form-item label="可选设备" prop="serverName" :required="true">
+              <el-form-item prop="serverName" :required="true">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">可选设备</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="未占用 — 设备未被任何任务使用，支持配置，支持使用<br />
+                              占用中 — 设备被其他任务占用，但占用任务未执行，在本任务中可支持配置，支持使用<br />
+                              其他任务占用，且该任务处于运行中，该设备支持配置，但配置后该任务无法马上执行"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="getDeviceInfo(item, index)">
                   <el-option
                     :label="it.ip"
@@ -92,7 +108,23 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="可选版本" prop="pendingVersion" :required="true">
+              <el-form-item prop="pendingVersion" :required="true">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">可选版本</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="版本列表：产品包-主线、项目版本列表中所有可选包<br />
+                              Tag:研发代码仓库Tag标签<br />
+                              当版本列表选择后缀为.tgz的产品包，需要手动上传jar文件"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-radio-group v-model="item.pendingVersionOrigin" class="ml-4" @change="changePendingVersionOrigin(item, index)">
                   <el-radio label="auto" size="large">版本列表</el-radio>
                   <el-radio label="manual" size="large">Tag</el-radio>
@@ -207,7 +239,15 @@
               label-position="top"
               status-icon
             >
-              <el-form-item label="适用版本" prop="netsignVersion" :required="true">
+              <el-form-item prop="netsignVersion" :required="true">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">适用版本</span>
+                    <el-tooltip class="box-item" effect="dark" content="接口自动化代码适用的签名服务器主线版本" placement="top" raw-content>
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-select
                   v-model="item.netsignVersion"
                   placeholder="请选择适用版本"
@@ -222,7 +262,15 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item label="代码分支" prop="branch" :required="true">
+              <el-form-item prop="branch" :required="true">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">代码分支</span>
+                    <el-tooltip class="box-item" effect="dark" content="接口自动化代码可选分支" placement="top" raw-content>
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-select
                   v-model="item.branch"
                   placeholder="请选择代码分支"
@@ -261,7 +309,7 @@
 <script lang="ts" setup>
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules, genFileId, UploadInstance, UploadRawFile } from 'element-plus'
-import { Delete, FullScreen } from '@element-plus/icons-vue'
+import { Delete, FullScreen, QuestionFilled } from '@element-plus/icons-vue'
 import type { UploadProps, UploadUserFile } from 'element-plus'
 import {
   getDeviceApi,

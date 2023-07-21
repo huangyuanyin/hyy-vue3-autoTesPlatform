@@ -52,7 +52,23 @@
               label-position="top"
               status-icon
             >
-              <el-form-item label="可选设备" prop="serverName" :required="true">
+              <el-form-item prop="serverName" :required="true">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">可选设备</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="未占用 — 设备未被任何任务使用，支持配置，支持使用<br />
+                              占用中 — 设备被其他任务占用，但占用任务未执行，在本任务中可支持配置，支持使用<br />
+                              其他任务占用，且该任务处于运行中，该设备支持配置，但配置后该任务无法马上执行"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-select
                   v-model="item.serverName"
                   placeholder="请选择设备"
@@ -98,13 +114,42 @@
                   </ul>
                 </el-card>
               </el-form-item>
-              <el-form-item label="部署类型" prop="deployType" :required="true">
-                <el-select v-model="item.deployType" placeholder="请选择部署类型" :key="index">
+              <el-form-item prop="deployType" :required="true">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">部署类型</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="全量基线：仅安装主线产品包<br />
+                               项目基线：安装新硬件补丁后，再安装所选择项目包"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
+                <el-select v-model="item.deployType" placeholder="请选择部署类型" :key="index" style="display: block">
                   <el-option label="全量基线" value="full" />
                   <el-option label="项目基线" value="baseline" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="全量基线版本列表" prop="deployVersion" v-if="item.deployType === 'full'">
+              <el-form-item prop="deployVersion" v-if="item.deployType === 'full'">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">全量基线版本列表</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="产品包-主线版本列表中所有版本 （release 、待测版本）"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-select
                   v-model="item.deployVersion"
                   placeholder="请选择全量基线版本"
@@ -131,7 +176,15 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="项目基线版本列表" prop="packageName" v-if="item.deployType === 'baseline'">
+              <el-form-item prop="packageName" v-if="item.deployType === 'baseline'">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">项目基线版本列表</span>
+                    <el-tooltip class="box-item" effect="dark" content="产品包-项目版本列表中所有release版本" placement="top" raw-content>
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-select
                   v-model="item.packageName"
                   placeholder="请选择项目基线版本"
@@ -164,23 +217,65 @@
               <el-form-item label="项目包ID" prop="packageID" v-show="false">
                 <el-input v-model="item.packageID" placeholder="" />
               </el-form-item>
-              <el-form-item
-                label="开机自启中间件"
-                prop="startMidwareType"
-                v-if="`${item.showServerConfig[1].value}` !== 'x86' && item.serverName !== ''"
-              >
+              <el-form-item prop="startMidwareType" v-if="`${item.showServerConfig[1].value}` !== 'x86' && item.serverName !== ''">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">开机自启中间件</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="信创环境进行基线部署，需要选择自启中间件<br/>
+                                  1. Tomcat：默认端口8443<br/>
+                                  2. TongWeb: 默认端口8444"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-select v-model="item.startMidwareType" placeholder="请选择开机自启中间件" :key="index">
                   <el-option label="Tomcat" value="Tomcat" />
                   <el-option label="Tongweb" value="Tongweb" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="是否需要进行系统还原" prop="sysRest">
+              <el-form-item prop="sysRest">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">是否需要进行系统还原</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="是：环境部署过程先进行系统还原操作，将会清空所有非母盘文件，流水线任务执行过程中无法停止<br/>
+                              否：环境部署过程不会进行系统还原操作，流水线任务执行过程中可以停止"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-radio-group v-model="item.sysRest" class="ml-4">
                   <el-radio :label="true">是</el-radio>
                   <el-radio :label="false">否</el-radio>
                 </el-radio-group>
               </el-form-item>
-              <el-form-item label="是否需要进行设备重启" prop="reboot">
+              <el-form-item prop="reboot">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">是否需要进行设备重启</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="是：基线安装完成后，系统将进行重启<br />
+                              否：基线安装完成后，系统不会进行重启"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <el-radio-group v-model="item.reboot" class="ml-4">
                   <el-radio :label="true">是</el-radio>
                   <el-radio :label="false">否</el-radio>
@@ -191,37 +286,127 @@
                   <template #title>
                     <el-button text type="primary"> 高级设置 </el-button>
                   </template>
-                  <el-form-item label="是否安装HA" prop="ifha">
+                  <el-form-item prop="ifha">
+                    <template #label>
+                      <div style="display: flex; align-items: center">
+                        <span style="margin-right: 4px">是否安装HA</span>
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          content="是：基线安装时，将会安装HA程序<br />
+                                  否：基线安装时，不会安装HA程序"
+                          placement="top"
+                          raw-content
+                        >
+                          <el-icon><QuestionFilled /></el-icon>
+                        </el-tooltip>
+                      </div>
+                    </template>
                     <el-radio-group v-model="item.ifha" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
                       <el-radio label="n">否</el-radio>
                     </el-radio-group>
                   </el-form-item>
-                  <el-form-item label="是否安装人行模块" prop="ispbc">
+                  <el-form-item prop="ispbc">
+                    <template #label>
+                      <div style="display: flex; align-items: center">
+                        <span style="margin-right: 4px">是否安装人行模块</span>
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          content="是：基线安装时，将会安装人行模块<br />
+                                  否：基线安装时，不会安装人行模块"
+                          placement="top"
+                          raw-content
+                        >
+                          <el-icon><QuestionFilled /></el-icon>
+                        </el-tooltip>
+                      </div>
+                    </template>
                     <el-radio-group v-model="item.ispbc" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
                       <el-radio label="n">否</el-radio>
                     </el-radio-group>
                   </el-form-item>
-                  <el-form-item label="是否安装农信银模块" prop="isrbc">
+                  <el-form-item prop="isrbc">
+                    <template #label>
+                      <div style="display: flex; align-items: center">
+                        <span style="margin-right: 4px">是否安装农信银模块</span>
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          content="是：基线安装时，将会安装农信银模块<br />
+                                  否：基线安装时，不会安装农信银模块"
+                          placement="top"
+                          raw-content
+                        >
+                          <el-icon><QuestionFilled /></el-icon>
+                        </el-tooltip>
+                      </div>
+                    </template>
                     <el-radio-group v-model="item.isrbc" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
                       <el-radio label="n">否</el-radio>
                     </el-radio-group>
                   </el-form-item>
-                  <el-form-item label="WatchDog是否使用新数据类型" prop="useNewDataType">
+                  <el-form-item prop="useNewDataType">
+                    <template #label>
+                      <div style="display: flex; align-items: center">
+                        <span style="margin-right: 4px">WatchDog是否使用新数据类型</span>
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          content="是：基线安装时，WatchDog将会使用新数据类型<br />
+                                  否：基线安装时，WatchDog不会使用新数据类型"
+                          placement="top"
+                          raw-content
+                        >
+                          <el-icon><QuestionFilled /></el-icon>
+                        </el-tooltip>
+                      </div>
+                    </template>
                     <el-radio-group v-model="item.useNewDataType" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
                       <el-radio label="n">否</el-radio>
                     </el-radio-group>
                   </el-form-item>
-                  <el-form-item label="是否生产部门安装" prop="ifback" v-if="item.deployType === 'baseline'">
+                  <el-form-item prop="ifback" v-if="item.deployType === 'baseline'">
+                    <template #label>
+                      <div style="display: flex; align-items: center">
+                        <span style="margin-right: 4px">是否生产部门安装</span>
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          content="是：安装完成后，会对升级后的环境进行备份，作为出厂环境<br />  
+                                  否：安装完成后，不会对升级后的环境进行备份"
+                          placement="top"
+                          raw-content
+                        >
+                          <el-icon><QuestionFilled /></el-icon>
+                        </el-tooltip>
+                      </div>
+                    </template>
                     <el-radio-group v-model="item.ifback" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
                       <el-radio label="n">否</el-radio>
                     </el-radio-group>
                   </el-form-item>
-                  <el-form-item label="是否重启服务" prop="ifrs" v-if="item.deployType === 'baseline'">
+                  <el-form-item prop="ifrs" v-if="item.deployType === 'baseline'">
+                    <template #label>
+                      <div style="display: flex; align-items: center">
+                        <span style="margin-right: 4px">是否重启服务</span>
+                        <el-tooltip
+                          class="box-item"
+                          effect="dark"
+                          content="是：基线安装完成，将会重启服务进程<br />
+                                  否：基线安装完成，不糊重启服务进程"
+                          placement="top"
+                          raw-content
+                        >
+                          <el-icon><QuestionFilled /></el-icon>
+                        </el-tooltip>
+                      </div>
+                    </template>
                     <el-radio-group v-model="item.ifrs" class="ml-4" :key="index">
                       <el-radio label="y">是</el-radio>
                       <el-radio label="n">否</el-radio>
@@ -250,7 +435,7 @@
 <script lang="ts" setup>
 import { ref, reactive, watch, nextTick, onMounted } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
-import { Delete } from '@element-plus/icons-vue'
+import { Delete, QuestionFilled } from '@element-plus/icons-vue'
 import { getDeviceApi, getDeployVersionApi, getProductPackageApi, getMainProductPackageApi } from '@/api/NetDevOps'
 import { disposeList } from '../../views/lane/data'
 
@@ -682,6 +867,14 @@ const getDeployVersion = async (type, val, index) => {
       margin-left: 10px;
     }
     .device-space {
+      .el-form-item__label {
+        display: flex !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        .el-icon {
+          cursor: pointer;
+        }
+      }
       justify-content: space-between;
       display: flex;
       padding: 20px 20px 0;
@@ -764,6 +957,7 @@ const getDeployVersion = async (type, val, index) => {
     margin-right: 10px;
   }
 }
+
 .detail {
   display: flex !important;
   white-space: nowrap !important;
