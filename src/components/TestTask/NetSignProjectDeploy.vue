@@ -191,7 +191,7 @@
                           class="box-item"
                           effect="dark"
                           content="是：基线安装完成，将会重启服务进程<br />
-                                  否：基线安装完成，不糊重启服务进程"
+                                  否：基线安装完成，不会重启服务进程"
                           placement="top"
                           raw-content
                         >

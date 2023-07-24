@@ -12,7 +12,7 @@
           <div class="grid-content ep-bg-purple" />
           <el-tabs v-model="tabName" tab-position="top" class="testDetail_tabs" @tab-change="changeTab" @tab-remove="removeTab">
             <el-tab-pane name="recentlyRun" label="最近运行">
-              <RecentlyRun :runResult="recentlyRunLog" />
+              <RecentlyRun :runResult="recentlyRunLog" @refresh="refresh" />
             </el-tab-pane>
             <el-tab-pane name="operationHistory" label="运行历史">
               <RunHistory @handleClick="handleClick" :isUpdateHistory="isUpdateHistory" />
@@ -448,6 +448,11 @@ const toLook = () => {
       id: route.query.id
     }
   })
+}
+
+const refresh = () => {
+  // handleRunTask(route.query.id)
+  getTaskHistory()
 }
 
 const handleClick = val => {

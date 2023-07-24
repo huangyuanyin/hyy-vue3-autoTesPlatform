@@ -296,11 +296,17 @@
             </span>
           </div>
           <div>
+            <el-tooltip class="box-item" effect="dark" content="在原有失败数据的基础上，再执行一次失败的用例" placement="top">
+              <el-button type="info" @click="handleFailRetry">
+                <el-icon class="el-icon--left"><Refresh /></el-icon>
+                重试
+              </el-button>
+            </el-tooltip>
             <el-button type="success" v-show="!fullcen" @click="handleDialogFullcen">
               <el-icon class="el-icon--left"><FullScreen /></el-icon>
               全屏
             </el-button>
-            <el-button type="info" v-show="fullcen" @click="handleDialogFullcen">
+            <el-button type="success" v-show="fullcen" @click="handleDialogFullcen">
               <el-icon class="el-icon--left"><FullScreen /></el-icon>
               还原
             </el-button>
@@ -533,6 +539,7 @@ import {
   View,
   Document,
   FullScreen,
+  Refresh,
   UploadFilled,
   Monitor,
   SwitchButton,
@@ -553,7 +560,8 @@ import {
   getDockerLogsApi,
   runDockerShellApi,
   supplyDockerPackageApi,
-  batchSyncApi
+  batchSyncApi,
+  failRetryApi
 } from '@/api/NetDevOps'
 import Termmail from '@/components/Termail.vue'
 
@@ -563,6 +571,7 @@ const props = defineProps({
     default: () => {}
   }
 })
+const emit = defineEmits(['refresh'])
 
 const route = useRoute()
 const router = useRouter()
@@ -1088,6 +1097,23 @@ const handleDialogFullcen = () => {
       dialogEl.classList.remove('fullscreen')
     }
   }
+}
+
+const handleFailRetry = () => {
+  ElMessageBox.confirm('将在原有失败数据的基础上，再执行一次失败的用例！', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      let res = await failRetryApi({ task_details_history_id: currentId.value })
+      if (res.code === 1000) {
+        ElMessage.success('接口测试重试成功，请稍后~')
+        close2()
+        emit('refresh')
+      }
+    })
+    .catch(() => {})
 }
 
 const close2 = () => {

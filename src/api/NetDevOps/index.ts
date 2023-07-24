@@ -517,3 +517,13 @@ export function deleteDockerDeviceImagesApi(id) {
     urlType: 'NetDevOps'
   })
 }
+
+/* ---------------------------- /devops/interface/fail_retry/---------------------------- */
+export function failRetryApi(params) {
+  return request({
+    url: `/devops/interface/fail_retry`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
