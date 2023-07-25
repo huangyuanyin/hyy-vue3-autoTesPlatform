@@ -227,13 +227,22 @@
         @current-change="handleDockerImageCurrentChange"
       />
     </el-drawer>
-    <el-dialog v-model="addDockerImageDialog" :title="addDockerImageDialogTitle" width="35%" :before-close="closeaAdDockerImageDialog">
+    <el-dialog
+      v-model="addDockerImageDialog"
+      :title="addDockerImageDialogTitle"
+      width="40%"
+      :before-close="closeaAdDockerImageDialog"
+      custom-class="addDockerImageDialog"
+    >
       <el-form :model="dockerImageForm" ref="dockerImageFormRef" :rules="dockerImageFormRules">
         <el-form-item label="镜像名称" :label-width="formLabelWidth" prop="name">
           <el-input v-model="dockerImageForm.name" autocomplete="off" />
         </el-form-item>
         <el-form-item label="镜像标签" :label-width="formLabelWidth" prop="tag">
           <el-input v-model="dockerImageForm.tag" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="启动脚本" :label-width="formLabelWidth" prop="start_shell">
+          <CodeMirror :code="dockerImageForm.start_shell" @onCodeChange="onCodeChange" :codeStyle="{ height: '30vh', width: '25vw' }" />
         </el-form-item>
         <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
           <el-input v-model="dockerImageForm.remark" autocomplete="off" />
@@ -265,6 +274,7 @@ import {
   deleteDockerDeviceImagesApi
 } from '@/api/NetDevOps/index'
 import { useDockerDeviceManage } from '@/hooks/useDockerDeviceManage'
+import CodeMirror from '@/components/CodeMirror-5.vue'
 
 const dialogFormVisible = ref(false)
 const networkConfigDialogFormVisible = ref(false)
@@ -279,11 +289,13 @@ const dockerImageForm = reactive({
   docker_device_images_id: '',
   name: '',
   tag: '',
+  start_shell: '',
   remark: ''
 })
 const dockerImageFormRef = ref<FormInstance>()
 const dockerImageFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入镜像名称', trigger: 'blur' }],
+  start_shell: [{ required: true, message: '启动脚本不能为空', trigger: 'blur' }],
   tag: [{ required: true, message: '请输入镜像标签', trigger: 'blur' }]
 })
 const dockerImageTableData = ref([])
@@ -448,6 +460,9 @@ const submitDockerImageForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
+      if (dockerImageForm.start_shell === '') {
+        return ElMessage.error('启动脚本不能为空')
+      }
       if (addDockerImageDialogTitle.value === '添加镜像') {
         dockerImageForm.docker_device_manage_id = dockerImageDrawerId.value
         delete dockerImageForm.docker_device_images_id
@@ -659,6 +674,10 @@ const getOneDockerDeviceImages = async id => {
   }
 }
 
+const onCodeChange = val => {
+  dockerImageForm.start_shell = val
+}
+
 const handlesystemSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
@@ -712,6 +731,11 @@ onMounted(() => {
   .item-ip {
     cursor: pointer;
     color: #409eff;
+  }
+}
+.addDockerImageDialog {
+  .el-input {
+    width: 25vw !important;
   }
 }
 </style>

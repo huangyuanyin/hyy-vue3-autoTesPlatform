@@ -412,6 +412,10 @@ const props = defineProps({
   keywords: {
     type: Object,
     default: {}
+  },
+  isSocket: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -893,50 +897,6 @@ const handleTaskCurrentChange = async (val: number) => {
   emit('update:taskTableData', taskCurrentPage.value)
 }
 
-socket.onopen = function (event) {
-  console.log('WebSocket连接已经建立')
-}
-
-socket.onclose = function (event) {
-  console.log('WebSocket连接已经关闭')
-}
-
-socket.addEventListener('message', event => {
-  const message = JSON.parse(event.data)
-  console.log(message.data)
-  if (message.code === 1000) {
-    ElMessage.success('流水线执行结果更新！')
-    emit('update:taskTableData', taskCurrentPage.value)
-    message.data.map(item => {
-      ElNotification({
-        title: '通知',
-        dangerouslyUseHTMLString: true,
-        message:
-          item.status === 'success'
-            ? `<div>
-              <div>流水线【${item.name}】<span style='color:#67c23a;font-weight:600'>执行成功<span></div>
-                <div>成功时间：${item.last_mod_time}</div>
-              </div>`
-            : item.status === 'fail'
-            ? `<div>
-                <div>流水线【${item.name}】<span style='color:#f56c6c;font-weight:600'>执行失败<span></div>
-                <div>最后失败时间：${item.last_mod_time}</div>
-              </div>`
-            : item.status === 'channel'
-            ? `<div>
-                <div>流水线【${item.name}】<span style='color:#909399;font-weight:600'>已取消<span></div>
-                <div>取消时间：${item.last_mod_time}</div>
-              </div>`
-            : `<div>
-                <div>流水线【${item.name}】<span style='color:#e6a23c;font-weight:600'>执行中<span></div>
-                <div>执行时间：${item.last_mod_time}</div>
-              </div>`,
-        duration: 180000
-      })
-    })
-  }
-})
-
 function checkWebSocketStatus() {
   if (socket.readyState === WebSocket.CLOSED) {
     console.log('WebSocket连接已经断开')
@@ -959,7 +919,52 @@ function reconnectWebSocket() {
 
 onMounted(() => {
   getPipelineTag()
-  intervalId = setInterval(checkWebSocketStatus, 10000)
+  if (props.isSocket) {
+    socket.onopen = function (event) {
+      console.log('WebSocket连接已经建立')
+    }
+
+    socket.onclose = function (event) {
+      console.log('WebSocket连接已经关闭')
+    }
+
+    socket.addEventListener('message', event => {
+      const message = JSON.parse(event.data)
+      console.log(message.data)
+      if (message.code === 1000) {
+        ElMessage.success('流水线执行结果更新！')
+        emit('update:taskTableData', taskCurrentPage.value)
+        message.data.map(item => {
+          ElNotification({
+            title: '通知',
+            dangerouslyUseHTMLString: true,
+            message:
+              item.status === 'success'
+                ? `<div>
+              <div>流水线【${item.name}】<span style='color:#67c23a;font-weight:600'>执行成功<span></div>
+                <div>成功时间：${item.last_mod_time}</div>
+              </div>`
+                : item.status === 'fail'
+                ? `<div>
+                <div>流水线【${item.name}】<span style='color:#f56c6c;font-weight:600'>执行失败<span></div>
+                <div>最后失败时间：${item.last_mod_time}</div>
+              </div>`
+                : item.status === 'channel'
+                ? `<div>
+                <div>流水线【${item.name}】<span style='color:#909399;font-weight:600'>已取消<span></div>
+                <div>取消时间：${item.last_mod_time}</div>
+              </div>`
+                : `<div>
+                <div>流水线【${item.name}】<span style='color:#e6a23c;font-weight:600'>执行中<span></div>
+                <div>执行时间：${item.last_mod_time}</div>
+              </div>`,
+            duration: 180000
+          })
+        })
+      }
+    })
+  }
+  props.isSocket ? (intervalId = setInterval(checkWebSocketStatus, 10000)) : ''
 })
 
 onUnmounted(() => {

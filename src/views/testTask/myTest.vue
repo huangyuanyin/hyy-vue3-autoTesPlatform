@@ -19,6 +19,7 @@
           :keywords="favoritekKeywords"
           @update:taskTableData="updateTaskTableData"
           @searchLane="searchLane"
+          :isSocket="false"
         />
       </el-tab-pane>
     </el-tabs>

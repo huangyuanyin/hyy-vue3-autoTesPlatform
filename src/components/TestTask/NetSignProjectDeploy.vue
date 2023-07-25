@@ -126,7 +126,7 @@
                 <template #label>
                   <div style="display: flex; align-items: center">
                     <span style="margin-right: 4px">项目包</span>
-                    <el-tooltip class="box-item" effect="dark" content="项目包-项目版本列表中所有release版本" placement="top" raw-content>
+                    <el-tooltip class="box-item" effect="dark" content="产品包-项目版本列表中所有release版本" placement="top" raw-content>
                       <el-icon><QuestionFilled /></el-icon>
                     </el-tooltip>
                   </div>
