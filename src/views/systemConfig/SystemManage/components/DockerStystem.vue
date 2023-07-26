@@ -236,13 +236,14 @@
     >
       <el-form :model="dockerImageForm" ref="dockerImageFormRef" :rules="dockerImageFormRules">
         <el-form-item label="镜像名称" :label-width="formLabelWidth" prop="name">
-          <el-input v-model="dockerImageForm.name" autocomplete="off" />
+          <el-input v-model="dockerImageForm.name" autocomplete="off" placeholder="请输入镜像名称" />
         </el-form-item>
         <el-form-item label="镜像标签" :label-width="formLabelWidth" prop="tag">
-          <el-input v-model="dockerImageForm.tag" autocomplete="off" />
+          <el-input v-model="dockerImageForm.tag" autocomplete="off" placeholder="请输入镜像标签" />
         </el-form-item>
-        <el-form-item label="启动脚本" :label-width="formLabelWidth" prop="start_shell">
-          <CodeMirror :code="dockerImageForm.start_shell" @onCodeChange="onCodeChange" :codeStyle="{ height: '30vh', width: '25vw' }" />
+        <el-form-item label="启动脚本地址" :label-width="formLabelWidth" prop="start_shell">
+          <!-- <CodeMirror :code="dockerImageForm.start_shell" @onCodeChange="onCodeChange" :codeStyle="{ height: '30vh', width: '25vw' }" /> -->
+          <el-input v-model="dockerImageForm.start_shell" autocomplete="off" placeholder="请输入启动脚本地址,例如：/opt/run.sh" />
         </el-form-item>
         <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
           <el-input v-model="dockerImageForm.remark" autocomplete="off" />
@@ -295,7 +296,7 @@ const dockerImageForm = reactive({
 const dockerImageFormRef = ref<FormInstance>()
 const dockerImageFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入镜像名称', trigger: 'blur' }],
-  start_shell: [{ required: true, message: '启动脚本不能为空', trigger: 'blur' }],
+  start_shell: [{ required: true, message: '启动脚本地址不能为空', trigger: 'blur' }],
   tag: [{ required: true, message: '请输入镜像标签', trigger: 'blur' }]
 })
 const dockerImageTableData = ref([])
@@ -460,9 +461,9 @@ const submitDockerImageForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      if (dockerImageForm.start_shell === '') {
-        return ElMessage.error('启动脚本不能为空')
-      }
+      // if (dockerImageForm.start_shell === '') {
+      //   return ElMessage.error('启动脚本不能为空')
+      // }
       if (addDockerImageDialogTitle.value === '添加镜像') {
         dockerImageForm.docker_device_manage_id = dockerImageDrawerId.value
         delete dockerImageForm.docker_device_images_id

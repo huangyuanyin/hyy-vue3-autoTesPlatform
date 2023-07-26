@@ -119,11 +119,15 @@
                 </el-descriptions-item>
               </el-descriptions>
               <el-descriptions class="ignore-descript-title" title="二、设备配置" :column="4" :size="size" border>
-                <el-descriptions-item v-for="(a, index) in JSON.parse(i.task_details_history[0].dispose)[0].showServerConfig">
+                <el-descriptions-item
+                  v-for="(a, index) in JSON.parse(i.task_details_history[0].dispose)[0].showServerConfig.filter(
+                    item => item.label !== '设备序列号：' && item.label !== '产品ID：'
+                  )"
+                >
                   <template #label>
                     <div class="cell-item">{{ a.label }}</div>
                   </template>
-                  {{ a.value }}
+                  <span>{{ a.value }}</span>
                 </el-descriptions-item>
               </el-descriptions>
               <el-descriptions
