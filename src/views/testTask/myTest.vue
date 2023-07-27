@@ -9,6 +9,7 @@
           :keywords="keywords"
           @update:taskTableData="updateTaskTableData"
           @searchLane="searchLane"
+          :maxHeight="'66vh'"
         />
       </el-tab-pane>
       <el-tab-pane label="我的收藏" name="favorite">
@@ -20,6 +21,7 @@
           @update:taskTableData="updateTaskTableData"
           @searchLane="searchLane"
           :isSocket="false"
+          :maxHeight="'66vh'"
         />
       </el-tab-pane>
     </el-tabs>

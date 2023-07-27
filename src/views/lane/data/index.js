@@ -26,7 +26,9 @@ export const disposeList = {
         { label: 'cavium卡：', value: '' },
         { label: '国密卡：', value: '' },
         { label: '设备序列号：', value: '' },
-        { label: '产品ID：', value: '' }
+        { label: '产品ID：', value: '' },
+        { label: '内核版本：', value: '' },
+        { label: '操作系统版本：', value: '' }
       ],
       deviceConfig: {},
       deviceConfigString: ''
@@ -47,7 +49,9 @@ export const disposeList = {
         { label: 'cavium卡：', value: '' },
         { label: '国密卡：', value: '' },
         { label: '设备序列号：', value: '' },
-        { label: '产品ID：', value: '' }
+        { label: '产品ID：', value: '' },
+        { label: '内核版本：', value: '' },
+        { label: '操作系统版本：', value: '' }
       ],
       serverConfig: {},
       deviceConfig: {},
@@ -68,7 +72,9 @@ export const disposeList = {
         { label: 'cavium卡：', value: '' },
         { label: '国密卡：', value: '' },
         { label: '设备序列号：', value: '' },
-        { label: '产品ID：', value: '' }
+        { label: '产品ID：', value: '' },
+        { label: '内核版本：', value: '' },
+        { label: '操作系统版本：', value: '' }
       ],
       serverConfig: {},
       // log: ''

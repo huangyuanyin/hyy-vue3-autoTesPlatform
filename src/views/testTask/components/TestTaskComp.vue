@@ -28,7 +28,7 @@
       style="width: 100%"
       stripe
       v-loading="props.taskLoading"
-      max-height="70vh"
+      :max-height="props.maxHeight"
       class="taskTableData"
     >
       <el-table-column prop="name" label="任务名称" width="250" align="center">
@@ -408,6 +408,10 @@ const props = defineProps({
   taskLoading: {
     type: Boolean,
     default: false
+  },
+  maxHeight: {
+    type: String,
+    default: '72vh'
   },
   keywords: {
     type: Object,

@@ -59,6 +59,8 @@
       <el-table-column prop="main_board_type" label="CPU类型" align="center" width="160" />
       <el-table-column prop="cavium_card_type" label="cavium卡类型" width="150" align="center" />
       <el-table-column prop="gm_card_type" label="国密卡类型" width="150" align="center" />
+      <el-table-column prop="kernel" label="内核版本" width="200" align="center" />
+      <el-table-column prop="operating_system" label="操作系统版本" width="220" align="center" />
       <el-table-column prop="operate_user" label="使用人" width="160" align="center">
         <template #default="scope">
           <span>{{ scope.row.operate_user === null ? '' : scope.row.operate_user }}</span>

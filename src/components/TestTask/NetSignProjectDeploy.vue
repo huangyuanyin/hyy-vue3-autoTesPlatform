@@ -111,14 +111,16 @@
                     </div>
                   </template>
                   <ul>
-                    <li v-for="(it, index) in item.showServerConfig" :key="'serverConfigList' + index">
-                      <div class="detail">
-                        {{ it.label }}
-                        <el-tooltip class="box-item" effect="dark" :content="it.value" placement="top">
-                          <span>{{ it.value }}</span>
-                        </el-tooltip>
-                      </div>
-                    </li>
+                    <template v-for="(it, index) in item.showServerConfig" :key="'showServerConfig' + index">
+                      <li v-if="it.label !== '内核版本：' && it.label !== '操作系统版本：'">
+                        <div class="detail">
+                          {{ it.label }}
+                          <el-tooltip class="box-item" effect="dark" :content="it.value" placement="top">
+                            <span>{{ it.value }}</span>
+                          </el-tooltip>
+                        </div>
+                      </li>
+                    </template>
                   </ul>
                 </el-card>
               </el-form-item>
@@ -494,6 +496,8 @@ const getDeviceInfo = async (val, index) => {
     deviceList.value[index].showServerConfig[6].value = res.data.gm_card_type
     deviceList.value[index].showServerConfig[7].value = res.data.machine_sn
     deviceList.value[index].showServerConfig[8].value = res.data.product_id
+    deviceList.value[index].showServerConfig[9].value = res.data.kernel
+    deviceList.value[index].showServerConfig[10].value = res.data.operating_system
 
     deviceList.value[index].serverConfig.serverIP = res.data.ip
     deviceList.value[index].serverConfig.serverPasswd = res.data.password
