@@ -104,7 +104,7 @@
                   </template>
                   <ul>
                     <template v-for="(it, index) in item.showServerConfig" :key="'showServerConfig' + index">
-                      <li v-if="it.label !== '内核版本：' && it.label !== '操作系统版本：'">
+                      <li>
                         <div class="detail">
                           {{ it.label }}
                           <el-tooltip class="box-item" effect="dark" :content="it.value" placement="top">

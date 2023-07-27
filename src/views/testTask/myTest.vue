@@ -34,6 +34,7 @@ import { ref, onMounted } from 'vue'
 import TestTaskComp from './components/TestTaskComp.vue'
 import { getTaskInfoApi, deleteTaskInfoApi, runTaskInfoApi, stopTaskApi, releaseDeviceApi, getFavoriteTaskApi } from '@/api/NetDevOps/index'
 import type { TabsPaneContext } from 'element-plus'
+import { showDeviceList } from '@/views/lane/data'
 
 const activeName = ref('my')
 const taskCurrentPage = ref(1)
@@ -65,44 +66,7 @@ const getTaskInfo = async () => {
     taskTotal.value = res.total
     taskTableData.value.map(item => {
       item.device_list = item.device_list.map(it => {
-        return [
-          {
-            label: '设备IP',
-            value: it.ip
-          },
-          {
-            label: 'CPU类型：',
-            value: it.main_board_type
-          },
-          {
-            label: '设备型号：',
-            value: it.machine_type
-          },
-          {
-            label: '型号编码：',
-            value: it.mode_code
-          },
-          {
-            label: '配置编码：',
-            value: it.config_code
-          },
-          {
-            label: 'cavium卡：',
-            value: it.cavium_card_type
-          },
-          {
-            label: '国密卡：',
-            value: it.gm_card_type
-          },
-          {
-            label: '设备序列号：',
-            value: it.machine_sn
-          },
-          {
-            label: '产品ID：',
-            value: it.product_id
-          }
-        ]
+        return showDeviceList(it)
       })
       item.docker_device_list = item.docker_device_list.map(it => {
         return [
@@ -141,44 +105,7 @@ const getFavoriteTask = async () => {
     favoriteTaskTotal.value = res.total
     favoriteTaskTableData.value.map(item => {
       item.device_list = item.device_list.map(it => {
-        return [
-          {
-            label: '设备IP',
-            value: it.ip
-          },
-          {
-            label: 'CPU类型：',
-            value: it.main_board_type
-          },
-          {
-            label: '设备型号：',
-            value: it.machine_type
-          },
-          {
-            label: '型号编码：',
-            value: it.mode_code
-          },
-          {
-            label: '配置编码：',
-            value: it.config_code
-          },
-          {
-            label: 'cavium卡：',
-            value: it.cavium_card_type
-          },
-          {
-            label: '国密卡：',
-            value: it.gm_card_type
-          },
-          {
-            label: '设备序列号：',
-            value: it.machine_sn
-          },
-          {
-            label: '产品ID：',
-            value: it.product_id
-          }
-        ]
+        return showDeviceList(it)
       })
       item.docker_device_list = item.docker_device_list.map(it => {
         return [

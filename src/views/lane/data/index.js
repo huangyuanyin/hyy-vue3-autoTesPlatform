@@ -102,3 +102,52 @@ export const disposeList = {
   ],
   executeCommand: [{}]
 }
+
+export const showDeviceList = it => {
+  return [
+    {
+      label: '设备IP',
+      value: it.ip
+    },
+    {
+      label: 'CPU类型：',
+      value: it.main_board_type
+    },
+    {
+      label: '设备型号：',
+      value: it.machine_type
+    },
+    {
+      label: '型号编码：',
+      value: it.mode_code
+    },
+    {
+      label: '配置编码：',
+      value: it.config_code
+    },
+    {
+      label: 'cavium卡：',
+      value: it.cavium_card_type
+    },
+    {
+      label: '国密卡：',
+      value: it.gm_card_type
+    },
+    {
+      label: '设备序列号：',
+      value: it.machine_sn
+    },
+    {
+      label: '产品ID：',
+      value: it.product_id
+    },
+    {
+      label: '内核版本：',
+      value: it.kernel
+    },
+    {
+      label: '操作系统版本：',
+      value: it.operating_system
+    }
+  ]
+}
