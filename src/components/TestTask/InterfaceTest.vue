@@ -638,9 +638,12 @@ const getDeviceInfo = async (val, index) => {
     deviceList.value[index].showServerConfig[6].value = res.data.gm_card_type
     deviceList.value[index].showServerConfig[7].value = res.data.machine_sn
     deviceList.value[index].showServerConfig[8].value = res.data.product_id
-    deviceList.value[index].showServerConfig[9].value = res.data.kernel
-    deviceList.value[index].showServerConfig[10].value = res.data.operating_system
-
+    if (deviceList.value[index].showServerConfig[9]) {
+      deviceList.value[index].showServerConfig[9].value = res.data.kernel || '未知'
+    }
+    if (deviceList.value[index].showServerConfig[10]) {
+      deviceList.value[index].showServerConfig[10].value = res.data.operating_system || '未知'
+    }
     deviceList.value[index].serverConfig.serverIP = res.data.ip
     deviceList.value[index].serverConfig.serverPasswd = res.data.password
     deviceList.value[index].serverConfig.userName = res.data.username
