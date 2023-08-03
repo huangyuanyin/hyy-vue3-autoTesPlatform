@@ -97,7 +97,8 @@ export const disposeList = {
       docker_images_name: '',
       number: null,
       fileList: [],
-      shell: '# 此处输入shell命令（非必填） \n'
+      shell: '# 此处输入shell命令（非必填） \n',
+      available_quantity: null
     }
   ],
   executeCommand: [{}]

@@ -63,8 +63,14 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item label="容器数量" prop="number" :required="true">
-                <el-input v-model="item.number" placeholder="请输入容器数量" :maxlength="5" @input="limitNumericInput" />
+              <el-form-item prop="number" :required="true">
+                <template #label>
+                  <span>容器数量</span>
+                  <span class="numberTips" v-if="item.available_quantity && item.available_quantity < item.number"
+                    >最大容器数：{{ item.available_quantity }}</span
+                  >
+                </template>
+                <el-input v-model="item.number" :placeholder="numberPlaceholder" @input="limitNumericInput" />
               </el-form-item>
               <el-form-item label="docker镜像" prop="docker_images_id" :required="true">
                 <el-select
@@ -189,6 +195,7 @@ const configFileDialogTitle = ref('')
 const configFileDialogLog = ref('')
 const configId = ref(null)
 const pathFormVisible = ref(false)
+const numberPlaceholder = ref('请输入最大容器数')
 const pathForm = reactive<RuleForm>({
   docker_path: ''
 })
@@ -211,7 +218,19 @@ const taskDetailFormRules = reactive<FormRules>({
 const deviceList = ref(JSON.parse(JSON.stringify(disposeList['dockerDeployment'])))
 const deviceFormRef = ref([])
 const deviceFormRules = reactive<FormRules>({
-  number: [{ required: true, message: '容器数量不能为空', trigger: 'blur' }],
+  number: [
+    { required: true, message: '容器数量不能为空', trigger: 'blur' },
+    {
+      validator(rule, value, callback) {
+        if (value > deviceList.value[0].available_quantity) {
+          callback(new Error(`数量不能大于${deviceList.value[0].available_quantity}`))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
   docker_images_id: [{ required: true, message: '镜像不能为空', trigger: 'blur' }],
   shell: [{ required: true, message: 'shell脚本不能为空', trigger: 'blur' }],
   file_name: [{ required: true, message: '文件不能为空', trigger: 'change' }],
@@ -301,6 +320,10 @@ const selectDevice = val => {
       deviceList.value[0].showServerConfig[0].value = item.ip
       deviceList.value[0].showServerConfig[1].value = item.username
       deviceList.value[0].showServerConfig[2].value = item.port
+
+      deviceList.value[0].available_quantity = item.available_quantity
+
+      numberPlaceholder.value = `${val} 设备最大容器数为${item.available_quantity}`
     }
   })
 }
@@ -762,5 +785,9 @@ const onShellChange = val => {
 .detail {
   display: flex !important;
   white-space: nowrap !important;
+}
+.numberTips {
+  color: red;
+  font-size: 6px !important;
 }
 </style>

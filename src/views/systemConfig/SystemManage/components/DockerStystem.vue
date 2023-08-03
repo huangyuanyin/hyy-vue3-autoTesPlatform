@@ -245,6 +245,12 @@
           <!-- <CodeMirror :code="dockerImageForm.start_shell" @onCodeChange="onCodeChange" :codeStyle="{ height: '30vh', width: '25vw' }" /> -->
           <el-input v-model="dockerImageForm.start_shell" autocomplete="off" placeholder="请输入启动脚本地址,例如：/opt/run.sh" />
         </el-form-item>
+        <el-form-item label="网络模式" :label-width="formLabelWidth" prop="network_mode">
+          <el-select v-model="dockerImageForm.network_mode" placeholder="请选择网络模式">
+            <el-option label="none模式" value="none" />
+            <el-option label="bridge模式" value="bridge" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
           <el-input v-model="dockerImageForm.remark" autocomplete="off" />
         </el-form-item>
@@ -291,12 +297,14 @@ const dockerImageForm = reactive({
   name: '',
   tag: '',
   start_shell: '',
+  network_mode: '',
   remark: ''
 })
 const dockerImageFormRef = ref<FormInstance>()
 const dockerImageFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入镜像名称', trigger: 'blur' }],
   start_shell: [{ required: true, message: '启动脚本地址不能为空', trigger: 'blur' }],
+  network_mode: [{ required: true, message: '请选择网络模式', trigger: 'blur' }],
   tag: [{ required: true, message: '请输入镜像标签', trigger: 'blur' }]
 })
 const dockerImageTableData = ref([])
@@ -736,6 +744,9 @@ onMounted(() => {
 }
 .addDockerImageDialog {
   .el-input {
+    width: 25vw !important;
+  }
+  .el-select {
     width: 25vw !important;
   }
 }
