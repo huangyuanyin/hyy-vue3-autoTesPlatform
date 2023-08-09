@@ -527,3 +527,33 @@ export function failRetryApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/docker_arrange/stop_docker/---------------------------- */
+export function stopDockerApi(params) {
+  return request({
+    url: `/devops/docker_arrange/stop_docker/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+/* ---------------------------- /devops/docker_arrange/start_docker/---------------------------- */
+export function startDockerApi(params) {
+  return request({
+    url: `/devops/docker_arrange/start_docker/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+/* ---------------------------- /devops/docker_arrange/execute_all_script/---------------------------- */
+export function executeDockerScriptApi(params) {
+  return request({
+    url: `/devops/docker_arrange/execute_all_script/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}

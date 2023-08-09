@@ -13,7 +13,7 @@ export const disposeList = {
       isrbc: 'y',
       ifback: 'n',
       ifrs: 'y',
-      startMidwareType: 'Tomact',
+      startMidwareType: 'Tomcat',
       sysRest: false,
       reboot: true,
       serverConfig: {},

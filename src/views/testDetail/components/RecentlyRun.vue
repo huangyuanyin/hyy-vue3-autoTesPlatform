@@ -373,12 +373,31 @@
     <el-drawer
       custom-class="dockerDrawer"
       v-model="dockerDrawer"
-      :title="dockerDrawerTitle"
       direction="rtl"
       size="70%"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
+      :show-close="false"
     >
+      <template #header="{ close, titleId, titleClass }">
+        <h4 :id="titleId" :class="titleClass">{{ dockerDrawerTitle }}</h4>
+        <el-button type="success" @click="startDockerDialog = true">
+          <el-icon class="el-icon--left"><SwitchButton /></el-icon>
+          启动容器
+        </el-button>
+        <el-button type="warning" @click="stopDockerDialog = true">
+          <el-icon class="el-icon--left"><SwitchButton /></el-icon>
+          停止容器
+        </el-button>
+        <el-button type="info" @click="shellDockerDialog = true">
+          <el-icon class="el-icon--left"><SwitchButton /></el-icon>
+          脚本执行
+        </el-button>
+        <el-button type="danger" @click="close">
+          <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
+          关闭窗口
+        </el-button>
+      </template>
       <el-table :data="dockerNumDeatil" stripe>
         <el-table-column property="docker_name" label="容器名" width="200" />
         <el-table-column property="bridge_name" label="网口名" width="150" />
@@ -528,6 +547,102 @@
         <Termmail id="Termmail" :termmailInfo="termmailInfo" :isPropFullScreen="isShowFullScreen"></Termmail>
       </template>
     </el-dialog>
+    <el-dialog
+      v-model="stopDockerDialog"
+      title="停止容器"
+      custom-class="stopDockerDialog"
+      style="height: 50vh"
+      destroy-on-close
+      @close="cancelStopDocker(stopDockerFormRef)"
+    >
+      <el-form
+        ref="stopDockerFormRef"
+        :model="stopDockerForm"
+        :rules="stopDockerRules"
+        label-width="120px"
+        class="demo-ruleForm"
+        status-icon
+      >
+        <el-form-item label="选择容器">
+          <el-radio-group v-model="stopResource">
+            <el-radio label="部分" />
+            <el-radio label="全部" />
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="" v-if="stopResource === '部分'" prop="docker_name">
+          <el-select v-model="stopDockerForm.docker_name" multiple collapse-tags placeholder="请选择容器" style="width: 240px">
+            <el-option v-for="item in dockerNumDeatil" :key="item.docker_name" :label="item.docker_name" :value="item.docker_name" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="cancelStopDocker(stopDockerFormRef)">取消</el-button>
+          <el-button type="primary" @click="submitStopDocker(stopDockerFormRef)"> 确定 </el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+    <el-dialog
+      v-model="startDockerDialog"
+      title="启动容器"
+      custom-class="startDockerDialog"
+      style="height: 50vh"
+      destroy-on-close
+      @close="cancelStartDocker(startDockerFormRef)"
+    >
+      <el-form
+        ref="startDockerFormRef"
+        :model="startDockerForm"
+        :rules="startDockerRules"
+        label-width="120px"
+        class="demo-ruleForm"
+        status-icon
+      >
+        <el-form-item label="选择容器">
+          <el-radio-group v-model="startResource">
+            <el-radio label="部分" />
+            <el-radio label="全部" />
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="" v-if="startResource === '部分'" prop="docker_name">
+          <el-select v-model="startDockerForm.docker_name" multiple collapse-tags placeholder="请选择容器" style="width: 240px">
+            <el-option v-for="item in dockerNumDeatil" :key="item.docker_name" :label="item.docker_name" :value="item.docker_name" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="cancelStartDocker(startDockerFormRef)">取消</el-button>
+          <el-button type="primary" @click="submitStartDocker(startDockerFormRef)"> 确定 </el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+    <el-dialog
+      v-model="shellDockerDialog"
+      title="容器shell脚本"
+      custom-class="shellDockerDialog"
+      style="height: 50vh"
+      destroy-on-close
+      @close="cancelShellDocker(shellDockerFormRef)"
+    >
+      <el-form
+        ref="shellDockerFormRef"
+        :model="shellDockerForm"
+        :rules="shellDockerRules"
+        label-width="120px"
+        class="demo-ruleForm"
+        status-icon
+      >
+        <el-form-item label="选择容器">
+          <el-radio-group v-model="shellResource">
+            <el-radio label="全部" />
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="shell脚本位置" prop="shell_path">
+          <el-input v-model="shellDockerForm.shell_path" placeholder="请输入shell脚本位置" style="width: 240px" />
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="cancelShellDocker(shellDockerFormRef)">取消</el-button>
+          <el-button type="primary" @click="submitShellDocker(shellDockerFormRef)"> 确定 </el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -561,7 +676,10 @@ import {
   runDockerShellApi,
   supplyDockerPackageApi,
   batchSyncApi,
-  failRetryApi
+  failRetryApi,
+  startDockerApi,
+  stopDockerApi,
+  executeDockerScriptApi
 } from '@/api/NetDevOps'
 import Termmail from '@/components/Termail.vue'
 
@@ -634,6 +752,54 @@ const fullcen = ref(false)
 const termailDialog = ref(false)
 const termailDialogTitle = ref('')
 const isShowTermmail = ref(false)
+const stopDockerDialog = ref(false)
+const stopResource = ref('全部')
+const stopDockerForm = reactive({
+  task_detail_history_id: null,
+  docker_name: []
+})
+const stopDockerFormRef = ref<FormInstance>()
+const stopDockerRules = reactive({
+  docker_name: [
+    {
+      required: true,
+      message: '请选择容器',
+      trigger: 'change'
+    }
+  ]
+})
+const startDockerDialog = ref(false)
+const startResource = ref('全部')
+const startDockerForm = reactive({
+  task_detail_history_id: null,
+  docker_name: []
+})
+const startDockerFormRef = ref<FormInstance>()
+const startDockerRules = reactive({
+  docker_name: [
+    {
+      required: true,
+      message: '请选择容器',
+      trigger: 'change'
+    }
+  ]
+})
+const shellDockerDialog = ref(false)
+const shellResource = ref('全部')
+const shellDockerForm = reactive({
+  task_detail_history_id: null,
+  shell_path: '/home/docker_shell_cmd.sh'
+})
+const shellDockerFormRef = ref<FormInstance>()
+const shellDockerRules = reactive({
+  shell_path: [
+    {
+      required: true,
+      message: '请输入shell脚本位置',
+      trigger: 'blur'
+    }
+  ]
+})
 const termmailInfo = ref({
   id: '',
   docker_name: ''
@@ -919,6 +1085,87 @@ const submitFileSync = async (formEl: FormInstance | undefined) => {
       if (res.code === 1000) {
         ElMessage.success('文件同步成功！')
         cancelFileSync(fileSyncFormRef.value)
+      }
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
+const cancelStopDocker = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  stopDockerDialog.value = false
+  stopResource.value = '全部'
+}
+
+const submitStopDocker = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      let params = {}
+      stopResource.value === '全部'
+        ? (params = { task_detail_history_id: dockerDrawerId.value })
+        : (params = { task_detail_history_id: dockerDrawerId.value, docker_name: stopDockerForm.docker_name.join(',') })
+
+      let res = await stopDockerApi(params)
+      if (res.code === 1000) {
+        ElMessage.success('已停止Docker容器！')
+        stopResource.value = '全部'
+        cancelStopDocker(stopDockerFormRef.value)
+      }
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
+const cancelStartDocker = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  startDockerDialog.value = false
+  startResource.value = '全部'
+}
+
+const submitStartDocker = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      let params = {}
+      startResource.value === '全部'
+        ? (params = { task_detail_history_id: dockerDrawerId.value })
+        : (params = { task_detail_history_id: dockerDrawerId.value, docker_name: startDockerForm.docker_name.join(',') })
+
+      let res = await startDockerApi(params)
+      if (res.code === 1000) {
+        ElMessage.success('已启动Docker容器！')
+        startResource.value = '全部'
+        cancelStartDocker(startDockerFormRef.value)
+      }
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+}
+
+const cancelShellDocker = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  shellDockerDialog.value = false
+}
+
+const submitShellDocker = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      let params = {
+        task_details_history_id: dockerDrawerId.value,
+        shell_path: shellDockerForm.shell_path
+      }
+      let res = await executeDockerScriptApi(params)
+      if (res.code === 1000) {
+        ElMessage.success('已执行脚本！')
+        cancelShellDocker(shellDockerFormRef.value)
       }
     } else {
       console.log('error submit!', fields)

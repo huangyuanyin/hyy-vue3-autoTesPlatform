@@ -173,6 +173,7 @@
                 <el-option label="飞腾FT2000" value="飞腾FT2000" />
                 <el-option label="海光HG-3250" value="海光HG-3250" />
                 <el-option label="麒麟" value="麒麟" />
+                <el-option label="isecos" value="isecos" />
               </el-select>
             </el-form-item>
             <el-form-item label="cavium类型" :label-width="formLabelWidth" prop="cavium_card_type">
@@ -198,14 +199,18 @@
             </el-form-item>
             <el-form-item label="设备类型" :label-width="formLabelWidth" prop="machine_type">
               <el-select v-model="form.machine_type" placeholder="请选择Linux设备类型" :disabled="disabled">
+                <el-option label="500" value="500" />
+                <el-option label="1200" value="1200" />
                 <el-option label="3500" value="3500" />
                 <el-option label="6500" value="6500" />
+                <el-option label="12000" value="12000" />
+                <el-option label="12500" value="12500" />
                 <el-option label="15000" value="15000" />
+                <el-option label="18500" value="18500" />
                 <el-option label="25000" value="25000" />
                 <el-option label="7500A-DA" value="7500A-DA" />
                 <el-option label="7500B-DA" value="7500B-DA" />
                 <el-option label="7500C-DA" value="7500C-DA" />
-                <el-option label="isecos" value="isecos" />
               </el-select>
             </el-form-item>
             <el-form-item label="设备组" :label-width="formLabelWidth" prop="device_group">
