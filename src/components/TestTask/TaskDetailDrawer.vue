@@ -219,7 +219,8 @@
               <el-form-item label="项目包ID" prop="packageID" v-show="false">
                 <el-input v-model="item.packageID" placeholder="" />
               </el-form-item>
-              <el-form-item prop="startMidwareType" v-if="`${item.showServerConfig[1].value}` !== 'x86' && item.serverName !== ''">
+              <!-- <el-form-item prop="startMidwareType" v-if="`${item.showServerConfig[1].value}` !== 'x86' && item.serverName !== ''"> -->
+              <el-form-item prop="startMidwareType">
                 <template #label>
                   <div style="display: flex; align-items: center">
                     <span style="margin-right: 4px">开机自启中间件</span>

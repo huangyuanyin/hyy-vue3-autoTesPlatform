@@ -205,6 +205,7 @@
                 <el-option label="7500A-DA" value="7500A-DA" />
                 <el-option label="7500B-DA" value="7500B-DA" />
                 <el-option label="7500C-DA" value="7500C-DA" />
+                <el-option label="isecos" value="isecos" />
               </el-select>
             </el-form-item>
             <el-form-item label="设备组" :label-width="formLabelWidth" prop="device_group">
