@@ -374,7 +374,7 @@
       custom-class="dockerDrawer"
       v-model="dockerDrawer"
       direction="rtl"
-      size="70%"
+      size="75%"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       :show-close="false"
@@ -403,7 +403,13 @@
         <el-table-column property="bridge_name" label="网口名" width="150" />
         <el-table-column property="ipaddress" label="网口IP" width="200" />
         <el-table-column property="gateway" label="子网掩码" width="200" />
-        <el-table-column property="username" label="用户名" width="200" />
+        <el-table-column property="is_started" label="状态" width="120">
+          <template #default="scope">
+            <el-tag v-if="scope.row.is_started === true" type="success">运行中</el-tag>
+            <el-tag v-else type="danger">已停止</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column property="username" label="用户名" width="150" />
         <el-table-column property="password" label="密码" />
         <el-table-column fixed="right" label="操作" align="center" width="200">
           <template #default="scope">

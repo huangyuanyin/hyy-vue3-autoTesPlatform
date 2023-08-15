@@ -150,7 +150,7 @@
                   </template>
                   {{
                     JSON.parse(i.task_details_history[0].dispose)[0].deployType === 'full'
-                      ? 'netsign_x10_x11'
+                      ? JSON.parse(i.task_details_history[0].dispose)[0].deployVersion || 'netsign_x10_x11'
                       : JSON.parse(i.task_details_history[0].dispose)[0].packageName
                   }}
                 </el-descriptions-item>
