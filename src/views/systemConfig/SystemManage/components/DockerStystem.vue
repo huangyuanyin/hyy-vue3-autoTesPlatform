@@ -291,13 +291,14 @@
           <!-- <el-icon @click="fullScreen"><FullScreen /></el-icon> -->
         </div>
       </template>
-      <Termmail
-        v-if="isShowTermail"
-        id="Termmail"
-        :termmailInfo="termmailInfo"
-        :isPropFullScreen="isShowFullScreen"
-        @closeTermmail="cloeConsole(termmailId)"
-      ></Termmail>
+      <template v-if="isShowTermail">
+        <Termmail
+          id="Termmail"
+          :termmailInfo="termmailInfo"
+          :isPropFullScreen="isShowFullScreen"
+          @closeTermmail="cloeConsole(termmailId)"
+        ></Termmail>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -676,6 +677,7 @@ const handleTermailClose = () => {
 // 关闭终端
 const cloeConsole = row => {
   row.isShowTermail = false
+  handleTermailClose()
 }
 
 // 关闭弹窗
