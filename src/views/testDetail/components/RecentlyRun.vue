@@ -403,10 +403,12 @@
         <el-table-column property="bridge_name" label="网口名" width="150" />
         <el-table-column property="ipaddress" label="网口IP" width="200" />
         <el-table-column property="gateway" label="子网掩码" width="200" />
-        <el-table-column property="is_started" label="状态" width="120">
+        <el-table-column property="docker_status" label="状态" width="120">
           <template #default="scope">
-            <el-tag v-if="scope.row.is_started === true" type="success">运行中</el-tag>
-            <el-tag v-else type="danger">已停止</el-tag>
+            <el-tag v-if="scope.row.docker_status === 'start'" type="success">运行中</el-tag>
+            <el-tag v-if="scope.row.docker_status === 'stop'" type="danger">已停止</el-tag>
+            <el-tag v-if="scope.row.docker_status === 'wait_stop'" type="info">停止中</el-tag>
+            <el-tag v-if="scope.row.docker_status === 'wait_start'" type="primary">启动中</el-tag>
           </template>
         </el-table-column>
         <el-table-column property="username" label="用户名" width="150" />

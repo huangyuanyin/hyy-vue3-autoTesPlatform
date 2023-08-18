@@ -57,17 +57,28 @@
             编辑
           </el-button>
           <el-button link type="warning" size="small" :disabled="false" @click="openImageDockerDrawer(scope.row)"> 镜像管理 </el-button>
-          <el-popconfirm
-            title="确定删除该设备?"
-            trigger="click"
-            confirm-button-text="确认删除"
-            cancel-button-text="取消"
-            @confirm="deletetDevice(scope.row.id)"
-          >
+          <el-popover placement="bottom" :width="1" trigger="click" popper-class="moreGroupPopover">
             <template #reference>
-              <el-button link type="danger" size="small" :disabled="scope.row.using">删除</el-button>
+              <el-button link type="info" size="small">更多</el-button>
             </template>
-          </el-popconfirm>
+            <div class="moreButton">
+              <el-button link type="primary" size="small" v-if="isShowTermail === false" @click="openConsole(scope.row)">
+                在线终端
+              </el-button>
+              <el-button link type="warning" size="small" v-else @click="cloeConsole(scope.row)">关闭终端</el-button>
+              <el-popconfirm
+                title="确定删除该设备?"
+                trigger="click"
+                confirm-button-text="确认删除"
+                cancel-button-text="取消"
+                @confirm="deletetDevice(scope.row.id)"
+              >
+                <template #reference>
+                  <el-button link type="danger" size="small" :disabled="scope.row.using">删除</el-button>
+                </template>
+              </el-popconfirm>
+            </div>
+          </el-popover>
         </template>
       </el-table-column>
     </el-table>
@@ -262,14 +273,40 @@
         </span>
       </template>
     </el-dialog>
+    <el-dialog
+      v-model="termailDialog"
+      custom-class="termailDialog"
+      width="60%"
+      style="height: 80vh"
+      destroy-on-close
+      @close="handleTermailClose"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+    >
+      <template #header="{ close, titleId, titleClass }">
+        <div class="my-header2">
+          <h4>{{ termailDialogTitle }}</h4>
+          <el-button type="danger" :icon="CircleCloseFilled" @click="handleTermailClose">结束终端</el-button>
+          <!-- <el-icon @click="fullScreen"><FullScreen /></el-icon> -->
+        </div>
+      </template>
+      <Termmail
+        v-if="isShowTermail"
+        id="Termmail"
+        :termmailInfo="termmailInfo"
+        :isPropFullScreen="isShowFullScreen"
+        @closeTermmail="cloeConsole(termmailId)"
+      ></Termmail>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { CirclePlus, Search } from '@element-plus/icons-vue'
+import { CirclePlus, Search, CircleCloseFilled } from '@element-plus/icons-vue'
 import {
   getDockerDeviceManageApi,
   addDockerDeviceManageApi,
@@ -282,8 +319,15 @@ import {
 } from '@/api/NetDevOps/index'
 import { useDockerDeviceManage } from '@/hooks/useDockerDeviceManage'
 import CodeMirror from '@/components/CodeMirror-5.vue'
+import Termmail from '@/components/Termail2.vue'
 
 const dialogFormVisible = ref(false)
+const termailDialog = ref(false)
+const termailDialogTitle = ref('')
+const isShowFullScreen = ref(false)
+const termmailInfo = ref({})
+const termmailId = ref(null)
+const isShowTermail = ref(false)
 const networkConfigDialogFormVisible = ref(false)
 const networkConfigDialogTitle = ref('')
 const dockerImageDrawer = ref(false)
@@ -607,6 +651,33 @@ const openImageDockerDialog = (type, id?) => {
   }
 }
 
+const openConsole = async row => {
+  termailDialog.value = true
+  termailDialogTitle.value = `【${row.ip}】在线终端`
+  termmailInfo.value = {
+    docker_name: 'DOCKER',
+    id: row.id
+  }
+  nextTick(() => {
+    isShowTermail.value = true
+  })
+  termmailId.value = row.id
+}
+
+const handleTermailClose = () => {
+  if (termailDialog.value) {
+    nextTick(() => {
+      isShowTermail.value = false
+    })
+    termailDialog.value = false
+  }
+}
+
+// 关闭终端
+const cloeConsole = row => {
+  row.isShowTermail = false
+}
+
 // 关闭弹窗
 const closeaAdDockerImageDialog = () => {
   addDockerImageDialog.value = false
@@ -748,6 +819,27 @@ onMounted(() => {
   }
   .el-select {
     width: 25vw !important;
+  }
+}
+</style>
+
+<style lang="scss">
+.termailDialog {
+  .el-dialog__body {
+    padding-top: 0px !important;
+  }
+  .my-header2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .el-icon {
+      font-size: 18px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .el-icon:hover {
+      color: #75c0f2;
+    }
   }
 }
 </style>

@@ -88,7 +88,7 @@
                 >设备归还
               </el-button>
               <el-button v-else link type="warning" size="small" @click="deviceBorrowing(1, scope.row)">设备借用 </el-button>
-              <el-button link type="primary" size="small" v-if="isShowTermail === false" @click="openConsole(scope.row)" disabled>
+              <el-button link type="primary" size="small" v-if="isShowTermail === false" @click="openConsole(scope.row)">
                 在线终端
               </el-button>
               <el-button link type="warning" size="small" v-else @click="cloeConsole(scope.row)">关闭终端</el-button>
@@ -120,7 +120,32 @@
     />
 
     <!-- 终端 -->
-    <Termmail v-if="isShowTermail" :termmailInfo="termmailInfo" @closeTermmail="cloeConsole(termmailId)" />
+    <el-dialog
+      v-model="termailDialog"
+      custom-class="termailDialog"
+      width="60%"
+      style="height: 80vh"
+      destroy-on-close
+      @close="handleTermailClose"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+    >
+      <template #header="{ close, titleId, titleClass }">
+        <div class="my-header2">
+          <h4>{{ termailDialogTitle }}</h4>
+          <el-button type="danger" :icon="CircleCloseFilled" @click="handleTermailClose">结束终端</el-button>
+          <!-- <el-icon @click="fullScreen"><FullScreen /></el-icon> -->
+        </div>
+      </template>
+      <Termmail
+        v-if="isShowTermail"
+        id="Termmail"
+        :termmailInfo="termmailInfo"
+        :isPropFullScreen="isShowFullScreen"
+        @closeTermmail="cloeConsole(termmailId)"
+      ></Termmail>
+    </el-dialog>
 
     <!--linux弹窗-->
     <el-dialog v-model="dialogFormVisible" :title="LinuxTitle" width="55%" :before-close="closeDialog">
@@ -236,15 +261,18 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, nextTick } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { CirclePlus, Search } from '@element-plus/icons-vue'
-import Termmail from '@/components/Termail.vue'
+import { CirclePlus, Search, CircleCloseFilled } from '@element-plus/icons-vue'
+import Termmail from '@/components/Termail2.vue'
 import { getDeviceApi, addDeviceApi, editDeviceApi, deletetDeviceApi } from '@/api/NetDevOps/index'
 import { utc2beijing } from '@/utils/util.js'
 
 const dialogFormVisible = ref(false)
+const termailDialog = ref(false)
+const termailDialogTitle = ref('')
+const isShowFullScreen = ref(false)
 const isShowTermail = ref(false)
 const formLabelWidth = '140px'
 const termmailInfo = ref({})
@@ -401,7 +429,16 @@ const openLinuxDialog = (...args) => {
 }
 
 const openConsole = async row => {
-  isShowTermail.value = true
+  console.log(`output->row`, row)
+  termailDialog.value = true
+  termailDialogTitle.value = `【${row.ip}】在线终端`
+  termmailInfo.value = {
+    docker_name: 'LINUX',
+    id: row.id
+  }
+  nextTick(() => {
+    isShowTermail.value = true
+  })
   termmailId.value = row
 }
 
@@ -414,7 +451,15 @@ const closeDialog = () => {
 // 关闭终端
 const cloeConsole = row => {
   row.isShowTermail = false
-  isShowTermail.value = false
+}
+
+const handleTermailClose = () => {
+  if (termailDialog.value) {
+    nextTick(() => {
+      isShowTermail.value = false
+    })
+    termailDialog.value = false
+  }
 }
 
 const deviceBorrowing = async (status, val) => {
@@ -517,10 +562,46 @@ onMounted(() => {
     margin-left: 0;
   }
 }
+.termailDialog {
+  .el-dialog__body {
+    padding-top: 0px !important;
+  }
+  .my-header2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .el-icon {
+      font-size: 18px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .el-icon:hover {
+      color: #75c0f2;
+    }
+  }
+}
 </style>
 
 <style lang="scss">
 .moreGroupPopover {
   min-width: 60px !important;
+}
+.termailDialog {
+  .el-dialog__body {
+    padding-top: 0px !important;
+  }
+  .my-header2 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    .el-icon {
+      font-size: 18px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .el-icon:hover {
+      color: #75c0f2;
+    }
+  }
 }
 </style>

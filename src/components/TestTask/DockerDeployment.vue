@@ -126,7 +126,21 @@
                   </el-table-column>
                 </el-table>
               </el-form-item>
-              <el-form-item label="shell脚本" class="executeCommand-item">
+              <el-form-item class="executeCommand-item">
+                <template #label>
+                  <div style="display: flex; align-items: center">
+                    <span style="margin-right: 4px">shell脚本</span>
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="docker容器内存放地址：/opt/docker_shell_cmd.sh"
+                      placement="top"
+                      raw-content
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </div>
+                </template>
                 <CodeMirror :code="item.shell" :codeStyle="{ height: '30vh', width: '29vw' }" @onCodeChange="onShellChange" />
               </el-form-item>
             </el-form>
@@ -164,11 +178,10 @@
 <script lang="ts" setup>
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules, UploadProps, UploadRawFile, genFileId, UploadInstance } from 'element-plus'
-import { CloseBold, FullScreen, UploadFilled, Edit, Delete } from '@element-plus/icons-vue'
+import { QuestionFilled, FullScreen, UploadFilled, Edit, Delete } from '@element-plus/icons-vue'
 import { getDockerDeviceManageApi, getProductPackageApi, uploadSupplyPackageApi, getDockerDeviceImagesApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
-import { de } from 'element-plus/lib/locale'
 
 const props = defineProps({
   taskDetailDrawer: {
