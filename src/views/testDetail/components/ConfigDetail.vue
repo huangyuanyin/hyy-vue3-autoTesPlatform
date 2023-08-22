@@ -56,6 +56,20 @@
         </el-descriptions>
         <el-descriptions
           class="dockerDeployment—config"
+          title="Docker文件："
+          :column="1"
+          :size="size"
+          :style="blockMargin"
+          v-if="disposeType === 'dockerDeployment'"
+        >
+          <!-- <el-descriptions-item label=""> </el-descriptions-item> -->
+        </el-descriptions>
+        <el-table :data="dockerFileList" style="width: 50vw" stripe>
+          <el-table-column prop="file_name" label="文件名" width="200" />
+          <el-table-column prop="file_path" label="存放路径" min-width="300" />
+        </el-table>
+        <el-descriptions
+          class="dockerDeployment—config"
           title="其他配置："
           :column="1"
           :size="size"
@@ -87,6 +101,7 @@ const dockerDeploymentConfig = ref([])
 const disposeType = ref('')
 const isShow = ref(false)
 const size = ref('')
+const dockerFileList = ref([])
 const blockMargin = computed(() => {
   const marginMap = {
     large: '32px',
@@ -152,15 +167,16 @@ const handleConfigDetail = async () => {
         break
       case 'dockerDeployment':
         dockerDeploymentConfig.value = [
-          {
-            label: 'docker文件：',
-            value: dispose.value.file_name
-          },
+          // {
+          //   label: 'docker文件：',
+          //   value: dispose.value.file_name
+          // },
           {
             label: 'shell脚本：',
             value: dispose.value.shell
           }
         ]
+        dockerFileList.value = dispose.value.fileList
         break
       default:
         break

@@ -381,11 +381,19 @@
     >
       <template #header="{ close, titleId, titleClass }">
         <h4 :id="titleId" :class="titleClass">{{ dockerDrawerTitle }}</h4>
-        <el-button type="success" @click="startDockerDialog = true">
+        <!-- <el-button type="success" @click="startDockerDialog = true">
+          <el-icon class="el-icon--left"><SwitchButton /></el-icon>
+          启动容器
+        </el-button> -->
+        <el-button type="success" @click="onStartDocker">
           <el-icon class="el-icon--left"><SwitchButton /></el-icon>
           启动容器
         </el-button>
-        <el-button type="warning" @click="stopDockerDialog = true">
+        <!-- <el-button type="warning" @click="stopDockerDialog = true">
+          <el-icon class="el-icon--left"><SwitchButton /></el-icon>
+          停止容器
+        </el-button> -->
+        <el-button type="warning" @click="onStopDockerDialog">
           <el-icon class="el-icon--left"><SwitchButton /></el-icon>
           停止容器
         </el-button>
@@ -398,7 +406,8 @@
           关闭窗口
         </el-button>
       </template>
-      <el-table :data="dockerNumDeatil" stripe>
+      <el-table :data="dockerNumDeatil" row-key="id" stripe ref="multipleTableRef" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" :reserve-selection="true" />
         <el-table-column property="docker_name" label="容器名" width="200" />
         <el-table-column property="bridge_name" label="网口名" width="150" />
         <el-table-column property="ipaddress" label="网口IP" width="200" />
@@ -418,12 +427,12 @@
             <el-tooltip class="box-item" effect="dark" content="在线终端" placement="top">
               <el-button circle type="primary" size="small" @click="openTermail(scope.row)" :icon="Monitor"> </el-button>
             </el-tooltip>
-            <el-tooltip class="box-item" effect="dark" content="文件上传" placement="top">
+            <!-- <el-tooltip class="box-item" effect="dark" content="文件上传" placement="top">
               <el-button circle type="success" size="small" @click="uploadFile(scope.row)" :icon="Upload"> </el-button>
             </el-tooltip>
             <el-tooltip class="box-item" effect="dark" content="文件同步" placement="top">
               <el-button circle size="small" @click="fileSync(scope.row)" :icon="FolderOpened"> </el-button>
-            </el-tooltip>
+            </el-tooltip> -->
             <el-tooltip class="box-item" effect="dark" content="日志列表" placement="top">
               <el-button circle type="warning" size="small" @click="getLog(scope.row)" :icon="Tickets"> </el-button>
             </el-tooltip>
@@ -433,15 +442,21 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-        v-model:currentPage="dockerCurrentPage"
-        v-model:page-size="dockerPageSize"
-        :page-sizes="[10, 20, 30, 40]"
-        layout="total, prev, pager, next, jumper"
-        :total="dockerTotal"
-        @size-change="handleDockerSizeChange"
-        @current-change="handleDockerCurrentChange"
-      />
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px">
+        <div>
+          <el-button type="primary" @click="totalSelection()">选择全部</el-button>
+          <el-button type="info" @click="toggleSelection()">清空所选</el-button>
+        </div>
+        <el-pagination
+          v-model:currentPage="dockerCurrentPage"
+          v-model:page-size="dockerPageSize"
+          :page-sizes="[10, 20, 30, 40]"
+          layout="total, prev, pager, next, jumper"
+          :total="dockerTotal"
+          @size-change="handleDockerSizeChange"
+          @current-change="handleDockerCurrentChange"
+        />
+      </div>
       <el-drawer v-model="logDrawer" :title="logDrawerTitle" :append-to-body="true" :before-close="handleCloseLogDrawer">
         <el-table :data="logDrawerList" stripe>
           <el-table-column property="id" label="id" width="80" />
@@ -517,8 +532,8 @@
             <el-option
               :label="item.docker_name"
               :value="item.docker_name"
-              v-for="(item, index) in targetDockerList"
-              :key="'targetDockerList' + index"
+              v-for="(item, index) in dockerNumDeatilAll"
+              :key="'dockerNumDeatilAll' + index"
             />
           </el-select>
         </el-form-item>
@@ -544,11 +559,19 @@
       style="height: 60vh"
       destroy-on-close
       @close="handleTermailClose"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
     >
       <template #header="{ close, titleId, titleClass }">
-        <div class="my-header2">
+        <div class="my-header2" style="display: flex; justify-content: space-between; align-items: center">
           <h4>{{ termailDialogTitle }}</h4>
-          <!-- <el-icon @click="fullScreen"><FullScreen /></el-icon> -->
+          <div>
+            <el-button type="success" :icon="Upload" @click="uploadFile_new(dockerDrawerName)">文件上传</el-button>
+            <el-button type="" :icon="FolderOpened" @click="fileSync_new(dockerDrawerName)">文件同步</el-button>
+            <el-button type="primary" :icon="FullScreen" @click="fullScreen()">全屏</el-button>
+            <el-button type="danger" :icon="CircleCloseFilled" @click="handleTermailClose">结束终端</el-button>
+          </div>
         </div>
       </template>
       <template v-if="isShowTermmail">
@@ -867,8 +890,12 @@ const currentMethodsType = ref(null)
 const currentLogVal = ref(null)
 const caseList = ref([])
 const defaultExpandedKeys = ref([])
+const multipleTableRef = ref()
+const multipleSelection = ref([])
 const dockerNumDeatil = ref([])
 const dockerDrawerId = ref(null)
+const dockerDrawerName = ref('')
+const dockerNumDeatilAll = ref([])
 
 watch(
   () => props.runResult,
@@ -987,6 +1014,110 @@ const changeCollapse = val => {
   currentCollpose.value = val
 }
 
+const handleSelectionChange = val => {
+  multipleSelection.value = val
+  // console.log(`output->multipleSelection.value`, multipleSelection.value)
+}
+
+const toStartDocker = async isAll => {
+  let params = {}
+  let arr = []
+  multipleSelection.value.map(item => {
+    arr.push(item.docker_name)
+  })
+  isAll
+    ? (params = { task_detail_history_id: dockerDrawerId.value })
+    : (params = { task_detail_history_id: dockerDrawerId.value, docker_name: arr.join(',') })
+
+  let res = await startDockerApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('正在启动容器，请稍后...')
+    toggleSelection()
+  }
+}
+
+const toStopDocker = async isAll => {
+  let params = {}
+  let arr = []
+  multipleSelection.value.map(item => {
+    arr.push(item.docker_name)
+  })
+  isAll
+    ? (params = { task_detail_history_id: dockerDrawerId.value })
+    : (params = { task_detail_history_id: dockerDrawerId.value, docker_name: arr.join(',') })
+
+  let res = await stopDockerApi(params)
+  if (res.code === 1000) {
+    ElMessage.success('正在停止容器，请稍后...')
+    toggleSelection()
+  }
+}
+
+const toggleSelection = () => {
+  multipleTableRef.value!.clearSelection()
+}
+
+const isShowAll = ref(true)
+const resData = ref([])
+const totalSelection = async () => {
+  if (isShowAll.value) {
+    // isShowAll.value = false
+    // multipleTableRef.value!.toggleAllSelection()
+    const params = {
+      task_detail_history_id: dockerDrawerId.value
+    }
+    let res = await getDockerNameseApi(params)
+    if (res.code === 1000) {
+      resData.value = multipleSelection.value = res.data
+      multipleSelection.value.forEach(row => {
+        // multipleTableRef.value!.toggleRowSelection(row, undefined)
+        multipleTableRef.value!.toggleAllSelection()
+      })
+    }
+    nextTick(() => {})
+  }
+}
+
+const onStartDocker = () => {
+  if (!multipleSelection.value.length) {
+    return ElMessage.warning('请选择要启动的容器')
+  }
+  ElMessageBox.confirm('确定启动已选容器?', '启动容器', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      toStartDocker(false)
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消操作'
+      })
+    })
+}
+
+const onStopDockerDialog = () => {
+  if (!multipleSelection.value.length) {
+    return ElMessage.warning('请选择要停止的容器')
+  }
+  ElMessageBox.confirm('确定停止已选容器?', '停止容器', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      toStopDocker(false)
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消操作'
+      })
+    })
+}
+
 const openTermail = val => {
   termailDialog.value = true
   termailDialogTitle.value = `【${val.docker_name}】在线终端`
@@ -994,6 +1125,7 @@ const openTermail = val => {
     docker_name: val.docker_name,
     id: dockerDrawerId.value
   }
+  dockerDrawerName.value = val.docker_name
   nextTick(() => {
     isShowTermmail.value = true
   })
@@ -1016,10 +1148,35 @@ const fullScreen = () => {
   }
 }
 
+function checkFull() {
+  var fullScreen =
+    parent.document.webkitIsFullScreen || parent.document.fullscreen || parent.document.mozFullScreen || parent.document.msFullscreenElement
+  return !fullScreen
+}
+
+onMounted(async () => {
+  window.addEventListener('resize', () => {
+    nextTick(() => {
+      if (checkFull()) {
+        isShowFullScreen.value = false
+        const terminalContainer = document.getElementById('Termmail')
+        terminalContainer?.classList.add('fullScreen')
+      }
+    })
+  })
+})
+
 const uploadFile = val => {
   dockerFileDialog.value = true
   dockerFileDialogTitle.value = `【${val.docker_name}】上传文件`
   dockerFileForm.docker_name = val.docker_name
+  dockerFileForm.task_detail_history_id = dockerDrawerId.value
+}
+
+const uploadFile_new = val => {
+  dockerFileDialog.value = true
+  dockerFileDialogTitle.value = `【${val}】上传文件`
+  dockerFileForm.docker_name = val
   dockerFileForm.task_detail_history_id = dockerDrawerId.value
 }
 
@@ -1071,7 +1228,15 @@ const fileSync = val => {
   fileSyncDialogTitle.value = `【${val.docker_name}】文件同步`
   fileSyncForm.docker_name = val.docker_name
   fileSyncForm.task_detail_history_id = dockerDrawerId.value
-  targetDockerList.value = dockerNumDeatil.value
+  // targetDockerList.value = dockerNumDeatil.value
+}
+
+const fileSync_new = val => {
+  fileSyncDialog.value = true
+  fileSyncDialogTitle.value = `【${val}】文件同步`
+  fileSyncForm.docker_name = val
+  fileSyncForm.task_detail_history_id = dockerDrawerId.value
+  // targetDockerList.value = dockerNumDeatil.value
 }
 
 const submitFileSync = async (formEl: FormInstance | undefined) => {
@@ -1293,6 +1458,13 @@ const viewDocker = async val => {
   dockerDrawerId.value = val.id
   dockerCurrentPage.value = 1
   getDockerNamese(dockerDrawerId.value)
+  const params = {
+    task_detail_history_id: dockerDrawerId.value
+  }
+  let res = await getDockerNameseApi(params)
+  if (res.code === 1000) {
+    dockerNumDeatilAll.value = res.data
+  }
 }
 
 const getDockerNamese = async (id?) => {

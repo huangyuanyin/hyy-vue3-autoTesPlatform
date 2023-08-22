@@ -3,7 +3,7 @@
     v-model="code"
     placeholder="Code goes here..."
     :style="props.codeStyle"
-    :tabSize="2"
+    :tabSize="1"
     :extensions="extensions"
     @input="onCodeChange"
   />
@@ -11,7 +11,7 @@
 
 <script lang="ts" setup>
 import { Codemirror } from 'vue-codemirror'
-import { javascript } from '@codemirror/lang-javascript'
+// import { javascript } from '@codemirror/lang-javascript'
 // import { python } from '@codemirror/lang-python'
 // import { oneDark } from '@codemirror/theme-one-dark'
 import { onMounted, ref, watch, defineProps, defineEmits } from 'vue'
@@ -66,10 +66,14 @@ let myTheme = EditorView.theme(
   { dark: true }
 )
 
-const extensions = [myTheme, javascript()]
+// const extensions = [myTheme, javascript()]
+
+const extensions = [myTheme]
 
 const onCodeChange = () => {
+  code.value = code.value
   emit('onCodeChange', code.value)
+  console.log(`output->code.value`, code.value)
 }
 
 const handlePaste = event => {

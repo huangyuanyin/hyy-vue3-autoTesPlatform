@@ -34,7 +34,7 @@ const terminalSocket = ref(null)
 
 watchEffect(() => {
   if (props.isPropFullScreen) {
-    term.value.resize(term.value.cols, 50)
+    // term.value.resize(term.value.cols, 50)
   }
 })
 

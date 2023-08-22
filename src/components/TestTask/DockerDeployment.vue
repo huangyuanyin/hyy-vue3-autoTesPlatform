@@ -63,7 +63,7 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item prop="number" :required="true">
+              <el-form-item prop="number" :required="true" v-if="item.serverName">
                 <template #label>
                   <span>容器数量</span>
                   <span class="numberTips" v-if="item.available_quantity && item.available_quantity < item.number"
@@ -141,7 +141,15 @@
                     </el-tooltip>
                   </div>
                 </template>
-                <CodeMirror :code="item.shell" :codeStyle="{ height: '30vh', width: '29vw' }" @onCodeChange="onShellChange" />
+                <!-- <CodeMirror :code="item.shell" :codeStyle="{ height: '30vh', width: '29vw' }" @onCodeChange="onShellChange" /> -->
+                <el-input
+                  type="textarea"
+                  style="background: #000000 !important; color: #fff"
+                  :rows="5"
+                  placeholder="# 此处输入shell命令（非必填） "
+                  v-model="item.shell"
+                  :autosize="{ minRows: 5 }"
+                ></el-input>
               </el-form-item>
             </el-form>
           </div>
@@ -335,7 +343,7 @@ const selectDevice = val => {
       deviceList.value[0].showServerConfig[2].value = item.port
 
       deviceList.value[0].available_quantity = item.available_quantity
-
+      deviceList.value[0].number = null
       numberPlaceholder.value = `${val} 设备最大容器数为${item.available_quantity}`
     }
   })
@@ -496,6 +504,7 @@ const onCodeChange = val => {
 
 const onShellChange = val => {
   deviceList.value[0].shell = val
+  console.log(`output->val`, val)
 }
 </script>
 
@@ -802,5 +811,11 @@ const onShellChange = val => {
 .numberTips {
   color: red;
   font-size: 6px !important;
+}
+.executeCommand-item {
+  .el-textarea__inner {
+    background-color: #000;
+    color: #fff;
+  }
 }
 </style>
