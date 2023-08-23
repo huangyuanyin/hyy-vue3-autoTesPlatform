@@ -385,6 +385,10 @@
           <el-icon class="el-icon--left"><SwitchButton /></el-icon>
           启动容器
         </el-button> -->
+        <el-button type="primary" @click="onRefreshDocker">
+          <el-icon class="el-icon--left"><Refresh /></el-icon>
+          刷新状态
+        </el-button>
         <el-button type="success" @click="onStartDocker">
           <el-icon class="el-icon--left"><SwitchButton /></el-icon>
           启动容器
@@ -397,7 +401,11 @@
           <el-icon class="el-icon--left"><SwitchButton /></el-icon>
           停止容器
         </el-button>
-        <el-button type="info" @click="shellDockerDialog = true">
+        <!-- <el-button type="info" @click="shellDockerDialog = true">
+          <el-icon class="el-icon--left"><SwitchButton /></el-icon>
+          脚本执行
+        </el-button> -->
+        <el-button type="info" @click="toStartShellDocker">
           <el-icon class="el-icon--left"><SwitchButton /></el-icon>
           脚本执行
         </el-button>
@@ -438,7 +446,7 @@
             <span>111111</span>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" align="center" width="250">
+        <el-table-column fixed="right" label="操作" align="center" width="200">
           <template #default="scope">
             <el-tooltip class="box-item" effect="dark" content="详情" placement="top">
               <el-button circle type="" size="small" @click="openDetail(scope.row)" :icon="View"> </el-button>
@@ -455,9 +463,9 @@
             <el-tooltip class="box-item" effect="dark" content="日志列表" placement="top">
               <el-button circle type="warning" size="small" @click="getLog(scope.row)" :icon="Tickets"> </el-button>
             </el-tooltip>
-            <el-tooltip class="box-item" effect="dark" content="脚本执行" placement="top">
+            <!-- <el-tooltip class="box-item" effect="dark" content="脚本执行" placement="top">
               <el-button circle type="info" size="small" @click="runShell(scope.row)" :icon="SwitchButton"> </el-button>
-            </el-tooltip>
+            </el-tooltip> -->
           </template>
         </el-table-column>
       </el-table>
@@ -665,7 +673,7 @@
     </el-dialog>
     <el-dialog
       v-model="shellDockerDialog"
-      title="容器shell脚本"
+      title="shell脚本执行"
       custom-class="shellDockerDialog"
       style="height: 50vh"
       destroy-on-close
@@ -679,11 +687,11 @@
         class="demo-ruleForm"
         status-icon
       >
-        <el-form-item label="选择容器">
+        <!-- <el-form-item label="选择容器">
           <el-radio-group v-model="shellResource">
             <el-radio label="全部" />
           </el-radio-group>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="shell脚本位置" prop="shell_path">
           <el-input v-model="shellDockerForm.shell_path" placeholder="请输入shell脚本位置" style="width: 240px" />
         </el-form-item>
@@ -698,36 +706,59 @@
       :title="detailDockerTitle"
       custom-class="detailDockerDialog"
       style="height: 50vh"
-      width="40%"
+      width="50%"
       destroy-on-close
       @close="cancelDetailDocker(detailDockerFormRef)"
     >
-      <el-form ref="detailDockerFormRef" :model="detailDockerForm" label-width="220px" class="demo-ruleForm" status-icon>
-        <el-form-item label="容器名：">
-          <el-input v-model="detailDockerForm.docker_name" placeholder="暂无数据" style="width: 240px" />
-        </el-form-item>
-        <el-form-item label="网口名：">
-          <el-input v-model="detailDockerForm.bridge_name" placeholder="暂无数据" style="width: 240px" />
-        </el-form-item>
-        <el-form-item label="网口IP：">
-          <el-input v-model="detailDockerForm.ipaddress" placeholder="暂无数据" style="width: 240px" />
-        </el-form-item>
-        <el-form-item label="子网掩码：">
-          <el-input v-model="detailDockerForm.gateway" placeholder="暂无数据" style="width: 240px" />
-        </el-form-item>
-        <el-form-item label="状态：">
+      <el-descriptions class="docker-descriptions" title="容器配置：" :column="3" border>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">容器名：</div>
+          </template>
+          {{ detailDockerForm.docker_name }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">网口名：</div>
+          </template>
+          {{ detailDockerForm.bridge_name }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">网口IP：</div>
+          </template>
+          {{ detailDockerForm.ipaddress }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">子网掩码：</div>
+          </template>
+          {{ detailDockerForm.gateway }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">状态：</div>
+          </template>
           <el-tag v-if="detailDockerForm.docker_status === 'start'" type="success">运行中</el-tag>
           <el-tag v-if="detailDockerForm.docker_status === 'stop'" type="danger">已停止</el-tag>
           <el-tag v-if="detailDockerForm.docker_status === 'wait_stop'" type="info">停止中</el-tag>
           <el-tag v-if="detailDockerForm.docker_status === 'wait_start'" type="primary">启动中</el-tag>
-        </el-form-item>
-        <el-form-item label="用户名：">
-          <el-input v-model="detailDockerForm.username" placeholder="暂无数据" style="width: 240px" />
-        </el-form-item>
-        <el-form-item label="密码：">
-          <el-input v-model="detailDockerForm.password" placeholder="暂无数据" style="width: 240px" />
-        </el-form-item>
-      </el-form>
+        </el-descriptions-item>
+      </el-descriptions>
+      <el-descriptions class="user-descriptions" title="用户信息：" :column="2" border>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">用户名：</div>
+          </template>
+          {{ detailDockerForm.username }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <div class="cell-item">密码：</div>
+          </template>
+          {{ detailDockerForm.password }}
+        </el-descriptions-item>
+      </el-descriptions>
     </el-dialog>
   </div>
 </template>
@@ -1144,6 +1175,19 @@ const totalSelection = async () => {
   })
 }
 
+const onRefreshDocker = async () => {
+  dockerLoading.value = true
+  const params = {
+    task_detail_history_id: dockerDrawerId.value
+  }
+  let res = await getDockerNameseApi(params)
+  dockerLoading.value = false
+  if (res.code === 1000) {
+    dockerNumDeatilAll.value = res.data
+    ElMessage.success('刷新成功')
+  }
+}
+
 const onStartDocker = () => {
   if (!multipleSelection.value.length) {
     return ElMessage.warning('请选择要启动的容器')
@@ -1182,6 +1226,13 @@ const onStopDockerDialog = () => {
         message: '取消操作'
       })
     })
+}
+
+const toStartShellDocker = () => {
+  if (!multipleSelection.value.length) {
+    return ElMessage.warning('请选择要执行脚本的容器')
+  }
+  shellDockerDialog.value = true
 }
 
 const openTermail = val => {
@@ -1415,15 +1466,25 @@ const submitShellDocker = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      let params = {
-        task_details_history_id: dockerDrawerId.value,
-        shell_path: shellDockerForm.shell_path
-      }
-      let res = await executeDockerScriptApi(params)
-      if (res.code === 1000) {
-        ElMessage.success('已执行脚本！')
-        cancelShellDocker(shellDockerFormRef.value)
-      }
+      ElMessageBox.confirm(`确定执行已选择容器的shell脚本?`, '执行脚本', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        let arr = []
+        multipleSelection.value.map(item => {
+          arr.push(item.docker_name)
+        })
+        let params = {
+          docker_name: arr.join(','),
+          shell_path: shellDockerForm.shell_path
+        }
+        let res = await executeDockerScriptApi(params)
+        if (res.code === 1000) {
+          ElMessage.success('已执行脚本！')
+          cancelShellDocker(shellDockerFormRef.value)
+        }
+      })
     } else {
       console.log('error submit!', fields)
     }
@@ -2267,6 +2328,15 @@ const handleDockerCurrentChange = (val: number) => {
       color: #8b8b8b;
     }
   }
+}
+.docker-descriptions,
+.user-descriptions {
+  margin-left: 40px;
+  margin-right: 40px;
+}
+.user-descriptions {
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
 </style>
 
