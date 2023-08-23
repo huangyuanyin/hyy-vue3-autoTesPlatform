@@ -54,13 +54,7 @@
             >
               <el-form-item label="可选设备" prop="serverName" :required="true">
                 <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="selectDevice">
-                  <el-option
-                    :label="item.ip"
-                    :value="item.ip"
-                    v-for="(item, index) in hasDeviceList"
-                    :key="'hasDeviceList' + index"
-                    :disabled="item.disabled"
-                  />
+                  <el-option :label="item.ip" :value="item.ip" v-for="(item, index) in hasDeviceList" :key="'hasDeviceList' + index" />
                 </el-select>
               </el-form-item>
               <el-form-item prop="number" :required="true" v-if="item.serverName">
@@ -279,15 +273,15 @@ watch(
   }
 )
 
+let currentDevice = ref([])
 watch(
   () => props.taskDetailInfo,
   async () => {
-    let currentDevice = []
     currentFlows.value.map(item => {
       item.task_stages.map(it => {
         it.task_details.map(i => {
           if (i.plugin === 'dockerDeployment') {
-            currentDevice.push(i.dispose[0].serverName)
+            currentDevice.value.push(i.dispose[0].serverName)
           }
         })
       })
@@ -305,7 +299,7 @@ watch(
       if (res.code === 1000) {
         hasDeviceList.value = res.data
         // 遍历currentDevice和hasDeviceList，如果currentDevice中的设备在hasDeviceList中，则将其置为不可选
-        currentDevice.map(item => {
+        currentDevice.value.map(item => {
           hasDeviceList.value.map(it => {
             if (item === it.ip) {
               hasDeviceList.value.map(i => {
@@ -319,7 +313,7 @@ watch(
       }
     } else {
       hasDeviceList.value.map(item => {
-        currentDevice.map(it => {
+        currentDevice.value.map(it => {
           if (item.ip === it) {
             item.disabled = true
           }

@@ -374,7 +374,7 @@
       custom-class="dockerDrawer"
       v-model="dockerDrawer"
       direction="rtl"
-      size="75%"
+      size="65%"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       :show-close="false"
@@ -406,13 +406,21 @@
           关闭窗口
         </el-button>
       </template>
-      <el-table :data="dockerNumDeatil" row-key="id" stripe ref="multipleTableRef" @selection-change="handleSelectionChange">
+      <el-table
+        :data="dockerNumDeatilAll.slice((dockerCurrentPage - 1) * 10, dockerCurrentPage * 10)"
+        row-key="id"
+        stripe
+        ref="multipleTableRef"
+        @selection-change="handleSelectionChange"
+        max-height="701vh"
+        v-loading="dockerLoading"
+      >
         <el-table-column type="selection" width="55" :reserve-selection="true" />
         <el-table-column property="docker_name" label="容器名" width="200" />
-        <el-table-column property="bridge_name" label="网口名" width="150" />
+        <!-- <el-table-column property="bridge_name" label="网口名" width="150" /> -->
         <el-table-column property="ipaddress" label="网口IP" width="200" />
-        <el-table-column property="gateway" label="子网掩码" width="200" />
-        <el-table-column property="docker_status" label="状态" width="120">
+        <!-- <el-table-column property="gateway" label="子网掩码" width="200" /> -->
+        <el-table-column property="docker_status" label="状态" width="200">
           <template #default="scope">
             <el-tag v-if="scope.row.docker_status === 'start'" type="success">运行中</el-tag>
             <el-tag v-if="scope.row.docker_status === 'stop'" type="danger">已停止</el-tag>
@@ -420,10 +428,21 @@
             <el-tag v-if="scope.row.docker_status === 'wait_start'" type="primary">启动中</el-tag>
           </template>
         </el-table-column>
-        <el-table-column property="username" label="用户名" width="150" />
-        <el-table-column property="password" label="密码" />
-        <el-table-column fixed="right" label="操作" align="center" width="200">
+        <el-table-column property="username" label="用户名" width="150">
           <template #default="scope">
+            <span>root</span>
+          </template>
+        </el-table-column>
+        <el-table-column property="password" label="密码">
+          <template #default="scope">
+            <span>111111</span>
+          </template>
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" align="center" width="250">
+          <template #default="scope">
+            <el-tooltip class="box-item" effect="dark" content="详情" placement="top">
+              <el-button circle type="" size="small" @click="openDetail(scope.row)" :icon="View"> </el-button>
+            </el-tooltip>
             <el-tooltip class="box-item" effect="dark" content="在线终端" placement="top">
               <el-button circle type="primary" size="small" @click="openTermail(scope.row)" :icon="Monitor"> </el-button>
             </el-tooltip>
@@ -458,7 +477,7 @@
         />
       </div>
       <el-drawer v-model="logDrawer" :title="logDrawerTitle" :append-to-body="true" :before-close="handleCloseLogDrawer">
-        <el-table :data="logDrawerList" stripe>
+        <el-table :data="logDrawerList" stripe height="70vh">
           <el-table-column property="id" label="id" width="80" />
           <el-table-column property="created_time" label="创建时间" width="170" />
           <el-table-column property="last_mod_time" label="修改时间" width="170" />
@@ -674,6 +693,42 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+    <el-dialog
+      v-model="detailDockerDialog"
+      :title="detailDockerTitle"
+      custom-class="detailDockerDialog"
+      style="height: 50vh"
+      width="40%"
+      destroy-on-close
+      @close="cancelDetailDocker(detailDockerFormRef)"
+    >
+      <el-form ref="detailDockerFormRef" :model="detailDockerForm" label-width="220px" class="demo-ruleForm" status-icon>
+        <el-form-item label="容器名：">
+          <el-input v-model="detailDockerForm.docker_name" placeholder="暂无数据" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="网口名：">
+          <el-input v-model="detailDockerForm.bridge_name" placeholder="暂无数据" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="网口IP：">
+          <el-input v-model="detailDockerForm.ipaddress" placeholder="暂无数据" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="子网掩码：">
+          <el-input v-model="detailDockerForm.gateway" placeholder="暂无数据" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="状态：">
+          <el-tag v-if="detailDockerForm.docker_status === 'start'" type="success">运行中</el-tag>
+          <el-tag v-if="detailDockerForm.docker_status === 'stop'" type="danger">已停止</el-tag>
+          <el-tag v-if="detailDockerForm.docker_status === 'wait_stop'" type="info">停止中</el-tag>
+          <el-tag v-if="detailDockerForm.docker_status === 'wait_start'" type="primary">启动中</el-tag>
+        </el-form-item>
+        <el-form-item label="用户名：">
+          <el-input v-model="detailDockerForm.username" placeholder="暂无数据" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="密码：">
+          <el-input v-model="detailDockerForm.password" placeholder="暂无数据" style="width: 240px" />
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -815,11 +870,23 @@ const startDockerRules = reactive({
     }
   ]
 })
+const detailDockerDialog = ref(false)
+const detailDockerTitle = ref('')
+const detailDockerForm = reactive({
+  docker_name: '',
+  bridge_name: '',
+  ipaddress: '',
+  gateway: '',
+  docker_status: '',
+  username: '',
+  password: ''
+})
+const detailDockerFormRef = ref<FormInstance>()
 const shellDockerDialog = ref(false)
 const shellResource = ref('全部')
 const shellDockerForm = reactive({
   task_detail_history_id: null,
-  shell_path: '/home/docker_shell_cmd.sh'
+  shell_path: '/opt/docker_shell_cmd.sh'
 })
 const shellDockerFormRef = ref<FormInstance>()
 const shellDockerRules = reactive({
@@ -896,6 +963,16 @@ const dockerNumDeatil = ref([])
 const dockerDrawerId = ref(null)
 const dockerDrawerName = ref('')
 const dockerNumDeatilAll = ref([])
+const dockerLoading = ref(false)
+
+watch(
+  () => dockerDrawer.value,
+  () => {
+    if (!dockerDrawer.value) {
+      multipleTableRef.value!.clearSelection()
+    }
+  }
+)
 
 watch(
   () => props.runResult,
@@ -1057,25 +1134,14 @@ const toggleSelection = () => {
   multipleTableRef.value!.clearSelection()
 }
 
-const isShowAll = ref(true)
-const resData = ref([])
+const selectAllClicked = ref(false) // 是否点击了选择全部按钮
 const totalSelection = async () => {
-  if (isShowAll.value) {
-    // isShowAll.value = false
-    // multipleTableRef.value!.toggleAllSelection()
-    const params = {
-      task_detail_history_id: dockerDrawerId.value
-    }
-    let res = await getDockerNameseApi(params)
-    if (res.code === 1000) {
-      resData.value = multipleSelection.value = res.data
-      multipleSelection.value.forEach(row => {
-        // multipleTableRef.value!.toggleRowSelection(row, undefined)
-        multipleTableRef.value!.toggleAllSelection()
-      })
-    }
-    nextTick(() => {})
-  }
+  selectAllClicked.value = true
+  nextTick(() => {
+    dockerNumDeatilAll.value.forEach(row => {
+      multipleTableRef.value.toggleRowSelection(row, true)
+    })
+  })
 }
 
 const onStartDocker = () => {
@@ -1129,6 +1195,24 @@ const openTermail = val => {
   nextTick(() => {
     isShowTermmail.value = true
   })
+}
+
+const openDetail = val => {
+  detailDockerDialog.value = true
+  detailDockerTitle.value = `【${val.docker_name}】容器详情`
+  detailDockerForm.bridge_name = val.bridge_name
+  detailDockerForm.docker_name = val.docker_name
+  detailDockerForm.docker_status = val.docker_status
+  detailDockerForm.gateway = val.docker_status
+  detailDockerForm.ipaddress = val.ipaddress
+  detailDockerForm.username = val.username || 'root'
+  detailDockerForm.password = val.password || '111111'
+}
+
+const cancelDetailDocker = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  detailDockerDialog.value = false
 }
 
 const handleTermailClose = () => {
@@ -1458,10 +1542,12 @@ const viewDocker = async val => {
   dockerDrawerId.value = val.id
   dockerCurrentPage.value = 1
   getDockerNamese(dockerDrawerId.value)
+  dockerLoading.value = true
   const params = {
     task_detail_history_id: dockerDrawerId.value
   }
   let res = await getDockerNameseApi(params)
+  dockerLoading.value = false
   if (res.code === 1000) {
     dockerNumDeatilAll.value = res.data
   }
@@ -1578,8 +1664,15 @@ const handleDockerSizeChange = (val: number) => {
   // dockerCurrentPage.value = val
 }
 const handleDockerCurrentChange = (val: number) => {
+  if (selectAllClicked.value) {
+    // 切换页码时，如果已经点击了选择全部，则再次将所有行设为选中状态
+    dockerNumDeatilAll.value.forEach(row => {
+      multipleTableRef.value.toggleRowSelection(row, true)
+    })
+  }
   dockerCurrentPage.value = val
   getDockerNamese(dockerDrawerId.value)
+  selectAllClicked.value = false
 }
 </script>
 
