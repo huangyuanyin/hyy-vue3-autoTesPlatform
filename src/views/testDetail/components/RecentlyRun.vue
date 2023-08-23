@@ -431,10 +431,10 @@
         <el-table-column property="docker_status" label="状态" width="200">
           <template #default="scope">
             <el-tag v-if="scope.row.docker_status === 'start'" type="success">运行中</el-tag>
-            <el-tag v-if="scope.row.docker_status === 'stop'" type="danger">已停止</el-tag>
+            <el-tag v-if="scope.row.docker_status === 'stop'" type="warning">已停止</el-tag>
             <el-tag v-if="scope.row.docker_status === 'wait_stop'" type="info">停止中</el-tag>
             <el-tag v-if="scope.row.docker_status === 'wait_start'" type="primary">启动中</el-tag>
-            <el-tag v-if="scope.row.docker_status === 'deleted'" type="success">已删除</el-tag>
+            <el-tag v-if="scope.row.docker_status === 'deleted'" type="danger">已删除</el-tag>
           </template>
         </el-table-column>
         <el-table-column property="username" label="用户名" width="150">
