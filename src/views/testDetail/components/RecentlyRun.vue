@@ -1484,6 +1484,7 @@ const submitShellDocker = async (formEl: FormInstance | undefined) => {
         if (res.code === 1000) {
           ElMessage.success('已执行脚本！')
           cancelShellDocker(shellDockerFormRef.value)
+          toggleSelection()
         }
       })
     } else {

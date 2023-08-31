@@ -35,7 +35,7 @@
             <template #reference>
               <el-button link type="primary">查看</el-button>
             </template>
-            <el-table :data="scope.row.docker_network_config">
+            <el-table :data="scope.row.docker_network_config" max-height="40vh">
               <el-table-column width="150" property="start_ipaddress" label="起始IP" />
               <el-table-column width="150" property="netmask" label="子网掩码" />
               <el-table-column width="150" property="bridge_name" label="网口名称" />
@@ -95,7 +95,7 @@
     <el-dialog v-model="dialogFormVisible" :title="DockerTitle" width="75%" :before-close="closeDialog">
       <el-form :model="form" ref="ruleFormRef" :rules="rules">
         <el-row>
-          <el-col :span="12">
+          <el-col :span="10">
             <el-form-item label="设备ip" :label-width="formLabelWidth" prop="ip">
               <el-input v-model="form.ip" autocomplete="off" :disabled="disabled" />
             </el-form-item>
@@ -111,18 +111,21 @@
             <el-form-item label="容器总数" :label-width="formLabelWidth" prop="container_num">
               <el-input v-model="form.container_num" autocomplete="off" :disabled="disabled" maxlength="6" @input="limitNumericInput" />
             </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth" prop="remark" v-if="form.docker_network_config.length >= 5">
+              <el-input class="remark-hh" v-model="form.remark" autocomplete="off" type="textarea" :rows="3" :disabled="disabled" />
+            </el-form-item>
           </el-col>
-          <el-col :span="11">
+          <el-col :span="13">
             <el-form-item label="网口名称列表" :label-width="formLabelWidth">
               <el-button type="primary" :icon="CirclePlus" @click="openNetworkConfigDialog('add')">新增</el-button>
             </el-form-item>
             <el-form-item label="" :label-width="formLabelWidth" prop="docker_network_config">
-              <el-table :data="form.docker_network_config" border style="width: 100%">
+              <el-table :data="form.docker_network_config" border style="width: 100%" max-height="32vh">
                 <el-table-column prop="start_ipaddress" label="起始ip" width="140" />
                 <el-table-column prop="netmask" label="子网掩码" width="90" />
                 <el-table-column prop="bridge_name" label="网关名称" width="120" />
                 <el-table-column prop="gateway" label="网关IP" width="120" />
-                <el-table-column fixed="right" label="操作" align="center" width="90">
+                <el-table-column fixed="right" label="操作" align="center">
                   <template #default="scope">
                     <el-button link type="primary" size="small" :disabled="disabled" @click="openNetworkConfigDialog('edit', scope.row)">
                       编辑
@@ -151,14 +154,15 @@
             <el-form-item label="网关" :label-width="formLabelWidth" prop="gateway">
               <el-input v-model="form.gateway" autocomplete="off" :disabled="disabled" />
             </el-form-item> -->
-            <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
+            <el-form-item label="备注" :label-width="formLabelWidth" prop="remark" v-if="form.docker_network_config.length < 5">
               <el-input v-model="form.remark" autocomplete="off" type="textarea" :rows="3" :disabled="disabled" />
             </el-form-item>
           </el-col>
+          <el-col :span="1"></el-col>
         </el-row>
       </el-form>
       <template #footer>
-        <span class="dialog-footer">
+        <span class="dialog-footer" style="width: 100%; display: flex; align-items: center; justify-content: center">
           <el-button @click="resetForm(ruleFormRef)">取消</el-button>
           <el-button type="primary" @click="submitForm(ruleFormRef)"> 确定 </el-button>
         </span>
@@ -803,7 +807,10 @@ onMounted(() => {
     width: 400px;
   }
   .el-textarea {
-    width: 600px;
+    // width: 400px;
+  }
+  .remark-hh {
+    width: 400px;
   }
   .el-pagination {
     display: flex;

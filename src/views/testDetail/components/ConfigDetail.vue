@@ -64,8 +64,8 @@
         >
           <el-descriptions-item label=""> </el-descriptions-item>
         </el-descriptions> -->
-        <h3>Docker文件：</h3>
-        <el-table :data="dockerFileList" style="width: 50vw" stripe>
+        <h3 v-if="disposeType === 'dockerDeployment'">Docker文件：</h3>
+        <el-table :data="dockerFileList" style="width: 50vw" stripe v-if="disposeType === 'dockerDeployment'">
           <el-table-column prop="file_name" label="文件名" width="200" />
           <el-table-column prop="docker_path" label="存放路径" min-width="300" />
         </el-table>

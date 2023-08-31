@@ -239,7 +239,7 @@
                 </template>
                 <el-select v-model="item.startMidwareType" placeholder="请选择开机自启中间件" :key="index">
                   <el-option label="Tomcat" value="Tomcat" />
-                  <el-option label="Tongweb" value="Tongweb" />
+                  <el-option label="TongWeb" value="TongWeb" />
                 </el-select>
               </el-form-item>
               <el-form-item prop="sysRest">

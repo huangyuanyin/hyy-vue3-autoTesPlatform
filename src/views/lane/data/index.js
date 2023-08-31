@@ -95,6 +95,7 @@ export const disposeList = {
       ],
       docker_images_id: '',
       docker_images_name: '',
+      docker_run_mode: 'ALL',
       number: null,
       fileList: [],
       shell: '',

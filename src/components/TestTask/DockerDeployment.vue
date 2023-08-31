@@ -77,6 +77,12 @@
                   <el-option v-for="item in image_tagList" :key="item.name" :label="item.name" :value="item.name" />
                 </el-select>
               </el-form-item>
+              <el-form-item label="执行模式" prop="docker_run_mode" :required="true">
+                <el-select v-model="item.docker_run_mode" class="m-2" placeholder="请选择执行模式" @change="selectRunMode">
+                  <el-option label="全量创建docker容器之后执行脚本" value="ALL" />
+                  <el-option label="创建一个docker容器并执行容器内脚本" value="ONE" />
+                </el-select>
+              </el-form-item>
               <el-form-item label="文件上传">
                 <el-upload
                   ref="uploadFile"
@@ -375,6 +381,10 @@ const selectImageTag = val => {
       deviceList.value[0].docker_images_name = item.name
     }
   })
+}
+
+const selectRunMode = val => {
+  deviceList.value[0].docker_run_mode = val
 }
 
 const limitNumericInput = val => {
