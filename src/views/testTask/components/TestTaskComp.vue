@@ -595,7 +595,7 @@ const tableData = [
   }
 ]
 let intervalId = ref(null)
-let wsLink = import.meta.env.MODE === 'development' ? 'ws://10.4.150.27:8023' : 'ws://10.4.150.55:8023'
+let wsLink = import.meta.env.MODE === 'development' ? 'ws://10.4.150.27:8023' : 'ws://10.4.150.56:8023'
 let socket = new WebSocket(`${wsLink}/ws/get_task_result/`)
 
 watch(
@@ -911,7 +911,7 @@ function checkWebSocketStatus() {
 }
 
 function reconnectWebSocket() {
-  socket = new WebSocket('ws://10.4.150.55:8022/ws/get_task_result/')
+  socket = new WebSocket('ws://10.4.150.56:8022/ws/get_task_result/')
   socket.onopen = function (event) {
     console.log('WebSocket连接已经重新连接')
   }

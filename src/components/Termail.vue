@@ -71,7 +71,7 @@ onMounted(() => {
   })
   term.value.open(terminalContainer)
   // open websocket
-  terminalSocket.value = new WebSocket(`ws://10.4.150.55:8023/ws/docker_online_terminal/${docker_name}/${id}`)
+  terminalSocket.value = new WebSocket(`ws://10.4.150.56:8023/ws/docker_online_terminal/${docker_name}/${id}`)
   console.log('dada', terminalSocket.value)
   terminalSocket.value.onopen = runRealTerminal
   terminalSocket.value.onclose = closeRealTerminal

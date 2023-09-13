@@ -89,7 +89,7 @@
                   class="uploadFile-demo"
                   drag
                   multiple
-                  action="http://10.4.150.55:8021/devops/docker_arrange/supply_package/"
+                  action="http://10.4.150.56:8021/devops/docker_arrange/supply_package/"
                   name="upload_file"
                   accept=""
                   with-credentials

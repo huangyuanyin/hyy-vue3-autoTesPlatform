@@ -351,7 +351,7 @@ const statusColorMap = {
   fail: '#F56C6C',
   channel: '#F56C6C'
 }
-let wsLink = import.meta.env.MODE === 'development' ? 'ws://10.4.150.27:8023' : 'ws://10.4.150.55:8023'
+let wsLink = import.meta.env.MODE === 'development' ? 'ws://10.4.150.27:8023' : 'ws://10.4.150.56:8023'
 let socket = new WebSocket(`${wsLink}/ws/get_task_history/${route.query.id}`)
 let additionalSocket = null // 新的 WebSocket 实例
 
@@ -420,6 +420,7 @@ const toReport = async (type?) => {
     reportData.value = runDetailLog.value
     reportTitle.value = `#${tabName.value} 运行报告`
   }
+  console.log(`output-> reportData.value`, reportData.value)
 }
 
 const dowaloadReport = () => {

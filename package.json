@@ -9,6 +9,7 @@
     "prod": "vite serve --mode production",
     "build:prod": "vite build --mode production",
     "build:53": "vite build --mode 53",
+    "build:56": "vite build --mode 56",
     "build:master": "vite build --mode master",
     "preview": "vite preview",
     "format": "prettier --write src/* src/*/* src/*/*/* src/*/*/*/*"
