@@ -66,7 +66,7 @@
                 </template>
                 <el-input v-model="item.number" :placeholder="numberPlaceholder" @input="limitNumericInput" />
               </el-form-item>
-              <el-form-item label="docker镜像" prop="docker_images_id" :required="true">
+              <el-form-item label="docker镜像" prop="docker_dispose_image_id" :required="true">
                 <el-select
                   v-model="item.docker_images_name"
                   class="m-2"
@@ -74,7 +74,10 @@
                   @visible-change="getImage_tagList"
                   @change="selectImageTag"
                 >
-                  <el-option v-for="item in image_tagList" :key="item.name" :label="item.name" :value="item.name" />
+                  <el-option v-for="item in image_tagList" :key="item.name" :value="`${item.name}:${item.tag}`">
+                    <span>{{ item.name }}：</span>
+                    <span>{{ item.tag }}</span>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="执行模式" prop="docker_run_mode" :required="true">
@@ -187,7 +190,7 @@
 import { ref, reactive, watch, nextTick, onMounted, watchEffect } from 'vue'
 import { ElMessage, FormInstance, FormRules, UploadProps, UploadRawFile, genFileId, UploadInstance } from 'element-plus'
 import { QuestionFilled, FullScreen, UploadFilled, Edit, Delete } from '@element-plus/icons-vue'
-import { getDockerDeviceManageApi, getProductPackageApi, uploadSupplyPackageApi, getDockerDeviceImagesApi } from '@/api/NetDevOps/index'
+import { getDockerDeviceManageApi, uploadSupplyPackageApi, getDockerImageApi } from '@/api/NetDevOps/index'
 import { disposeList } from '../../views/lane/data'
 import CodeMirror from '@/components/CodeMirror.vue'
 
@@ -350,12 +353,11 @@ const selectDevice = val => {
 }
 
 const getImage_tagList = async val => {
-  console.log(`output->val`, val)
   if (val) {
-    if (!deviceList.value[0].showServerConfig[0].value) {
-      ElMessage.warning('请先选择设备')
-      return
-    }
+    // if (!deviceList.value[0].showServerConfig[0].value) {
+    //   ElMessage.warning('请先选择设备')
+    //   return
+    // }
     let docker_device_manage_id = null
     hasDeviceList.value.map(item => {
       if (item.ip === deviceList.value[0].showServerConfig[0].value) {
@@ -363,11 +365,11 @@ const getImage_tagList = async val => {
       }
     })
     const params = {
-      docker_device_manage_id,
+      // docker_image_deposit_id: docker_device_manage_id,
       page: 1,
       page_size: 1000
     }
-    let res = await getDockerDeviceImagesApi(params)
+    let res = await getDockerImageApi(params)
     if (res.code === 1000) {
       image_tagList.value = res.data
     }
@@ -376,9 +378,9 @@ const getImage_tagList = async val => {
 
 const selectImageTag = val => {
   image_tagList.value.map(item => {
-    if (item.name === val) {
-      deviceList.value[0].docker_images_id = item.id
-      deviceList.value[0].docker_images_name = item.name
+    if (item.name === val.split(':')[0] && item.tag === val.split(':')[1]) {
+      deviceList.value[0].docker_dispose_image_id = item.id
+      // deviceList.value[0].docker_images_name = item.name
     }
   })
 }

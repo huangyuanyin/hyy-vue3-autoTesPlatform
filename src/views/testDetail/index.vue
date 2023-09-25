@@ -193,6 +193,23 @@
               </el-descriptions>
               <el-descriptions
                 class="ignore-descript-title"
+                title="四、开机自启项检查："
+                :column="4"
+                :size="size"
+                border
+                v-if="i.task_details_history[0].plugin === 'netSignPrepare'"
+              >
+                <el-descriptions-item v-for="(item, index) in i.task_details_history[0].task_execute_record[0].reboot_info" :key="index">
+                  <template #label>
+                    <div class="cell-item">{{ item.service_name }}</div>
+                  </template>
+                  <!-- {{ item.reboot_status === '1' ? '是' : '否' }} -->
+                  <svg-icon v-if="item.reboot_status === '1'" class="status-icon" iconName="icon-zhengque"></svg-icon>
+                  <svg-icon v-else class="status-icon" iconName="icon-cuowu"></svg-icon>
+                </el-descriptions-item>
+              </el-descriptions>
+              <el-descriptions
+                class="ignore-descript-title"
                 title="三、其他配置："
                 :column="2"
                 :size="size"
@@ -660,6 +677,10 @@ onUnmounted(() => {
   font-weight: 700;
   margin-top: 10px;
   margin-bottom: 20px;
+}
+.status-icon {
+  display: flex;
+  margin: 0 auto;
 }
 </style>
 <style lang="scss">

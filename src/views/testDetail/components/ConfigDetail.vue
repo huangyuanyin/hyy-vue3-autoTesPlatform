@@ -18,15 +18,41 @@
         <el-descriptions
           class="margin-top"
           title="其他配置："
-          :column="1"
+          :column="3"
           :size="size"
           :style="blockMargin"
+          border
           v-if="disposeType === 'netSignPrepare'"
         >
           <el-descriptions-item :label="it.label" v-for="(it, index) in environmentPrepareConfig" :key="'environmentPrepareConfig' + index">
             {{ it.value }}
           </el-descriptions-item>
+          <!-- <el-descriptions-item v-for="(item, index) in dispose.task_details_history[0].task_execute_record[0].reboot_info" :key="index">
+            <template #label>
+              <div class="cell-item">{{ item.service_name }}</div>
+            </template>
+            {{ item.reboot_status === '1' ? '是' : '否' }}
+          </el-descriptions-item> -->
         </el-descriptions>
+        <!-- <el-descriptions
+          class="margin-top"
+          title="开机自启项检查："
+          :column="3"
+          :size="size"
+          :style="blockMargin"
+          border
+          v-if="disposeType === 'netSignPrepare'"
+        >
+          <el-descriptions-item :label="it.label" v-for="(it, index) in environmentPrepareConfig" :key="'environmentPrepareConfig' + index">
+            {{ dispose }}
+          </el-descriptions-item>
+          <el-descriptions-item v-for="(item, index) in dispose.task_details_history[0].task_execute_record[0].reboot_info" :key="index">
+            <template #label>
+              <div class="cell-item">{{ item.service_name }}</div>
+            </template>
+            {{ item.reboot_status === '1' ? '是' : '否' }}
+          </el-descriptions-item>
+        </el-descriptions> -->
         <el-descriptions
           class="margin-top"
           title="其他配置："
@@ -136,8 +162,32 @@ const handleConfigDetail = async () => {
             value: dispose.value.deployType === 'full' ? '全量基线' : '项目基线'
           },
           {
-            label: '基线版本：',
+            label: '部署包：',
             value: dispose.value.deployType === 'full' ? dispose.value.deployVersion : dispose.value.packageName
+          },
+          {
+            label: '是否需要进行系统还原：',
+            value: dispose.value.sysRest ? '是' : '否'
+          },
+          {
+            label: '是否需要进行设备重启：',
+            value: dispose.value.reboot ? '是' : '否'
+          },
+          {
+            label: '是否安装HA：',
+            value: dispose.value.ifha ? '是' : '否'
+          },
+          {
+            label: '是否安装人行模块：',
+            value: dispose.value.ispbc ? '是' : '否'
+          },
+          {
+            label: '	是否安装农信银模块：',
+            value: dispose.value.isrbc ? '是' : '否'
+          },
+          {
+            label: '	WatchDog是否使用新数据类型：',
+            value: dispose.value.useNewDataType ? '是' : '否'
           }
         ]
         break

@@ -557,3 +557,42 @@ export function executeDockerScriptApi(params) {
     data: params
   })
 }
+
+/* ---------------------------- /devops/docker_dispose/docker_image_deposit/---------------------------- */
+export function getDockerImageApi(params) {
+  return request({
+    url: `/devops/docker_dispose/docker_image_deposit/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
+/* ---------------------------- /devops/docker_dispose/docker_image_deposit/---------------------------- */
+export function addDockerImageApi(params) {
+  return request({
+    url: `/devops/docker_dispose/docker_image_deposit/`,
+    method: 'post',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+/* ---------------------------- /devops/docker_dispose/docker_image_deposit/---------------------------- */
+export function editDockerImageApi(params) {
+  return request({
+    url: `/devops/docker_dispose/docker_image_deposit/`,
+    method: 'put',
+    urlType: 'NetDevOps',
+    data: params
+  })
+}
+
+/* ---------------------------- /devops/docker_dispose/docker_image_deposit/---------------------------- */
+export function deleteDockerImageApi(id) {
+  return request({
+    url: `/devops/docker_dispose/docker_image_deposit/${id}`,
+    method: 'delete',
+    urlType: 'NetDevOps'
+  })
+}
