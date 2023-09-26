@@ -57,12 +57,12 @@
         </template>
       </el-table-column>
       <el-table-column prop="last_mod_time" label="更新时间" width="180" />
-      <el-table-column fixed="right" label="操作" align="center">
+      <el-table-column fixed="right" label="操作" align="center" width="100">
         <template #default="scope">
           <el-button link type="primary" size="small" :disabled="scope.row.using" @click="openDockerDialog('edit', scope.row.id)">
             编辑
           </el-button>
-          <el-button link type="warning" size="small" :disabled="false" @click="openImageDockerDrawer(scope.row)"> 镜像管理 </el-button>
+          <!-- <el-button link type="warning" size="small" :disabled="false" @click="openImageDockerDrawer(scope.row)"> 镜像管理 </el-button> -->
           <el-popover placement="bottom" :width="1" trigger="click" popper-class="moreGroupPopover">
             <template #reference>
               <el-button link type="info" size="small">更多</el-button>

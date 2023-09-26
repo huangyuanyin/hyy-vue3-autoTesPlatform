@@ -75,8 +75,13 @@
                   @change="selectImageTag"
                 >
                   <el-option v-for="item in image_tagList" :key="item.name" :value="`${item.name}:${item.tag}`">
-                    <span>{{ item.name }}：</span>
-                    <span>{{ item.tag }}</span>
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                      <div style="display: flex; align-items: center">
+                        <span>{{ item.name }}：</span>
+                        <span>{{ item.tag }}</span>
+                      </div>
+                      <span style="font-size: 14px; color: #8a8f8d">{{ item.illustrate }}</span>
+                    </div>
                   </el-option>
                 </el-select>
               </el-form-item>
