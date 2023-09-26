@@ -44,6 +44,12 @@
           </el-popover>
         </template>
       </el-table-column>
+      <el-table-column prop="illustrate" label="说明" width="200">
+        <template #default="scope">
+          <span v-if="scope.row.illustrate !== null">{{ scope.row.illustrate }}</span>
+          <el-tag type="info" v-else>暂无说明</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="remark" label="备注" width="200">
         <template #default="scope">
           <span v-if="scope.row.remark !== null">{{ scope.row.operate_user }}</span>
@@ -111,6 +117,9 @@
             <el-form-item label="容器总数" :label-width="formLabelWidth" prop="container_num">
               <el-input v-model="form.container_num" autocomplete="off" :disabled="disabled" maxlength="6" @input="limitNumericInput" />
             </el-form-item>
+            <el-form-item label="说明" :label-width="formLabelWidth" prop="illustrate">
+              <el-input class="remark-hh" v-model="form.illustrate" autocomplete="off" type="textarea" :rows="2" :disabled="disabled" />
+            </el-form-item>
             <el-form-item label="备注" :label-width="formLabelWidth" prop="remark" v-if="form.docker_network_config.length >= 5">
               <el-input class="remark-hh" v-model="form.remark" autocomplete="off" type="textarea" :rows="3" :disabled="disabled" />
             </el-form-item>
@@ -120,7 +129,7 @@
               <el-button type="primary" :icon="CirclePlus" @click="openNetworkConfigDialog('add')">新增</el-button>
             </el-form-item>
             <el-form-item label="" :label-width="formLabelWidth" prop="docker_network_config">
-              <el-table :data="form.docker_network_config" border style="width: 100%" max-height="32vh">
+              <el-table :data="form.docker_network_config" border style="width: 100%" max-height="40vh">
                 <el-table-column prop="start_ipaddress" label="起始ip" width="140" />
                 <el-table-column prop="netmask" label="子网掩码" width="90" />
                 <el-table-column prop="bridge_name" label="网关名称" width="120" />
@@ -211,6 +220,7 @@
         <el-table-column prop="name" label="镜像名称" width="180" />
         <el-table-column prop="docker_full_name" label="镜像名称和版本全称" width="180" />
         <el-table-column prop="tag" label="镜像标签" width="130" />
+        <el-table-column prop="illustrate" label="说明" min-width="120" />
         <el-table-column prop="remark" label="备注" min-width="120" />
         <el-table-column prop="update_user" label="更新人" width="120" />
         <el-table-column prop="last_mod_time" label="修改时间" width="180" />
@@ -375,6 +385,7 @@ const form = reactive({
   port: '22',
   container_num: '',
   docker_network_config: [],
+  illustrate: '',
   remark: ''
 })
 const ruleFormRef = ref<FormInstance>()
@@ -449,7 +460,8 @@ const rules = reactive<FormRules>({
   start_ipaddress: [{ required: true, validator: validateIp, trigger: 'blur' }],
   netmask: [{ required: true, message: '请输入子网掩码', trigger: 'blur' }],
   gateway: [{ required: true, message: '请输入网关', trigger: 'blur' }],
-  docker_network_config: [{ required: true, message: '网口列表不能为空', trigger: 'blur' }]
+  docker_network_config: [{ required: true, message: '网口列表不能为空', trigger: 'blur' }],
+  illustrate: [{ required: true, message: '请输入说明', trigger: 'blur' }]
 })
 const dockerTableData = ref([])
 

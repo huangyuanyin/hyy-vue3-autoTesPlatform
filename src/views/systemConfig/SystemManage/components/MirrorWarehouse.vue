@@ -22,6 +22,7 @@
       <el-table-column prop="ssh_password" label="ssh连接密码" align="center" width="120" />
       <el-table-column prop="last_mod_time" label="更新时间" width="180" />
       <el-table-column prop="create_user" label="创建人" width="180" />
+      <el-table-column prop="illustrate" label="说明" width="180" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="openMirrorDialog('edit', scope.row.id)"> 编辑 </el-button>
@@ -78,6 +79,9 @@
             </el-form-item>
             <el-form-item label="ssh连接密码" :label-width="formLabelWidth">
               <el-input v-model="form.ssh_password" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="说明" :label-width="formLabelWidth" prop="illustrate">
+              <el-input class="remark-hh" v-model="form.illustrate" autocomplete="off" type="textarea" :rows="1" :disabled="disabled" />
             </el-form-item>
           </el-col>
           <el-col :span="10">
@@ -148,6 +152,9 @@
             </el-form-item>
             <el-form-item label="ssh连接密码" :label-width="formLabelWidth">
               <el-input v-model="form.ssh_password" autocomplete="off" :disabled="disabled" />
+            </el-form-item>
+            <el-form-item label="说明" :label-width="formLabelWidth" prop="illustrate">
+              <el-input class="remark-hh" v-model="form.illustrate" autocomplete="off" type="textarea" :rows="1" :disabled="disabled" />
             </el-form-item>
             <el-form-item label="备注" :label-width="formLabelWidth">
               <el-input class="remark-hh" v-model="form.remark" autocomplete="off" type="textarea" :rows="1" :disabled="disabled" />
@@ -359,6 +366,7 @@ const form = reactive({
   client_password: '',
   image_name: '',
   image_tag: '',
+  illustrate: '',
   remark: ''
 })
 const ruleFormRef = ref<FormInstance>()
@@ -433,7 +441,8 @@ const rules = reactive<FormRules>({
   client_password: [{ required: true, message: '请输入远程连接密码', trigger: 'blur' }],
   image_name: [{ required: true, message: '请输入远程镜像名称', trigger: 'blur' }],
   image_tag: [{ required: true, message: '请输入远程镜像标签', trigger: 'blur' }],
-  upload_file: [{ required: true, message: '请上传镜像文件', trigger: 'change' }]
+  upload_file: [{ required: true, message: '请上传镜像文件', trigger: 'change' }],
+  illustrate: [{ required: true, message: '请输入说明', trigger: 'blur' }]
 })
 const mirrorTableData = ref([])
 
@@ -543,6 +552,7 @@ const addMirror = async () => {
       fd.append('network_mode', form.network_mode)
       fd.append('ssh_username', form.ssh_username)
       fd.append('ssh_password', form.ssh_password)
+      fd.append('illustrate', form.illustrate)
       fd.append('remark', form.remark)
       break
     default:
@@ -598,6 +608,7 @@ const editMirror = async () => {
     ssh_password: form.ssh_password,
     name: form.name,
     tag: form.tag,
+    illustrate: form.illustrate,
     remark: form.remark
   }
   fullscreenLoading.value = true
