@@ -1255,7 +1255,7 @@ const openDetail = val => {
   detailDockerForm.bridge_name = val.bridge_name
   detailDockerForm.docker_name = val.docker_name
   detailDockerForm.docker_status = val.docker_status
-  detailDockerForm.gateway = val.docker_status
+  detailDockerForm.gateway = val.gateway
   detailDockerForm.ipaddress = val.ipaddress
   detailDockerForm.username = val.username || 'root'
   detailDockerForm.password = val.password || '111111'

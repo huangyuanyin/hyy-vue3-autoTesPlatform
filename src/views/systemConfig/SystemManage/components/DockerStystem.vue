@@ -19,10 +19,10 @@
           <span class="item-ip" @click="openDockerDialog('detail', scope.row.id)">{{ scope.row.ip }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="using" label="占用状态" width="160" align="center">
+      <el-table-column prop="using" label="使用状态" width="160" align="center">
         <template #default="scope">
           <el-tag :type="scope.row.using === true ? 'danger' : ''" disable-transitions>
-            {{ scope.row.using === true ? '占用中' : '未占用' }}
+            {{ scope.row.using === true ? '使用中' : '未使用' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -320,7 +320,7 @@
 <script lang="ts" setup>
 import { nextTick, onMounted, reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElLoading } from 'element-plus'
 import { CirclePlus, Search, CircleCloseFilled } from '@element-plus/icons-vue'
 import {
   getDockerDeviceManageApi,
@@ -575,7 +575,14 @@ const deleteDockerImage = async id => {
 
 // 添加设备接口
 const addDevice = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '添加中，请稍后...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
+
   const res = await addDockerDeviceManageApi(form)
+  loading.close()
   if (res.code === 1000) {
     ElMessage.success('添加成功')
     resetForm(ruleFormRef.value)
@@ -586,7 +593,14 @@ const addDevice = async () => {
 
 // 修改设备接口
 const editDevice = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: '编辑中，请稍后...',
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
+
   const res = await editDockerDeviceManageApi(form)
+  loading.close()
   if (res.code === 1000) {
     ElMessage.success('修改成功')
     resetForm(ruleFormRef.value)

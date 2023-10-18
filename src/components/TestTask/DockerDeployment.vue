@@ -53,8 +53,13 @@
               status-icon
             >
               <el-form-item label="可选设备" prop="serverName" :required="true">
-                <el-select v-model="item.serverName" placeholder="请选择设备" :key="index" @change="selectDevice">
-                  <el-option :label="item.ip" :value="item.ip" v-for="(item, index) in hasDeviceList" :key="'hasDeviceList' + index" />
+                <el-select v-model="item.serverName" placeholder="请选择设备" @change="selectDevice">
+                  <el-option :label="item.ip" :value="item.ip" v-for="(item, index) in hasDeviceList" :key="'hasDeviceList' + index">
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                      <span>{{ item.ip }}</span>
+                      <span class="server-ip">{{ item.illustrate }}</span>
+                    </div>
+                  </el-option>
                 </el-select>
               </el-form-item>
               <el-form-item prop="number" :required="true" v-if="item.serverName">
@@ -80,7 +85,7 @@
                         <span>{{ item.name }}：</span>
                         <span>{{ item.tag }}</span>
                       </div>
-                      <span style="font-size: 14px; color: #8a8f8d">{{ item.illustrate }}</span>
+                      <span class="server-ip">{{ item.illustrate }}</span>
                     </div>
                   </el-option>
                 </el-select>
@@ -355,6 +360,30 @@ const selectDevice = val => {
       numberPlaceholder.value = `${val} 设备最大容器数为${item.available_quantity}`
     }
   })
+}
+
+const getDevice_tagList = async val => {
+  if (val) {
+    // if (!deviceList.value[0].showServerConfig[0].value) {
+    //   ElMessage.warning('请先选择设备')
+    //   return
+    // }
+    let docker_device_manage_ip = null
+    hasDeviceList.value.map(item => {
+      if (item.ip === deviceList.value[0].showServerConfig[0].value) {
+        docker_device_manage_ip = item.id
+      }
+    })
+    const params = {
+      // docker_image_deposit_id: docker_device_manage_id,
+      page: 1,
+      page_size: 1000
+    }
+    let res = await getDockerDeviceManageApi(params)
+    if (res.code === 1000) {
+      image_tagList.value = res.data
+    }
+  }
 }
 
 const getImage_tagList = async val => {
@@ -813,6 +842,11 @@ const onShellChange = val => {
   .delete-icon {
     margin-left: 20px;
   }
+}
+
+.server-ip {
+  color: #8a8f8d;
+  font-size: 14px;
 }
 
 .detail {

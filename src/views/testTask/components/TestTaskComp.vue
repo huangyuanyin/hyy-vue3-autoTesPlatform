@@ -43,13 +43,13 @@
           <el-tag v-else>是</el-tag>
         </template>
       </el-table-column> -->
-      <el-table-column prop="device_list" label="占用设备详情" align="center" width="200">
+      <el-table-column prop="device_list" label="使用设备详情" align="center" width="200">
         <template #default="item">
           <span v-if="item.row.device_list.length === 0 && item.row.docker_device_list.length === 0"> - </span>
           <el-popover placement="bottom" trigger="click" popper-class="devicePopper">
             <template #reference>
-              <el-tag v-if="item.row.device_list.length !== 0">占用：{{ item.row.device_list.length }}</el-tag>
-              <el-tag v-if="item.row.docker_device_list.length !== 0">占用：{{ item.row.docker_device_list.length }}</el-tag>
+              <el-tag v-if="item.row.device_list.length !== 0">使用：{{ item.row.device_list.length }}</el-tag>
+              <el-tag v-if="item.row.docker_device_list.length !== 0">使用：{{ item.row.docker_device_list.length }}</el-tag>
             </template>
             <el-card class="box-card" shadow="never" v-if="item.row.device_list.length !== 0">
               <el-descriptions
