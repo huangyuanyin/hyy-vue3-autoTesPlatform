@@ -732,7 +732,7 @@
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
-            <div class="cell-item">子网掩码：</div>
+            <div class="cell-item">网关：</div>
           </template>
           {{ detailDockerForm.gateway }}
         </el-descriptions-item>
