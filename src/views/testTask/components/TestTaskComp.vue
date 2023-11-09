@@ -113,15 +113,43 @@
               </el-tooltip>
               <li>-</li>
               <el-tooltip popper-class="box-item" effect="customized" :content="`${statusMap[item.row.status]}`" placement="top">
-                <li>
+                <li v-if="item.row.status !== 'in_progress'">
                   <el-icon v-if="item.row.status === 'wait_execute'" style="color: #000"><InfoFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'not_start'" style="color: #e6a23c"><InfoFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'success'" style="color: #67c23a"><CircleCheckFilled /></el-icon>
                   <el-icon v-if="item.row.status === 'fail'" style="color: #e62412"><CircleCloseFilled /></el-icon>
-                  <svg-icon v-if="item.row.status === 'in_progress'" class="run-icon" iconName="icon-shuaxin"></svg-icon>
+                  <!-- <svg-icon v-if="item.row.status === 'in_progress'" class="run-icon" iconName="icon-shuaxin"></svg-icon> -->
                   <el-icon v-if="item.row.status === 'channel'" style="color: #909399"><RemoveFilled /></el-icon>
                 </li>
               </el-tooltip>
+              <el-popover
+                placement="top"
+                :title="
+                  progressType !== 'warning' ? `容器创建进度【${create_count} / ${docker_all_number}】` : '正在努力获取容器创建进度...'
+                "
+                :width="250"
+                trigger="click"
+              >
+                <template #reference>
+                  <li v-if="item.row.status === 'in_progress'" @click="toShowPovper(item.row)">
+                    <svg-icon class="run-icon" iconName="icon-shuaxin"></svg-icon>
+                  </li>
+                </template>
+                <template #default>
+                  <div class="progress">
+                    <el-progress
+                      v-if="progressType !== 'warning'"
+                      :percentage="Math.floor((create_count / docker_all_number) * 100)"
+                      :text-inside="true"
+                      :stroke-width="15"
+                      :status="progressType"
+                      striped
+                      striped-flow
+                      :duration="10"
+                    />
+                  </div>
+                </template>
+              </el-popover>
             </ul>
           </div>
         </template>
@@ -606,6 +634,44 @@ watch(
     }
   }
 )
+
+const docker_all_number = ref(0)
+const create_count = ref(0)
+const progressType = ref('warning')
+
+var socket2
+const toShowPovper = data => {
+  docker_all_number.value = 0
+  create_count.value = 0
+  progressType.value = 'warning'
+  // 关闭之前的ws/get_docker_progress的连接
+  if (socket2 && socket2.readyState === WebSocket.OPEN) {
+    // 如果WebSocket连接处于活跃状态，关闭它
+    socket2.close()
+  }
+  // 新建一个 WebSocket 连接
+  socket2 = new WebSocket(`ws://10.4.150.56:8023/ws/get_docker_progress/${data.id}`)
+  socket2.onopen = function (event) {
+    console.log('WebSocket连接已经建立')
+  }
+  socket2.onclose = function (event) {
+    console.log('WebSocket连接已经关闭')
+  }
+  socket2.addEventListener('message', event => {
+    const message = JSON.parse(event.data)
+    if (message.code === 1000) {
+      docker_all_number.value = message.data.docker_all_number
+      create_count.value = message.data.create_count
+      if (docker_all_number.value === 0) {
+        progressType.value = 'warning'
+      } else if (docker_all_number.value === create_count.value) {
+        progressType.value = 'success'
+      } else {
+        progressType.value = ''
+      }
+    }
+  })
+}
 
 const handleCommand = item => {
   let tmp = item.value

@@ -20,9 +20,10 @@
       <el-table-column prop="network_mode" label="网络模式" align="center" width="120" />
       <el-table-column prop="ssh_username" label="ssh连接账户名" align="center" width="150" />
       <el-table-column prop="ssh_password" label="ssh连接密码" align="center" width="120" />
-      <el-table-column prop="last_mod_time" label="更新时间" width="180" />
       <el-table-column prop="create_user" label="创建人" width="180" />
       <el-table-column prop="illustrate" label="说明" width="180" />
+      <el-table-column prop="remark" label="备注" width="180" />
+      <el-table-column prop="last_mod_time" label="更新时间" width="180" />
       <el-table-column fixed="right" label="操作" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="openMirrorDialog('edit', scope.row.id)"> 编辑 </el-button>
