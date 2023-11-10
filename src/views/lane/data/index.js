@@ -96,6 +96,7 @@ export const disposeList = {
       docker_images_id: '',
       docker_images_name: '',
       docker_run_mode: 'ALL',
+      docker_network_mode: 'bridge',
       number: null,
       fileList: [],
       shell: '',

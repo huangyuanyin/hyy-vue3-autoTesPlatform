@@ -96,6 +96,12 @@
                   <el-option label="创建一个docker容器并执行容器内脚本" value="ONE" />
                 </el-select>
               </el-form-item>
+              <el-form-item label="网络模式" prop="docker_network_mode" :required="true">
+                <el-select v-model="item.docker_network_mode" class="m-2" placeholder="请选择网络模式" @change="selectNetworkMode">
+                  <el-option label="bridge 模式" value="bridge" />
+                  <el-option label="none 模式" value="none" />
+                </el-select>
+              </el-form-item>
               <el-form-item label="文件上传">
                 <el-upload
                   ref="uploadFile"
@@ -421,6 +427,10 @@ const selectImageTag = val => {
 
 const selectRunMode = val => {
   deviceList.value[0].docker_run_mode = val
+}
+
+const selectNetworkMode = val => {
+  deviceList.value[0].docker_network_mode = val
 }
 
 const limitNumericInput = val => {
