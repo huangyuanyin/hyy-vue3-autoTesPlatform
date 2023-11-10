@@ -442,6 +442,16 @@ export function getDockerNameseApi(params) {
   })
 }
 
+/* ---------------------------- /devops/docker_arrange/get_task_memory/ ---------------------------- */
+export function getDockerSizeTopTenApi(params) {
+  return request({
+    url: `/devops/docker_arrange/get_task_memory/`,
+    method: 'get',
+    urlType: 'NetDevOps',
+    params
+  })
+}
+
 /* ---------------------------- /devops/docker_arrange/get_docker_logs/ ---------------------------- */
 export function getDockerLogsApi(params) {
   return request({

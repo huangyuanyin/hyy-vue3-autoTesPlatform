@@ -17,7 +17,7 @@
       <el-table-column prop="name" label="镜像名称" align="center" fixed width="180"> </el-table-column>
       <el-table-column prop="tag" label="镜像标签" width="160" align="center"></el-table-column>
       <el-table-column prop="start_shell" label="启动脚本" align="center" width="180" />
-      <el-table-column prop="network_mode" label="网络模式" align="center" width="120" />
+      <el-table-column prop="image_size" label="镜像大小" align="center" width="120" />
       <el-table-column prop="ssh_username" label="ssh连接账户名" align="center" width="150" />
       <el-table-column prop="ssh_password" label="ssh连接密码" align="center" width="120" />
       <el-table-column prop="create_user" label="创建人" width="180" />
@@ -69,12 +69,12 @@
             <el-form-item label="启动脚本" :label-width="formLabelWidth" prop="start_shell">
               <el-input v-model="form.start_shell" autocomplete="off" :disabled="disabled" />
             </el-form-item>
-            <el-form-item label="网络模式" :label-width="formLabelWidth" prop="network_mode">
+            <!-- <el-form-item label="网络模式" :label-width="formLabelWidth" prop="network_mode">
               <el-radio-group v-model="form.network_mode" :disabled="disabled">
                 <el-radio label="none">none 模式</el-radio>
                 <el-radio label="bridge">bridge 模式</el-radio>
               </el-radio-group>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="ssh连接账户名" :label-width="formLabelWidth">
               <el-input v-model="form.ssh_username" autocomplete="off" :disabled="disabled" />
             </el-form-item>
@@ -142,12 +142,12 @@
             <el-form-item label="启动脚本" :label-width="formLabelWidth" prop="start_shell">
               <el-input v-model="form.start_shell" autocomplete="off" :disabled="disabled" />
             </el-form-item>
-            <el-form-item label="网络模式" :label-width="formLabelWidth" prop="network_mode">
+            <!-- <el-form-item label="网络模式" :label-width="formLabelWidth" prop="network_mode">
               <el-radio-group v-model="form.network_mode" :disabled="disabled">
                 <el-radio label="none">none 模式</el-radio>
                 <el-radio label="bridge">bridge 模式</el-radio>
               </el-radio-group>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="ssh连接账户名" :label-width="formLabelWidth">
               <el-input v-model="form.ssh_username" autocomplete="off" :disabled="disabled" />
             </el-form-item>
@@ -269,12 +269,12 @@
           <!-- <CodeMirror :code="dockerImageForm.start_shell" @onCodeChange="onCodeChange" :codeStyle="{ height: '30vh', width: '25vw' }" /> -->
           <el-input v-model="dockerImageForm.start_shell" autocomplete="off" placeholder="请输入启动脚本地址,例如：/opt/run.sh" />
         </el-form-item>
-        <el-form-item label="网络模式" :label-width="formLabelWidth" prop="network_mode">
+        <!-- <el-form-item label="网络模式" :label-width="formLabelWidth" prop="network_mode">
           <el-select v-model="dockerImageForm.network_mode" placeholder="请选择网络模式">
             <el-option label="none模式" value="none" />
             <el-option label="bridge模式" value="bridge" />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="备注" :label-width="formLabelWidth" prop="remark">
           <el-input v-model="dockerImageForm.remark" autocomplete="off" />
         </el-form-item>
@@ -328,14 +328,14 @@ const dockerImageForm = reactive({
   name: '',
   tag: '',
   start_shell: '',
-  network_mode: '',
+  // network_mode: '',
   remark: ''
 })
 const dockerImageFormRef = ref<FormInstance>()
 const dockerImageFormRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入镜像名称', trigger: 'blur' }],
   start_shell: [{ required: true, message: '启动脚本地址不能为空', trigger: 'blur' }],
-  network_mode: [{ required: true, message: '请选择网络模式', trigger: 'blur' }],
+  // network_mode: [{ required: true, message: '请选择网络模式', trigger: 'blur' }],
   tag: [{ required: true, message: '请输入镜像标签', trigger: 'blur' }]
 })
 const dockerImageTableData = ref([])
@@ -358,7 +358,7 @@ const form = reactive({
   name: '',
   tag: '',
   start_shell: '',
-  network_mode: 'none',
+  // network_mode: 'none',
   ssh_username: '',
   ssh_password: '',
   upload_file: '',
@@ -436,7 +436,7 @@ const rules = reactive<FormRules>({
   start_shell: [{ required: true, message: '请输入启动脚本', trigger: 'blur' }],
   ssh_username: [{ required: true, message: '请输入ssh连接账户名', trigger: 'blur' }],
   ssh_password: [{ required: true, message: '请输入ssh连接密码', trigger: 'blur' }],
-  network_mode: [{ required: true, message: '请选择网络模式', trigger: 'change' }],
+  // network_mode: [{ required: true, message: '请选择网络模式', trigger: 'change' }],
   client_ip: [{ required: true, message: '请输入远程连接IP', trigger: 'blur' }],
   client_name: [{ required: true, message: '请输入远程连接名称', trigger: 'blur' }],
   client_password: [{ required: true, message: '请输入远程连接密码', trigger: 'blur' }],
@@ -550,7 +550,7 @@ const addMirror = async () => {
       fd.append('name', form.name)
       fd.append('tag', form.tag)
       fd.append('start_shell', form.start_shell)
-      fd.append('network_mode', form.network_mode)
+      // fd.append('network_mode', form.network_mode)
       fd.append('ssh_username', form.ssh_username)
       fd.append('ssh_password', form.ssh_password)
       fd.append('illustrate', form.illustrate)
@@ -604,7 +604,7 @@ const editMirror = async () => {
   const params = {
     docker_image_deposit_id: dockerImageId.value,
     start_shell: form.start_shell,
-    network_mode: form.network_mode,
+    // network_mode: form.network_mode,
     ssh_username: form.ssh_username,
     ssh_password: form.ssh_password,
     name: form.name,

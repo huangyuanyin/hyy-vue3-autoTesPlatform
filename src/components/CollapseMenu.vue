@@ -90,7 +90,7 @@
   <el-dialog v-model="addGroupDialog" :title="addGroupDialogTitle" width="40%" :before-close="handleClose">
     <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="120px" class="demo-ruleForm" status-icon>
       <el-form-item label="分组名称" prop="name">
-        <el-input v-model="form.name" maxlength="10" show-word-limit />
+        <el-input v-model="form.name" maxlength="32" show-word-limit />
       </el-form-item>
     </el-form>
     <template #footer>

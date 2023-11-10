@@ -380,11 +380,33 @@
       :show-close="false"
     >
       <template #header="{ close, titleId, titleClass }">
-        <h4 :id="titleId" :class="titleClass">{{ dockerDrawerTitle }}</h4>
-        <!-- <el-button type="success" @click="startDockerDialog = true">
-          <el-icon class="el-icon--left"><SwitchButton /></el-icon>
-          启动容器
-        </el-button> -->
+        <div class="my-header">
+          <div class="left">
+            <h4 :id="titleId" :class="titleClass">{{ dockerDrawerTitle }}</h4>
+            <el-popover placement="right" :width="350" trigger="click">
+              <template #reference>
+                <span class="count2" v-if="!loadingMemory">【 努力计算中... 】</span>
+                <el-button v-else type="primary" link class="memory">【{{ dockerSizeDeatilAll.all_memory_size || '未知' }}】</el-button>
+              </template>
+              <div class="memory_wrap">
+                <span>
+                  容器总大小：
+                  <span class="count" v-if="!loadingMemory">【 努力计算中... 】</span>
+                  <span class="count" v-if="loadingMemory">【{{ dockerSizeDeatilAll.all_memory_size || '未知' }}】</span>
+                </span>
+                <span>占用内存最大的10个容器：</span>
+              </div>
+              <el-table :data="dockerSizeDeatilAll.max_top_ten" width="380">
+                <!-- <el-table-column width="150" property="date" label="date" /> -->
+                <el-table-column property="docker_name" label="容器名" width="180" />
+                <el-table-column property="memory_size" label="容器大小" width="150" />
+                <!-- <el-table-column width="100" property="name" label="name" />
+                <el-table-column width="300" property="address" label="address" /> -->
+              </el-table>
+            </el-popover>
+          </div>
+        </div>
+
         <el-button type="primary" @click="onRefreshDocker">
           <el-icon class="el-icon--left"><Refresh /></el-icon>
           刷新状态
@@ -438,15 +460,15 @@
             <el-tag v-if="scope.row.docker_status === 'create_fail'" type="danger">创建失败</el-tag>
           </template>
         </el-table-column>
-        <el-table-column property="username" label="用户名" width="150">
-          <template #default="scope">
+        <el-table-column property="ssh_username" label="用户名" width="150">
+          <!-- <template #default="scope">
             <span>root</span>
-          </template>
+          </template> -->
         </el-table-column>
-        <el-table-column property="password" label="密码">
-          <template #default="scope">
+        <el-table-column property="ssh_password" label="密码">
+          <!-- <template #default="scope">
             <span>111111</span>
-          </template>
+          </template> -->
         </el-table-column>
         <el-table-column fixed="right" label="操作" align="center" width="200">
           <template #default="scope">
@@ -791,6 +813,7 @@ import {
   getClassNameApi,
   getMethodsApi,
   getDockerNameseApi,
+  getDockerSizeTopTenApi,
   getDockerLogsApi,
   runDockerShellApi,
   supplyDockerPackageApi,
@@ -996,7 +1019,9 @@ const dockerNumDeatil = ref([])
 const dockerDrawerId = ref(null)
 const dockerDrawerName = ref('')
 const dockerNumDeatilAll = ref([])
+const dockerSizeDeatilAll = ref([])
 const dockerLoading = ref(false)
+const loadingMemory = ref(true)
 
 watch(
   () => dockerDrawer.value,
@@ -1606,6 +1631,7 @@ const viewDocker = async val => {
   dockerDrawerId.value = val.id
   dockerCurrentPage.value = 1
   getDockerNamese(dockerDrawerId.value)
+  getDockerSizeTopTen(dockerDrawerId.value)
   dockerLoading.value = true
   const params = {
     task_detail_history_id: dockerDrawerId.value
@@ -1625,12 +1651,24 @@ const getDockerNamese = async (id?) => {
   }
   let res = await getDockerNameseApi(params)
   if (res.code === 1000) {
-    res.data.forEach(item => {
-      item.username = 'root'
-      item.password = '11111111'
-    })
+    // res.data.forEach(item => {
+    //   item.username = 'root'
+    //   item.password = '11111111'
+    // })
     dockerNumDeatil.value = res.data
     dockerTotal.value = res.total
+  }
+}
+
+const getDockerSizeTopTen = async (id?) => {
+  const params = {
+    task_details_history_id: id
+  }
+  loadingMemory.value = false
+  let res = await getDockerSizeTopTenApi(params)
+  loadingMemory.value = true
+  if (res.code === 1000) {
+    dockerSizeDeatilAll.value = res.data
   }
 }
 
@@ -2317,7 +2355,19 @@ const handleDockerCurrentChange = (val: number) => {
   justify-content: space-between;
   .left {
     display: flex;
-    align-items: center;
+    align-items: baseline;
+    h4 {
+      line-height: 32px;
+    }
+
+    .memory {
+      margin-left: 4px;
+    }
+    .count2 {
+      margin-left: 4px;
+      color: #409eff;
+      font-size: 14px;
+    }
     .success {
       margin-left: 5px;
       color: #22b066;
@@ -2413,5 +2463,27 @@ const handleDockerCurrentChange = (val: number) => {
   margin: 0;
   padding: 0;
   z-index: 9999;
+}
+
+.titleAndSizeId {
+  position: fixed;
+  display: flex;
+  //挤不下换行
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.memory_wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 5px;
+  span {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    .count {
+      color: #409eff;
+    }
+  }
 }
 </style>

@@ -44,6 +44,7 @@
           </el-popover>
         </template>
       </el-table-column>
+      <el-table-column prop="network_mode" label="网络模式" align="center" width="120" />
       <el-table-column prop="illustrate" label="说明" width="200">
         <template #default="scope">
           <span v-if="scope.row.illustrate !== null">{{ scope.row.illustrate }}</span>
@@ -116,6 +117,12 @@
             </el-form-item>
             <el-form-item label="容器总数" :label-width="formLabelWidth" prop="container_num">
               <el-input v-model="form.container_num" autocomplete="off" :disabled="disabled" maxlength="6" @input="limitNumericInput" />
+            </el-form-item>
+            <el-form-item label="网络模式" :label-width="formLabelWidth" prop="network_mode">
+              <el-radio-group v-model="form.network_mode" :disabled="disabled">
+                <el-radio label="none">none 模式</el-radio>
+                <el-radio label="bridge">bridge 模式</el-radio>
+              </el-radio-group>
             </el-form-item>
             <el-form-item label="说明" :label-width="formLabelWidth" prop="illustrate">
               <el-input class="remark-hh" v-model="form.illustrate" autocomplete="off" type="textarea" :rows="2" :disabled="disabled" />
@@ -386,6 +393,7 @@ const form = reactive({
   container_num: '',
   docker_network_config: [],
   illustrate: '',
+  network_mode: '',
   remark: ''
 })
 const ruleFormRef = ref<FormInstance>()
