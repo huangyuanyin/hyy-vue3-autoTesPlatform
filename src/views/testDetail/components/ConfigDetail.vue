@@ -175,19 +175,19 @@ const handleConfigDetail = async () => {
           },
           {
             label: '是否安装HA：',
-            value: dispose.value.ifha ? '是' : '否'
+            value: dispose.value.ifha === 'y' ? '是' : '否'
           },
           {
             label: '是否安装人行模块：',
-            value: dispose.value.ispbc ? '是' : '否'
+            value: dispose.value.ispbc === 'y' ? '是' : '否'
           },
           {
             label: '	是否安装农信银模块：',
-            value: dispose.value.isrbc ? '是' : '否'
+            value: dispose.value.isrbc === 'y' ? '是' : '否'
           },
           {
             label: '	WatchDog是否使用新数据类型：',
-            value: dispose.value.useNewDataType ? '是' : '否'
+            value: dispose.value.useNewDataType === 'y' ? '是' : '否'
           }
         ]
         break
